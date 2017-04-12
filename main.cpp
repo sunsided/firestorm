@@ -103,7 +103,9 @@ int main() {
                 _mm_prefetch(&a[i + 32 * 8], _MM_HINT_T1);
                 _mm_prefetch(&b[i + 32 * 8], _MM_HINT_T1);
 
-                // load 64 floats
+                // load 32 floats per vector
+                // For some reason, _mm256_loadu_ps is faster than _mm256_load_ps on both AVX and AVX2 ...
+                // In this example, times drop from 160ms to 120ms ... ?
                 const auto a0 = _mm256_load_ps(&a[i]);
                 const auto b0 = _mm256_load_ps(&b[i]);
                 const auto a1 = _mm256_load_ps(&a[i + 8]);
