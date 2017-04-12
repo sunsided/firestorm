@@ -1,0 +1,58 @@
+Question: Given 16 AVX registers, how many dot products can be performed
+without having to STORE back the results from the registers to memory.
+
+    Free:
+    YMM0 YMM1 YMM2 YMM3 YMM4 YMM5 YMM6 YMM7 YMM8 YMM9 YMM10 YMM11 YMM12 YMM13 YMM14 YMM15
+
+Dot products #1:
+YMM0  = YMM1  YMM2
+YMM3  = YMM4  YMM5
+YMM6  = YMM7  YMM8
+YMM9  = YMM10 YMM11
+YMM12 = YMM13 YMM14
+
+    Free: 
+    YMM15 | YMM1 YMM2 YMM4 YMM5 YMM7 YMM8 YMM10 YMM11 YMM13 YMM14
+
+Dot products #2:
+YMM15 = YMM1 YMM2
+YMM4  = YMM5 YMM7
+YMM8  = YMM10 YMM11
+
+    Free:
+    YMM13 YMM14 | YMM1 YMM2 YMM5 YMM7 YMM10 YMM11
+
+Dot products #3:
+YMM13 = YMM14 YMM1
+YMM2  = YMM5  YMM7
+
+    Free
+    YMM10 YMM11 | YMM14 YMM1 YMM5 YMM7
+
+Dot products #4:
+YMM10 = YMM11 YMM14
+YMM1  = YMM5  YMM7
+
+    Free:
+    YMM11 YMM14 YMM5 YMM7
+
+Dot products #5:
+YMM11 = YMM14  YMM5 
+
+    Free:
+    YMM7 | YMM14 YMM5
+
+Dot products #6:
+YMM7  = YMM14 YMM5
+
+    Free:
+    YMM14 YMM5
+
+Total number of dot products without STOREs:
+Dot products #1: 5
+Dot products #2: 3
+Dot products #3: 2
+Dot products #4: 2
+Dot products #5: 1
+Total:           13
+                 104 floats * 104 floats
