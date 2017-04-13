@@ -3,6 +3,12 @@ project(firestorm)
 
 set(CMAKE_CXX_STANDARD 14)
 
+include_directories("${PROJECT_SOURCE_DIR}/include")
+set(SOURCE_FILES main.cpp include/Simd.h)
+add_executable(firestorm ${SOURCE_FILES})
+
+# Check for AVX and AVX2
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(OptimizeForArchitecture)
 OptimizeForArchitecture()
@@ -19,6 +25,11 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Vc_ARCHITECTURE_FLAGS}")
 
-include_directories("${PROJECT_SOURCE_DIR}/include")
-set(SOURCE_FILES main.cpp include/Simd.h)
-add_executable(firestorm ${SOURCE_FILES})
+# Check for Boost
+
+find_package(Boost 1.62 REQUIRED)
+if(Boost_FOUND)
+    message(STATUS "Found Boost ${Boost_VERSION}")
+    include_directories(${Boost_INCLUDE_DIRS})
+    target_link_libraries(firestorm ${Boost_LIBRARIES})
+endif()
