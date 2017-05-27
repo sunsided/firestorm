@@ -14,41 +14,41 @@
 // TODO: Number of elements needs to be identical for all vectors, so is identical in whole table.
 // TODO: Indexing can be performed on a separate instance.
 
-struct alignas(32) mem_block_t {
+struct alignas(32) mem_chunk_t {
     static const size_t byte_alignment = 32;
     float *data;
 
-    mem_block_t (size_t bytes) {
+    mem_chunk_t (size_t bytes) {
         data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
     }
 
-    ~mem_block_t() {
+    ~mem_chunk_t() {
         boost::alignment::aligned_free(data);
         data = nullptr;
     }
 };
 
-class BlockManager {
+class ChunkManager {
 private:
-    std::vector<std::unique_ptr<mem_block_t>> blocks;
+    std::vector<std::unique_ptr<mem_chunk_t>> chunks;
 public:
-    BlockManager() {}
-    ~BlockManager() {
-        blocks.clear();
+    ChunkManager() {}
+    ~ChunkManager() {
+        chunks.clear();
     }
 
-    mem_block_t* allocate(size_t bytes) {
-        auto block = std::make_unique<mem_block_t>(bytes);
-        const auto ptr = block.get();
-        blocks.push_back(std::move(block));
+    mem_chunk_t* allocate(size_t bytes) {
+        auto chunk = std::make_unique<mem_chunk_t>(bytes);
+        const auto ptr = chunk.get();
+        chunks.push_back(std::move(chunk));
         return ptr;
     }
 
-    mem_block_t* get(size_t n) const {
-        return blocks.at(n).get();
+    mem_chunk_t* get(size_t n) const {
+        return chunks.at(n).get();
     }
 
-    inline size_t size() const { return blocks.size(); }
+    inline size_t size() const { return chunks.size(); }
 };
 
 struct vector_t {
@@ -85,17 +85,17 @@ int what() {
     auto result = new float[M];
 
     std::cout << "Initializing vectors ..." << std::endl;
-    BlockManager blockManager_a;
-    BlockManager blockManager_b;
-    const auto block_size = megabyte(32);
+    ChunkManager chunkManager_a;
+    ChunkManager chunkManager_b;
+    const auto chunk_size = megabyte(32);
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
-    static_assert((block_size % (sizeof(float)*N)) == 0);
+    static_assert((chunk_size % (sizeof(float)*N)) == 0);
 
-    mem_block_t* block_a = nullptr;
-    mem_block_t* block_b = nullptr;
-    size_t remaining_block_size = 0;    // number of remaining bytes in the current block
+    mem_chunk_t* chunk_a = nullptr;
+    mem_chunk_t* chunk_b = nullptr;
+    size_t remaining_chunk_size = 0;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
     // Keep track of the total sum for validation.
@@ -105,12 +105,12 @@ int what() {
 
         // Initial condition, also reached during runtime: If one block is full,
         // allocate another one.
-        if (remaining_block_size == 0) {
-            std::cout << "Allocating block." << std::endl;
+        if (remaining_chunk_size == 0) {
+            std::cout << "Allocating chunk." << std::endl;
 
-            block_a = blockManager_a.allocate(block_size);
-            block_b = blockManager_b.allocate(block_size);
-            remaining_block_size = block_size;
+            chunk_a = chunkManager_a.allocate(chunk_size);
+            chunk_b = chunkManager_b.allocate(chunk_size);
+            remaining_chunk_size = chunk_size;
             float_offset = 0;
         }
 
@@ -119,13 +119,13 @@ int what() {
         }
 
         expected[j] = 0;
-        auto a = &block_a->data[float_offset];
-        auto b = &block_b->data[float_offset];
+        auto a = &chunk_a->data[float_offset];
+        auto b = &chunk_b->data[float_offset];
 
         assert(float_offset < M*N);
-        assert(remaining_block_size >= sizeof(float)*N);
+        assert(remaining_chunk_size >= sizeof(float)*N);
 
-        remaining_block_size -= (sizeof(float)*N);
+        remaining_chunk_size -= (sizeof(float)*N);
         float_offset += N;
 
         // Write one vector and one expected result.
@@ -143,35 +143,36 @@ int what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "Running test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        size_t current_block = 0;
-        block_a = blockManager_a.get(current_block);
-        block_b = blockManager_b.get(current_block);
-        float_offset = 0;
-
-        const auto vectors_per_block = block_size / (N * sizeof(float));
-        auto remaining_vectors_per_block = vectors_per_block;
 
         // Keep track of the total sum for validation.
         auto total_sum = 0.0f;
+
+        size_t current_chunk = 0;
+        chunk_a = chunkManager_a.get(current_chunk);
+        chunk_b = chunkManager_b.get(current_chunk);
+        float_offset = 0;
+
+        const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
+        auto remaining_vectors_per_chunk = vectors_per_chunk;
 
         auto start_time = std::chrono::high_resolution_clock::now();
 
         // Run for a couple of test iterations ...
         for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
 
-            if (remaining_vectors_per_block == 0) {
-                current_block += 1;
-                block_a = blockManager_a.get(current_block);
-                block_b = blockManager_b.get(current_block);
+            if (remaining_vectors_per_chunk == 0) {
+                current_chunk += 1;
+                chunk_a = chunkManager_a.get(current_chunk);
+                chunk_b = chunkManager_b.get(current_chunk);
 
                 float_offset = 0;
-                remaining_vectors_per_block = vectors_per_block;
+                remaining_vectors_per_chunk = vectors_per_chunk;
             }
 
-            auto a_row = &block_a->data[float_offset];
-            auto b_row = &block_b->data[float_offset];
+            auto a_row = &chunk_a->data[float_offset];
+            auto b_row = &chunk_b->data[float_offset];
 
-            --remaining_vectors_per_block;
+            --remaining_vectors_per_chunk;
             float_offset += N;
 
             result[vector_idx] = 0.0f;
