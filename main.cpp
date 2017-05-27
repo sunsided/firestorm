@@ -2,67 +2,12 @@
 #include <random>
 #include <chrono>
 #include <functional>
-#include <vector>
 #include <memory>
-#include <boost/align/aligned_alloc.hpp>
 #include "Simd.h"
+#include "ChunkManager.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
-
-
-// TODO: Number of elements needs to be identical for all vectors, so is identical in whole table.
-// TODO: Indexing can be performed on a separate instance.
-
-struct alignas(32) mem_chunk_t {
-    static const size_t byte_alignment = 32;
-    float *data;
-
-    mem_chunk_t (size_t bytes) {
-        data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
-    }
-
-    ~mem_chunk_t() {
-        boost::alignment::aligned_free(data);
-        data = nullptr;
-    }
-};
-
-class ChunkManager {
-private:
-    std::vector<std::unique_ptr<mem_chunk_t>> chunks;
-public:
-    ChunkManager() {}
-    ~ChunkManager() {
-        chunks.clear();
-    }
-
-    mem_chunk_t* allocate(size_t bytes) {
-        auto chunk = std::make_unique<mem_chunk_t>(bytes);
-        const auto ptr = chunk.get();
-        chunks.push_back(std::move(chunk));
-        return ptr;
-    }
-
-    mem_chunk_t* get(size_t n) const {
-        return chunks.at(n).get();
-    }
-
-    inline size_t size() const { return chunks.size(); }
-};
-
-struct vector_t {
-    alignas(32) float* v;
-
-    vector_t (size_t n) {
-        v = reinterpret_cast<float*>(boost::alignment::aligned_alloc(32, n*4));
-    }
-
-    ~vector_t() {
-        boost::alignment::aligned_free(v);
-        v = nullptr;
-    }
-};
 
 static inline constexpr size_t kilobyte(const size_t n) {
     return n * 1024UL;
@@ -147,7 +92,7 @@ int what() {
     std::cout << "Initializing vectors ..." << std::endl;
     ChunkManager chunkManager_a;
     ChunkManager chunkManager_b;
-    const auto chunk_size = megabyte(32);
+    constexpr const auto chunk_size = 32_MB;
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
@@ -155,7 +100,7 @@ int what() {
 
     mem_chunk_t* chunk_a = nullptr;
     mem_chunk_t* chunk_b = nullptr;
-    size_t remaining_chunk_size = 0;    // number of remaining bytes in the current chunk
+    auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
     // Keep track of the total sum for validation.
@@ -165,7 +110,7 @@ int what() {
 
         // Initial condition, also reached during runtime: If one block is full,
         // allocate another one.
-        if (remaining_chunk_size == 0) {
+        if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
             chunk_a = chunkManager_a.allocate(chunk_size);

@@ -4,7 +4,7 @@ project(firestorm)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
-set(SOURCE_FILES main.cpp include/Simd.h)
+set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk.h include/ChunkManager.h include/units.h)
 add_executable(firestorm ${SOURCE_FILES})
 
 # Check for AVX and AVX2
