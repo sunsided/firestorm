@@ -72,6 +72,68 @@ static inline constexpr size_t megabyte(const size_t n) {
     return kilobyte(n * 1024UL);
 }
 
+float dot_product_avx(const float* const a_row, const float* const b_row, const size_t N) {
+    auto total = _mm256_set1_ps(0.0f);
+    for (size_t i = 0; i < N; i += 32) {
+        // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
+        _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
+        _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
+
+        // load 32 floats per vector
+        // For some reason, _mm256_loadu_ps is faster than _mm256_load_ps on both AVX and AVX2 ...
+        // In this example, times drop from 160ms to 120ms ... ?
+        const auto a0 = _mm256_load_ps(&a_row[i]);
+        const auto b0 = _mm256_load_ps(&b_row[i]);
+        const auto a1 = _mm256_load_ps(&a_row[i + 8]);
+        const auto b1 = _mm256_load_ps(&b_row[i + 8]);
+        const auto a2 = _mm256_load_ps(&a_row[i + 16]);
+        const auto b2 = _mm256_load_ps(&b_row[i + 16]);
+        const auto a3 = _mm256_load_ps(&a_row[i + 24]);
+        const auto b3 = _mm256_load_ps(&b_row[i + 24]);
+
+        // do separate dot products
+        const auto c0 = _mm256_dp_ps(a0, b0, 0xff);
+        const auto c1 = _mm256_dp_ps(a1, b1, 0xff);
+        const auto c2 = _mm256_dp_ps(a2, b2, 0xff);
+        const auto c3 = _mm256_dp_ps(a3, b3, 0xff);
+
+        // do separate partial sums
+        const auto p0 = _mm256_add_ps(c0, c1);
+        const auto p1 = _mm256_add_ps(c2, c3);
+
+        // aggregate the partial sums and allocate to running total
+        const auto s = _mm256_add_ps(p0, p1);
+        total = _mm256_add_ps(total, s);
+    }
+
+    alignas(32) float ptr[8];
+    _mm256_store_ps(ptr, total);
+    return ptr[0] + ptr[5];
+}
+
+float dot_product_naive(const float* const a_row, const float* const b_row, const size_t N) {
+    auto total = 0.0f;
+    for (size_t i = 0; i < N; ++i) {
+        total += a_row[i] * b_row[i];
+    }
+    return total;
+}
+
+float dot_product_unrolled_8(const float *const a_row, const float *const b_row, const size_t N) {
+    auto total = 0.0f;
+    for (size_t i = 0; i < N; i += 8) {
+        total += a_row[i] * b_row[i] +
+                a_row[i + 1] * b_row[i + 1] +
+                a_row[i + 2] * b_row[i + 2] +
+                a_row[i + 3] * b_row[i + 3] +
+                a_row[i + 4] * b_row[i + 4] +
+                a_row[i + 5] * b_row[i + 5] +
+                a_row[i + 6] * b_row[i + 6] +
+                a_row[i + 7] * b_row[i + 7];
+    }
+    return total;
+}
+
 int what() {
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -175,47 +237,14 @@ int what() {
             --remaining_vectors_per_chunk;
             float_offset += N;
 
-            result[vector_idx] = 0.0f;
-
             // Calculate the dot product of the 2048-element vector
-            auto total = _mm256_set1_ps(0.0f);
             static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-            for (size_t i = 0; i < N; i += 32) {
-                // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
-                _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
-                _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
+            const auto dot_product = dot_product_avx(a_row, b_row, N);
+            // const auto dot_product = dot_product_naive(a_row, b_row, N);
+            // const auto dot_product = dot_product_unrolled_8(a_row, b_row, N);
 
-                // load 32 floats per vector
-                // For some reason, _mm256_loadu_ps is faster than _mm256_load_ps on both AVX and AVX2 ...
-                // In this example, times drop from 160ms to 120ms ... ?
-                const auto a0 = _mm256_load_ps(&a_row[i]);
-                const auto b0 = _mm256_load_ps(&b_row[i]);
-                const auto a1 = _mm256_load_ps(&a_row[i + 8]);
-                const auto b1 = _mm256_load_ps(&b_row[i + 8]);
-                const auto a2 = _mm256_load_ps(&a_row[i + 16]);
-                const auto b2 = _mm256_load_ps(&b_row[i + 16]);
-                const auto a3 = _mm256_load_ps(&a_row[i + 24]);
-                const auto b3 = _mm256_load_ps(&b_row[i + 24]);
-
-                // do separate dot products
-                const auto c0 = _mm256_dp_ps(a0, b0, 0xff);
-                const auto c1 = _mm256_dp_ps(a1, b1, 0xff);
-                const auto c2 = _mm256_dp_ps(a2, b2, 0xff);
-                const auto c3 = _mm256_dp_ps(a3, b3, 0xff);
-
-                // do separate partial sums
-                const auto p0 = _mm256_add_ps(c0, c1);
-                const auto p1 = _mm256_add_ps(c2, c3);
-
-                // aggregate the partial sums and allocate to running total
-                const auto s = _mm256_add_ps(p0, p1);
-                total = _mm256_add_ps(total, s);
-            }
-
-            alignas(32) float ptr[8];
-            _mm256_store_ps(ptr, total);
-            result[vector_idx] = ptr[0] + ptr[5];
-            total_sum += ptr[0] + ptr[5];
+            result[vector_idx] = dot_product;
+            total_sum += dot_product;
         }
 
         auto end_time = std::chrono::high_resolution_clock::now();
