@@ -2,6 +2,8 @@
 #include <random>
 #include <chrono>
 #include <functional>
+#include <vector>
+#include <memory>
 #include <boost/align/aligned_alloc.hpp>
 #include "Simd.h"
 
@@ -12,52 +14,42 @@
 // TODO: Number of elements needs to be identical for all vectors, so is identical in whole table.
 // TODO: Indexing can be performed on a separate instance.
 
-union alignas(32) float8 {
-    float f[8];
+struct alignas(32) mem_block_t {
+    static const size_t byte_alignment = 32;
+    float *data;
+
+    mem_block_t (size_t bytes) {
+        data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
+    }
+
+    ~mem_block_t() {
+        boost::alignment::aligned_free(data);
+        data = nullptr;
+    }
 };
 
-union alignas(32) float32 {
-    float f[32];
-    float8 f8[4];
+class BlockManager {
+private:
+    std::vector<std::unique_ptr<mem_block_t>> blocks;
+public:
+    BlockManager() {}
+    ~BlockManager() {
+        blocks.clear();
+    }
+
+    mem_block_t* allocate(size_t bytes) {
+        auto block = std::make_unique<mem_block_t>(bytes);
+        const auto ptr = block.get();
+        blocks.push_back(std::move(block));
+        return ptr;
+    }
+
+    mem_block_t* get(size_t n) const {
+        return blocks.at(n).get();
+    }
+
+    inline size_t size() const { return blocks.size(); }
 };
-
-// AVX:
-//  - registers YMM0 to YMM15, each 256 bit / 32 byte / 8 floats
-//  - three-operand form (c = a OP b), so three registers per operation
-//  - allows for five operations (5 * 3 registers = 15 registers) on 8x8 floats each
-//  - Haswell allows for 32 byte reads into L1
-
-void foo() {
-    float8 m0 {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    float8 m1 {1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 64.0f, 128.0f};
-    float8 m2 {2.0f, 2.0f, 2.0f, 2.0f, 4.0f, 4.0f, 4.0f, 4.0f};
-    float8 m3 {1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 64.0f, 128.0f};
-
-    __m256 a0 = _mm256_loadu_ps(m0.f);
-    __m256 b0 = _mm256_loadu_ps(m0.f);
-
-    __m256 a1 = _mm256_loadu_ps(m0.f);
-    __m256 b1 = _mm256_loadu_ps(m1.f);
-
-    __m256 a2 = _mm256_loadu_ps(m2.f);
-    __m256 b2 = _mm256_loadu_ps(m3.f);
-
-    __m256 a3 = _mm256_loadu_ps(m1.f);
-    __m256 b3 = _mm256_loadu_ps(m3.f);
-
-    __m256 c0 = _mm256_dp_ps(a0, b0, 0b11110001);
-    __m256 c1 = _mm256_dp_ps(a1, b1, 0b11110101);
-    __m256 c2 = _mm256_dp_ps(a2, b2, 0b11111111);
-    __m256 c3 = _mm256_dp_ps(a3, b3, 0b11110000);
-
-    _mm256_store_ps(m0.f, c0);
-    _mm256_store_ps(m1.f, c1);
-    _mm256_store_ps(m2.f, c2);
-    _mm256_store_ps(m3.f, c3);
-
-    std::cout << "Alignment offset: " << (reinterpret_cast<size_t>(&m0.f[0]) & 31L) << std::endl;
-    std::cout << m0.f[0] << " size " << sizeof(m0) << std::endl;
-}
 
 struct vector_t {
     alignas(32) float* v;
@@ -72,8 +64,15 @@ struct vector_t {
     }
 };
 
-int what() {
+static inline constexpr size_t kilobyte(const size_t n) {
+    return n * 1024UL;
+}
 
+static inline constexpr size_t megabyte(const size_t n) {
+    return kilobyte(n * 1024UL);
+}
+
+int what() {
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
@@ -82,75 +81,121 @@ int what() {
     const size_t N = 2048;
     const size_t M = 10000;
 
-    auto b = new vector_t*[M];
-    auto a = new vector_t*[M];
     auto expected = new float[M];
     auto sum = new float[M];
 
     std::cout << "Initializing vectors ..." << std::endl;
+    BlockManager blockManager_a;
+    BlockManager blockManager_b;
+    const auto block_size = megabyte(32);
+
+    // To simplify experiments, we require the block to exactly match our expectations
+    // about vector lengths. Put differently, all bytes in the buffer can be used.
+    static_assert((block_size % (sizeof(float)*N)) == 0);
+
+    mem_block_t* block_a = nullptr;
+    mem_block_t* block_b = nullptr;
+    size_t remaining_block_size = 0;    // number of remaining bytes in the current block
+    size_t float_offset = 0;            // index into the current buffer, counts floats
+
     for (size_t j = 0; j < M; ++j) {
+
+        // Initial condition, also reached during runtime: If one block is full,
+        // allocate another one.
+        if (remaining_block_size == 0) {
+            std::cout << "Allocating block." << std::endl;
+
+            block_a = blockManager_a.allocate(block_size);
+            block_b = blockManager_b.allocate(block_size);
+            remaining_block_size = block_size;
+            float_offset = 0;
+        }
+
         if (j % 2500 == 0) {
             std::cout << "- " << j << "/" << M << std::endl;
         }
 
         expected[j] = 0;
-        a[j] = new vector_t(N);
-        b[j] = new vector_t(N);
+        auto a = &block_a->data[float_offset];
+        auto b = &block_b->data[float_offset];
 
+        assert(float_offset < M*N);
+        assert(remaining_block_size >= sizeof(float)*N);
+
+        remaining_block_size -= (sizeof(float)*N);
+        float_offset += N;
+
+        // Write one vector and one expected result.
         for (size_t i = 0; i < N; ++i) {
-            a[j]->v[i] = random();
-            b[j]->v[i] = random();
-            expected[j] += a[j]->v[i] * b[j]->v[i];
+            a[i] = random();
+            b[i] = random();
+            expected[j] += a[i] * b[i];
         }
     }
+    std::cout << "- " << M << "/" << M << std::endl
+              << "Vectors initialized." << std::endl;
 
     std::cout << "Running tests ..." << std::endl;
     for (size_t repetition = 0; repetition < 20; ++repetition)
     {
         auto start_time = std::chrono::high_resolution_clock::now();
+        const auto blocks = blockManager_a.size();
+
+        // Run for a couple of test iterations ...
         for (size_t test_iteration = 0; test_iteration < M; ++test_iteration) {
-            sum[test_iteration] = 0.0f;
-            float* a_row = a[test_iteration]->v;
-            float* b_row = b[test_iteration]->v;
+            // Go through each data block / chunk ...
+            for (size_t block = 0; block < blocks; ++block) {
+                block_a = blockManager_a.allocate(block);
+                block_b = blockManager_b.allocate(block);
 
-            auto total = _mm256_set1_ps(0.0f);
+                for (remaining_block_size = block_size, float_offset = 0;
+                     remaining_block_size >= N;
+                     remaining_block_size -= N, float_offset += N) {
 
-            static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-            for (size_t i = 0; i < N; i += 32) {
-                // prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows
-                _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
-                _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
+                    auto a_row = &block_a->data[float_offset];
+                    auto b_row = &block_a->data[float_offset];
+                    sum[test_iteration] = 0.0f;
 
-                // load 32 floats per vector
-                // For some reason, _mm256_loadu_ps is faster than _mm256_load_ps on both AVX and AVX2 ...
-                // In this example, times drop from 160ms to 120ms ... ?
-                const auto a0 = _mm256_load_ps(&a_row[i]);
-                const auto b0 = _mm256_load_ps(&b_row[i]);
-                const auto a1 = _mm256_load_ps(&a_row[i + 8]);
-                const auto b1 = _mm256_load_ps(&b_row[i + 8]);
-                const auto a2 = _mm256_load_ps(&a_row[i + 16]);
-                const auto b2 = _mm256_load_ps(&b_row[i + 16]);
-                const auto a3 = _mm256_load_ps(&a_row[i + 24]);
-                const auto b3 = _mm256_load_ps(&b_row[i + 24]);
+                    auto total = _mm256_set1_ps(0.0f);
 
-                // do separate dot products
-                const auto c0 = _mm256_dp_ps(a0, b0, 0xff);
-                const auto c1 = _mm256_dp_ps(a1, b1, 0xff);
-                const auto c2 = _mm256_dp_ps(a2, b2, 0xff);
-                const auto c3 = _mm256_dp_ps(a3, b3, 0xff);
+                    static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
+                    for (size_t i = 0; i < N; i += 32) {
+                        // prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows
+                        _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
+                        _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
 
-                // do separate partial sums
-                const auto p0 = _mm256_add_ps(c0, c1);
-                const auto p1 = _mm256_add_ps(c2, c3);
+                        // load 32 floats per vector
+                        // For some reason, _mm256_loadu_ps is faster than _mm256_load_ps on both AVX and AVX2 ...
+                        // In this example, times drop from 160ms to 120ms ... ?
+                        const auto a0 = _mm256_load_ps(&a_row[i]);
+                        const auto b0 = _mm256_load_ps(&b_row[i]);
+                        const auto a1 = _mm256_load_ps(&a_row[i + 8]);
+                        const auto b1 = _mm256_load_ps(&b_row[i + 8]);
+                        const auto a2 = _mm256_load_ps(&a_row[i + 16]);
+                        const auto b2 = _mm256_load_ps(&b_row[i + 16]);
+                        const auto a3 = _mm256_load_ps(&a_row[i + 24]);
+                        const auto b3 = _mm256_load_ps(&b_row[i + 24]);
 
-                // aggregate the partial sums and add to running total
-                const auto s = _mm256_add_ps(p0, p1);
-                total = _mm256_add_ps(total, s);
+                        // do separate dot products
+                        const auto c0 = _mm256_dp_ps(a0, b0, 0xff);
+                        const auto c1 = _mm256_dp_ps(a1, b1, 0xff);
+                        const auto c2 = _mm256_dp_ps(a2, b2, 0xff);
+                        const auto c3 = _mm256_dp_ps(a3, b3, 0xff);
+
+                        // do separate partial sums
+                        const auto p0 = _mm256_add_ps(c0, c1);
+                        const auto p1 = _mm256_add_ps(c2, c3);
+
+                        // aggregate the partial sums and allocate to running total
+                        const auto s = _mm256_add_ps(p0, p1);
+                        total = _mm256_add_ps(total, s);
+                    }
+
+                    alignas(32) float ptr[8];
+                    _mm256_store_ps(ptr, total);
+                    sum[test_iteration] = ptr[0] + ptr[5];
+                }
             }
-
-            alignas(32) float ptr[8];
-            _mm256_store_ps(ptr, total);
-            sum[test_iteration] = ptr[0] + ptr[5];
         }
 
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -160,12 +205,6 @@ int what() {
     }
 
     std::cout << "Cleaning up ..." << std::endl;
-    for (size_t j = 0; j < M; ++j) {
-        delete a[j];
-        delete b[j];
-    }
-    delete[] a;
-    delete[] b;
     delete expected;
     delete sum;
 
