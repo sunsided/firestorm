@@ -153,7 +153,6 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
 }
 
 int what() {
-    Worker worker;
 
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -164,9 +163,11 @@ int what() {
     auto result = new float[M];
 
     std::cout << "Initializing vectors ..." << std::endl;
-    ChunkManager chunkManager_a;
-    ChunkManager chunkManager_b;
+    std::shared_ptr<ChunkManager> chunkManager_a = std::make_shared<ChunkManager>();
+    std::shared_ptr<ChunkManager> chunkManager_b = std::make_shared<ChunkManager>();
     constexpr const auto chunk_size = 32_MB;
+
+    std::unique_ptr<Worker> worker = std::make_unique<Worker>(chunkManager_a);
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
@@ -187,8 +188,8 @@ int what() {
         if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
-            chunk_a = chunkManager_a.allocate(chunk_size).lock();
-            chunk_b = chunkManager_b.allocate(chunk_size).lock();
+            chunk_a = chunkManager_a->allocate(chunk_size).lock();
+            chunk_b = chunkManager_b->allocate(chunk_size).lock();
             remaining_chunk_size = chunk_size;
             float_offset = 0;
         }
@@ -212,8 +213,8 @@ int what() {
             a[i] = random();
             b[i] = random();
             expected[j] += a[i] * b[i];
-            expected_total_sum += a[i] * b[i];
         }
+        expected_total_sum += expected[j];
     }
     std::cout << "- " << M << "/" << M << std::endl
               << "Vectors initialized." << std::endl;

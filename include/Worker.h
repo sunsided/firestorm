@@ -6,7 +6,10 @@
 #define FIRESTORM_WORKER_H
 
 #include <deque>
+#include <boost/optional.hpp>
 #include "mem_chunk_t.h"
+#include "ChunkVisitor.h"
+#include "ChunkAccessor.h"
 
 /// Worker that processes vectors in the registered chunks.
 class Worker {
@@ -16,20 +19,34 @@ private:
     /// such that adding an item from a worker to the "right" at the back
     /// moves the first item (on the front) to a worker on the "left". This way,
     /// memory is quasi-sequential for each worker.
-    std::deque<std::weak_ptr<mem_chunk_t>> assigned_blocks;
+    std::deque<chunk_idx_t > assigned_chunks;
+
+    const std::shared_ptr<const ChunkAccessor> accessor;
 
 public:
-    void assign_block(std::weak_ptr<mem_chunk_t> block) {
-        assigned_blocks.push_back(block);
+    Worker(const std::shared_ptr<const ChunkAccessor> accessor) : accessor(accessor) {}
+
+    void assign_chunk(chunk_idx_t chunk_idx) {
+        assigned_chunks.push_back(chunk_idx);
     }
 
-    std::weak_ptr<mem_chunk_t> unassign_block() {
-        auto block = std::move(assigned_blocks.front());
-        assigned_blocks.pop_front();
-        return block;
+    boost::optional<chunk_idx_t> unassign_chunk() {
+        if (assigned_chunks.size() == 0) {
+            return boost::none;
+        }
+
+        auto chunk = std::move(assigned_chunks.front());
+        assigned_chunks.pop_front();
+        return chunk;
     }
 
-    // TODO: Implement visitor pattern
+    void accept(ChunkVisitor visitor) {
+        for(auto chunk : assigned_chunks) {
+            auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+            visitor.visit(shared_chunk);
+        }
+    }
 };
 
 #endif //FIRESTORM_WORKER_H

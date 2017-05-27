@@ -7,15 +7,15 @@
 
 #include <vector>
 #include <memory>
-#include "mem_chunk_t.h"
+#include <ChunkAccessor.h>
 
-class ChunkManager {
+class ChunkManager : public ChunkAccessor {
 private:
     std::vector<std::shared_ptr<mem_chunk_t>> chunks;
     chunk_idx_t next_index = 0;
 public:
     ChunkManager() {}
-    ~ChunkManager() {
+    virtual ~ChunkManager() {
         chunks.clear();
     }
 
@@ -28,7 +28,12 @@ public:
         return ptr;
     }
 
-    std::weak_ptr<mem_chunk_t> const get(const chunk_idx_t n) const {
+    std::shared_ptr<const mem_chunk_t> get_ro(const chunk_idx_t n) const override {
+        // TODO: Exception handling for invalid n
+        return chunks.at(n);
+    }
+
+    std::shared_ptr<mem_chunk_t> get(const chunk_idx_t n) const {
         return chunks.at(n);
     }
 
