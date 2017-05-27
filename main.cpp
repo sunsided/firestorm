@@ -9,14 +9,6 @@
 // TODO: Boost
 // TODO: Boost.SIMD
 
-static inline constexpr size_t kilobyte(const size_t n) {
-    return n * 1024UL;
-}
-
-static inline constexpr size_t megabyte(const size_t n) {
-    return kilobyte(n * 1024UL);
-}
-
 float dot_product_avx256(const float *const a_row, const float *const b_row, const size_t N) {
     auto total = _mm256_set1_ps(0.0f);
     for (size_t i = 0; i < N; i += 32) {
