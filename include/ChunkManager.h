@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <memory>
-#include "mem_chunk.h"
+#include "mem_chunk_t.h"
 
 class ChunkManager {
 private:

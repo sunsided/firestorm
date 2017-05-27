@@ -3,8 +3,10 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+
 #include "Simd.h"
 #include "ChunkManager.h"
+#include "index_t.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD

@@ -6,7 +6,7 @@
 #define FIRESTORM_MEM_CHUNK_H
 
 #include <boost/align/aligned_alloc.hpp>
-#include <units.h>
+#include <bytes_t.h>
 
 struct mem_chunk_t {
     static const size_t byte_alignment = 32;
