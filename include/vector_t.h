@@ -11,12 +11,16 @@
 /// A single vector.
 struct vector_t {
     static const size_t byte_alignment = 32;
-    const size_t elements;
+
+    /// The dimensionality of the query vector.
+    const size_t dimensions;
+
+    /// The actual data buffer.
     float* data;
 
-    vector_t(size_t elements)
-        : elements(elements) {
-        const bytes_t bytes = elements * sizeof(float);
+    vector_t(size_t dimensions)
+        : dimensions(dimensions) {
+        const bytes_t bytes = dimensions * sizeof(float);
         data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
     }
 

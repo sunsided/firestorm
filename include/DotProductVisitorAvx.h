@@ -13,14 +13,13 @@ public:
     DotProductVisitorAvx() {}
     virtual ~DotProductVisitorAvx() {}
 
-    void visit(const mem_chunk_t& chunk, const vector_t& query) const override {
-        const size_t N = query.elements;
-        // TODO: Check if chunk vector size matches query vector size
-        const auto b_row = query.data;
+    void visit(const mem_chunk_t& chunk, const vector_t& query, vector_t& out_scores) const override {
+        assert(chunk.dimensions == query.dimensions);
 
-        const bytes_t stride = N;
-        const bytes_t count = chunk.size / sizeof(float);
-        for (bytes_t start_idx = 0; start_idx < count; start_idx += stride) {
+        const size_t N = query.dimensions;
+        const auto b_row = query.data;
+        const size_t element_count = chunk.vectors * chunk.dimensions; ///< The total number of float elements in the buffer.
+        for (size_t start_idx = 0; start_idx < element_count; start_idx += N) {
             const auto a_row = &chunk.data[start_idx];
 
             auto total = _mm256_set1_ps(0.0f);

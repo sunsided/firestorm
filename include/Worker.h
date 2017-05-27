@@ -46,7 +46,10 @@ public:
             if (shared_chunk == nullptr) continue;
 
             const auto chunk_ptr = shared_chunk.get();
-            visitor.visit(*chunk_ptr, query);
+            assert(chunk_ptr->dimensions == query.dimensions);
+
+            vector_t out_scores { chunk_ptr->vectors };
+            visitor.visit(*chunk_ptr, query, out_scores);
         }
     }
 };

@@ -19,8 +19,8 @@ public:
         chunks.clear();
     }
 
-    std::weak_ptr<mem_chunk_t> allocate(const bytes_t bytes) {
-        auto chunk = std::make_shared<mem_chunk_t>(next_index, bytes);
+    std::weak_ptr<mem_chunk_t> allocate(const size_t vectors, const size_t dimensions) {
+        auto chunk = std::make_shared<mem_chunk_t>(next_index, vectors, dimensions);
         ++next_index;
 
         const std::weak_ptr<mem_chunk_t> ptr = chunk;

@@ -166,13 +166,14 @@ int what() {
     std::cout << "Initializing vectors ..." << std::endl;
     std::shared_ptr<ChunkManager> chunkManager_a = std::make_shared<ChunkManager>();
     std::shared_ptr<ChunkManager> chunkManager_b = std::make_shared<ChunkManager>();
-    constexpr const auto chunk_size = 32_MB;
+    constexpr const auto target_chunk_size = 32_MB;
+    constexpr size_t num_vectors = target_chunk_size / (N*sizeof(float));
 
     std::unique_ptr<Worker> worker = std::make_unique<Worker>(chunkManager_a);
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
-    static_assert((chunk_size % (sizeof(float)*N)) == 0);
+    static_assert((target_chunk_size % (sizeof(float)*N)) == 0);
 
     std::shared_ptr<mem_chunk_t> chunk_a = nullptr;
     std::shared_ptr<mem_chunk_t> chunk_b = nullptr;
@@ -189,9 +190,9 @@ int what() {
         if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
-            chunk_a = chunkManager_a->allocate(chunk_size).lock();
-            chunk_b = chunkManager_b->allocate(chunk_size).lock();
-            remaining_chunk_size = chunk_size;
+            chunk_a = chunkManager_a->allocate(num_vectors, N).lock();
+            chunk_b = chunkManager_b->allocate(num_vectors, N).lock();
+            remaining_chunk_size = target_chunk_size;
             float_offset = 0;
 
             worker->assign_chunk(chunk_a->index);
