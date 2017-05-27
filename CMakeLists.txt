@@ -25,6 +25,12 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Vc_ARCHITECTURE_FLAGS}")
 
+# Compiler optimizations
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+endif()
+
 # Check for Boost
 
 find_package(Boost 1.62 REQUIRED)
