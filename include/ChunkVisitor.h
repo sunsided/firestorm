@@ -7,11 +7,11 @@
 
 #include <memory>
 #include "mem_chunk_t.h"
+#include "vector_t.h"
 
 class ChunkVisitor {
 public:
-    void visit(const std::shared_ptr<const mem_chunk_t> chunk)
-    {}
+    virtual void visit(const mem_chunk_t& chunk, const vector_t& query) const = 0;
 };
 
 #endif //FIRESTORM_CHUNKVISITOR_H

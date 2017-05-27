@@ -40,11 +40,13 @@ public:
         return chunk;
     }
 
-    void accept(ChunkVisitor visitor) {
+    void accept(ChunkVisitor& visitor, const vector_t& query) {
         for(auto chunk : assigned_chunks) {
             auto shared_chunk = accessor->get_ro(chunk);
             if (shared_chunk == nullptr) continue;
-            visitor.visit(shared_chunk);
+
+            const auto chunk_ptr = shared_chunk.get();
+            visitor.visit(*chunk_ptr, query);
         }
     }
 };

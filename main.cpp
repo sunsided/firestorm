@@ -9,6 +9,7 @@
 #include "Simd.h"
 #include "ChunkManager.h"
 #include "Worker.h"
+#include "DotProductVisitorAvx.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -192,6 +193,8 @@ int what() {
             chunk_b = chunkManager_b->allocate(chunk_size).lock();
             remaining_chunk_size = chunk_size;
             float_offset = 0;
+
+            worker->assign_chunk(chunk_a->index);
         }
 
         if (j % 2500 == 0) {
@@ -218,6 +221,16 @@ int what() {
     }
     std::cout << "- " << M << "/" << M << std::endl
               << "Vectors initialized." << std::endl;
+
+    // Create a simple query vector
+    vector_t query {N};
+    for (size_t i = 0; i < N; ++i) {
+        query.data[i] = random();
+    }
+
+    // Worker test
+    DotProductVisitorAvx visitor;
+    worker->accept(visitor, query);
 
     const size_t repetitions = 20;
 
