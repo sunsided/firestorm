@@ -6,7 +6,7 @@
 
 #include "Simd.h"
 #include "ChunkManager.h"
-#include "index_t.h"
+#include "Worker.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -72,6 +72,8 @@ float dot_product_unrolled_8(const float *const a_row, const float *const b_row,
 }
 
 int what() {
+    Worker worker;
+
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
@@ -92,8 +94,8 @@ int what() {
     // about vector lengths. Put differently, all bytes in the buffer can be used.
     static_assert((chunk_size % (sizeof(float)*N)) == 0);
 
-    mem_chunk_t* chunk_a = nullptr;
-    mem_chunk_t* chunk_b = nullptr;
+    std::shared_ptr<mem_chunk_t> chunk_a = nullptr;
+    std::shared_ptr<mem_chunk_t> chunk_b = nullptr;
     auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
@@ -107,8 +109,8 @@ int what() {
         if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
-            chunk_a = chunkManager_a.allocate(chunk_size);
-            chunk_b = chunkManager_b.allocate(chunk_size);
+            chunk_a = chunkManager_a.allocate(chunk_size).lock();
+            chunk_b = chunkManager_b.allocate(chunk_size).lock();
             remaining_chunk_size = chunk_size;
             float_offset = 0;
         }
@@ -146,9 +148,9 @@ int what() {
         // Keep track of the total sum for validation.
         auto total_sum = 0.0f;
 
-        size_t current_chunk = 0;
-        chunk_a = chunkManager_a.get(current_chunk);
-        chunk_b = chunkManager_b.get(current_chunk);
+        chunk_idx_t current_chunk = 0;
+        chunk_a = chunkManager_a.get(current_chunk).lock();
+        chunk_b = chunkManager_b.get(current_chunk).lock();
         float_offset = 0;
 
         const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
@@ -161,8 +163,8 @@ int what() {
 
             if (remaining_vectors_per_chunk == 0) {
                 current_chunk += 1;
-                chunk_a = chunkManager_a.get(current_chunk);
-                chunk_b = chunkManager_b.get(current_chunk);
+                chunk_a = chunkManager_a.get(current_chunk).lock();
+                chunk_b = chunkManager_b.get(current_chunk).lock();
 
                 float_offset = 0;
                 remaining_vectors_per_chunk = vectors_per_chunk;
