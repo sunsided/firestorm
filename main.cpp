@@ -111,6 +111,29 @@ float dot_product_avx(const float* const a_row, const float* const b_row, const 
     return ptr[0] + ptr[5];
 }
 
+float dot_product_naive(const float* const a_row, const float* const b_row, const size_t N) {
+    auto total = 0.0f;
+    for (size_t i = 0; i < N; ++i) {
+        total += a_row[i] * b_row[i];
+    }
+    return total;
+}
+
+float dot_product_unrolled_8(const float *const a_row, const float *const b_row, const size_t N) {
+    auto total = 0.0f;
+    for (size_t i = 0; i < N; i += 8) {
+        total += a_row[i] * b_row[i] +
+                a_row[i + 1] * b_row[i + 1] +
+                a_row[i + 2] * b_row[i + 2] +
+                a_row[i + 3] * b_row[i + 3] +
+                a_row[i + 4] * b_row[i + 4] +
+                a_row[i + 5] * b_row[i + 5] +
+                a_row[i + 6] * b_row[i + 6] +
+                a_row[i + 7] * b_row[i + 7];
+    }
+    return total;
+}
+
 int what() {
     const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -217,6 +240,8 @@ int what() {
             // Calculate the dot product of the 2048-element vector
             static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
             const auto dot_product = dot_product_avx(a_row, b_row, N);
+            // const auto dot_product = dot_product_naive(a_row, b_row, N);
+            // const auto dot_product = dot_product_unrolled_8(a_row, b_row, N);
 
             result[vector_idx] = dot_product;
             total_sum += dot_product;
