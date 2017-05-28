@@ -165,8 +165,9 @@ int what() {
         query.data[i] = random();
     }
 
-    auto norm = vec_norm_avx256(query.data, query.dimensions);
-    std::cout << "Test vector norm is " << norm << std::endl;
+    auto norm = vec_normalize_avx256(query.data, query.dimensions);
+    auto norm2 = vec_norm_avx256(query.data, query.dimensions);
+    std::cout << "Test vector norm is " << norm << " and " << norm2 << std::endl;
 
     // Worker test
     DotProductVisitorAvx visitor;
