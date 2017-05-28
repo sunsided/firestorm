@@ -116,6 +116,10 @@ int what() {
     auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
+    // TODO: Allocate separate chunk for vector norms
+    // TODO: Simplify to only one chunk manager, find vector back by cosine similarity
+    // TODO: Sort out elements by NaN for unused norms, e.g. https://stackoverflow.com/questions/31818755/comparison-with-nan-using-avx
+
     // Keep track of the total sum for validation.
     auto expected_total_sum = 0.0f;
 
