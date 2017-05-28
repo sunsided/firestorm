@@ -11,21 +11,6 @@
 
 /// A memory chunk consisting of an arbitrary number of vectors.
 struct mem_chunk_t {
-    /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
-    static const size_t byte_alignment = 32;
-
-    /// The index of this chunk.
-    const chunk_idx_t index;
-
-    /// The number of vectors held by this chunk.
-    const size_t vectors;
-
-    /// The number of dimensions per vector.
-    const size_t dimensions;
-
-    /// The actual data field.
-    float* data;
-
     /// Initializes a new memory chunk.
     ///
     /// \param index The index of the memory chunk.
@@ -40,6 +25,21 @@ struct mem_chunk_t {
     ~mem_chunk_t() {
         boost::alignment::aligned_free(data);
     }
+
+    /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
+    static const size_t byte_alignment = 32;
+
+    /// The index of this chunk.
+    const chunk_idx_t index;
+
+    /// The number of vectors held by this chunk.
+    const size_t vectors;
+
+    /// The number of dimensions per vector.
+    const size_t dimensions;
+
+    /// The actual data field.
+    float* data;
 };
 
 #endif //FIRESTORM_MEM_CHUNK_H

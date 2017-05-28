@@ -231,7 +231,8 @@ int what() {
 
     // Worker test
     DotProductVisitorAvx visitor;
-    worker->accept(visitor, query);
+    auto results = worker->accept(visitor, query);
+    std::cout << results.at(0)->vector.data[0] << std::endl;
 
     const size_t repetitions = 20;
 

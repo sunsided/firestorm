@@ -13,13 +13,13 @@ public:
     DotProductVisitorAvx() {}
     virtual ~DotProductVisitorAvx() {}
 
-    void visit(const mem_chunk_t& chunk, const vector_t& query, vector_t& out_scores) const override {
+    void visit(const mem_chunk_t& chunk, const vector_t& query, const vector_t& out_scores) const override {
         assert(chunk.dimensions == query.dimensions);
 
         const size_t N = query.dimensions;
         const auto b_row = query.data;
         const size_t element_count = chunk.vectors * chunk.dimensions; ///< The total number of float elements in the buffer.
-        for (size_t start_idx = 0; start_idx < element_count; start_idx += N) {
+        for (size_t start_idx = 0, vector = 0; start_idx < element_count; start_idx += N, ++vector) {
             const auto a_row = &chunk.data[start_idx];
 
             auto total = _mm256_set1_ps(0.0f);
@@ -55,7 +55,7 @@ public:
 
             alignas(32) float ptr[8];
             _mm256_store_ps(ptr, total);
-            // TODO: return ptr[0] + ptr[5];
+            out_scores.data[vector] = ptr[0] + ptr[5];
         }
     };
 };

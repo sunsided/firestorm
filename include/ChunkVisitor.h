@@ -11,7 +11,7 @@
 
 class ChunkVisitor {
 public:
-    virtual void visit(const mem_chunk_t& chunk, const vector_t& query, vector_t& out_scores) const = 0;
+    virtual void visit(const mem_chunk_t& chunk, const vector_t& query, const vector_t& out_scores) const = 0;
 };
 
 #endif //FIRESTORM_CHUNKVISITOR_H

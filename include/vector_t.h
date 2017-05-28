@@ -10,14 +10,6 @@
 
 /// A single vector.
 struct vector_t {
-    static const size_t byte_alignment = 32;
-
-    /// The dimensionality of the query vector.
-    const size_t dimensions;
-
-    /// The actual data buffer.
-    float* data;
-
     vector_t(size_t dimensions)
         : dimensions(dimensions) {
         const bytes_t bytes = dimensions * sizeof(float);
@@ -28,6 +20,15 @@ struct vector_t {
         boost::alignment::aligned_free(data);
         data = nullptr;
     }
+
+    /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
+    static const size_t byte_alignment = 32;
+
+    /// The dimensionality of the query vector.
+    const size_t dimensions;
+
+    /// The actual data buffer.
+    float* data;
 };
 
 #endif //FIRESTORM_VECTORT_H
