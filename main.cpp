@@ -11,6 +11,8 @@
 // TODO: Boost
 // TODO: Boost.SIMD
 
+#ifdef AVX_VERSION
+
 float dot_product_avx256(const float *const a_row, const float *const b_row, const size_t N) {
     auto total = _mm256_set1_ps(0.0f);
     for (size_t i = 0; i < N; i += 32) {
@@ -47,6 +49,8 @@ float dot_product_avx256(const float *const a_row, const float *const b_row, con
     _mm256_store_ps(ptr, total);
     return ptr[0] + ptr[5];
 }
+
+#endif
 
 float dot_product_naive(const float* const a_row, const float* const b_row, const size_t N) {
     auto total = 0.0f;
@@ -178,9 +182,9 @@ int what() {
 
             // Calculate the dot product of the 2048-element vector
             static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-            const auto dot_product = dot_product_avx256(a_row, b_row, N);
+            // const auto dot_product = dot_product_avx256(a_row, b_row, N);
             // const auto dot_product = dot_product_naive(a_row, b_row, N);
-            // const auto dot_product = dot_product_unrolled_8(a_row, b_row, N);
+            const auto dot_product = dot_product_unrolled_8(a_row, b_row, N);
 
             result[vector_idx] = dot_product;
             total_sum += dot_product;
@@ -211,8 +215,7 @@ int main() {
     }
 
     if (!avx2_enabled() && !avx_enabled()) {
-        std::cout << "AVX/AVX2 support is required." << std::endl;
-        return 1;
+        std::cout << "AVX/AVX2 support is required for optimal performance." << std::endl;
     }
 
     what();
