@@ -11,6 +11,9 @@
 // TODO: Boost
 // TODO: Boost.SIMD
 
+const size_t N = 2048;
+const size_t M = 10000;
+
 #ifdef AVX_VERSION
 
 float dot_product_avx256(const float *const a_row, const float *const b_row, const size_t N) {
@@ -75,16 +78,66 @@ float dot_product_unrolled_8(const float *const a_row, const float *const b_row,
     return total;
 }
 
+template <typename DotProductFunc>
+void run_test_round(float *const result, const ChunkManager &chunkManager_a,
+                    const ChunkManager &chunkManager_b, const bytes_t chunk_size, float expected_total_sum,
+                    DotProductFunc && calculate) {
+
+    // Keep track of the total sum for validation.
+    auto total_sum = 0.0f;
+
+    chunk_idx_t current_chunk = 0;
+    auto chunk_a = chunkManager_a.get(current_chunk).lock();
+    auto chunk_b = chunkManager_b.get(current_chunk).lock();
+    auto float_offset = 0;
+
+    const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
+    auto remaining_vectors_per_chunk = vectors_per_chunk;
+
+    auto start_time = std::chrono::_V2::system_clock::now();
+
+    // Run for a couple of test iterations ...
+    for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
+
+        if (remaining_vectors_per_chunk == 0) {
+            current_chunk += 1;
+            chunk_a = chunkManager_a.get(current_chunk).lock();
+            chunk_b = chunkManager_b.get(current_chunk).lock();
+
+            float_offset = 0;
+            remaining_vectors_per_chunk = vectors_per_chunk;
+        }
+
+        auto a_row = &chunk_a->data[float_offset];
+        auto b_row = &chunk_b->data[float_offset];
+
+        --remaining_vectors_per_chunk;
+        float_offset += N;
+
+        // Calculate the dot product of the 2048-element vector
+        static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
+        const auto dot_product = calculate(a_row, b_row, N);
+
+        result[vector_idx] = dot_product;
+        total_sum += dot_product;
+    }
+
+    auto end_time = std::chrono::_V2::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+    auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
+    std::cout << "Sum: " << total_sum << " (expected: " << expected_total_sum << ")"
+              << " - duration: " << duration << "ms"
+              << " (" << vectors_per_second << " vector/s)"
+              << std::endl;
+}
+
 int what() {
     Worker worker;
 
-    const auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+    const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
-
-    const size_t N = 2048;
-    const size_t M = 100000;
 
     auto expected = new float[M];
     auto result = new float[M];
@@ -145,57 +198,36 @@ int what() {
               << "Vectors initialized." << std::endl;
 
     const size_t repetitions = 20;
+
+#if AVX_VERSION
+
+    std::cout << std::endl;
+    std::cout << "dot_product_avx256" << std::endl
+              << "------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "Running test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        std::cout << "round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_avx256);
+    }
 
-        // Keep track of the total sum for validation.
-        auto total_sum = 0.0f;
+#endif
 
-        chunk_idx_t current_chunk = 0;
-        chunk_a = chunkManager_a.get(current_chunk).lock();
-        chunk_b = chunkManager_b.get(current_chunk).lock();
-        float_offset = 0;
+    std::cout << std::endl;
+    std::cout << "dot_product_unrolled_8" << std::endl
+              << "----------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_unrolled_8);
+    }
 
-        const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
-        auto remaining_vectors_per_chunk = vectors_per_chunk;
-
-        auto start_time = std::chrono::high_resolution_clock::now();
-
-        // Run for a couple of test iterations ...
-        for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
-
-            if (remaining_vectors_per_chunk == 0) {
-                current_chunk += 1;
-                chunk_a = chunkManager_a.get(current_chunk).lock();
-                chunk_b = chunkManager_b.get(current_chunk).lock();
-
-                float_offset = 0;
-                remaining_vectors_per_chunk = vectors_per_chunk;
-            }
-
-            auto a_row = &chunk_a->data[float_offset];
-            auto b_row = &chunk_b->data[float_offset];
-
-            --remaining_vectors_per_chunk;
-            float_offset += N;
-
-            // Calculate the dot product of the 2048-element vector
-            static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-            // const auto dot_product = dot_product_avx256(a_row, b_row, N);
-            // const auto dot_product = dot_product_naive(a_row, b_row, N);
-            const auto dot_product = dot_product_unrolled_8(a_row, b_row, N);
-
-            result[vector_idx] = dot_product;
-            total_sum += dot_product;
-        }
-
-        auto end_time = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-        auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-        std::cout << "Sum: " << total_sum << " (expected: " << expected_total_sum << ")" << " - duration: " << duration << "ms"
-                  << " (" << vectors_per_second << " vector/s)"
-                  << std::endl;
+    std::cout << std::endl;
+    std::cout << "dot_product_naive" << std::endl
+              << "-----------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_naive);
     }
 
     std::cout << "Cleaning up ..." << std::endl;
@@ -220,6 +252,5 @@ int main() {
 
     what();
 
-    std::cin.get();
     return 0;
 }
