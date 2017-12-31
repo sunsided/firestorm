@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-#include <Eigen/Dense>
+#include <Eigen/CXX11/Tensor>
 
 #include "Simd.h"
 #include "ChunkManager.h"
@@ -85,6 +85,17 @@ float dot_product_eigen(float * const a_row, float * const b_row, const size_t _
     auto ma = Eigen::Map<Eigen::Matrix<float, 1, N>, Eigen::Aligned32>(a_row);
     auto mb = Eigen::Map<Eigen::Matrix<float, N, 1>, Eigen::Aligned32>(b_row);
     return ma.dot(mb);
+}
+
+float dot_product_eigen_tensor(const float * const a_row, const float * const b_row, const size_t _) {
+    // the _ parameter is assumed to be exactly N
+    auto ma = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(a_row, N);
+    auto mb = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(b_row, N);
+
+    const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
+    const auto op = ma.contract(mb, contraction_pair00); // ma.dot(mb);
+    const Eigen::TensorFixedSize<float, Eigen::Sizes<>, Eigen::RowMajor, int> result = op;
+    return result(0);
 }
 
 template <typename DotProductFunc>
@@ -228,6 +239,15 @@ int what() {
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
         run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_eigen);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_eigen_tensor (SYCL)" << std::endl
+              << "-------------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_eigen_tensor);
     }
 
     std::cout << std::endl;

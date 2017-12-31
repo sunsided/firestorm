@@ -9,10 +9,24 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h)
 add_executable(firestorm ${SOURCE_FILES})
 
+# Require ComputeCPP
+set(COMPUTECPP_PACKAGE_ROOT_DIR /opt/computecpp CACHE PATH "Path to ComputeCpp")
+include(FindComputeCpp)
+
 # Check for Eigen
 
-find_package(Eigen3 3.3.4 REQUIRED NO_MODULE)
-target_link_libraries (firestorm PUBLIC Eigen3::Eigen)
+# find_package(Eigen3 3.3.4 REQUIRED NO_MODULE)
+# target_link_libraries (firestorm PUBLIC Eigen3::Eigen)
+
+set(EIGEN_TEST_SYCL TRUE)
+set(EIGEN_TEST_CXX11 TRUE)
+
+set(EIGEN_BUILD_BTL FALSE)
+set(EIGEN_COVERAGE_TESTING FALSE)
+set(EIGEN_BUILD_PKGCONFIG FALSE)
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/")
+include_directories("${INCLUDE_DIRECTORIES};${CMAKE_CURRENT_SOURCE_DIR}/external/eigen;${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/unsupported")
 
 # Check for AVX and AVX2
 
