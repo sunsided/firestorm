@@ -87,12 +87,13 @@ float dot_product_eigen(float * const a_row, float * const b_row, const size_t _
     return ma.dot(mb);
 }
 
+static const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
+
 float dot_product_eigen_tensor(const float * const a_row, const float * const b_row, const size_t _) {
     // the _ parameter is assumed to be exactly N
     auto ma = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(a_row, N);
     auto mb = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(b_row, N);
 
-    const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
     const auto op = ma.contract(mb, contraction_pair00); // ma.dot(mb);
     const Eigen::TensorFixedSize<float, Eigen::Sizes<>, Eigen::RowMajor, int> result = op;
     return result(0);
