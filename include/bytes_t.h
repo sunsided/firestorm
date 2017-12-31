@@ -9,15 +9,15 @@
 
 using bytes_t = size_t;
 
-inline constexpr bytes_t operator"" _B (size_t amount) {
+inline constexpr bytes_t operator"" _B (unsigned long long int amount) {
     return bytes_t(amount);
 }
 
-inline constexpr bytes_t operator"" _KB (size_t amount) {
+inline constexpr bytes_t operator"" _KB (unsigned long long int amount) {
     return bytes_t(1024UL*amount);
 }
 
-inline constexpr bytes_t operator"" _MB (size_t amount) {
+inline constexpr bytes_t operator"" _MB (unsigned long long int amount) {
     return bytes_t(1024UL*1024UL*amount);
 }
 
