@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 
+#include <Eigen/Dense>
+
 #include "Simd.h"
 #include "ChunkManager.h"
 #include "Worker.h"
@@ -76,6 +78,13 @@ float dot_product_unrolled_8(const float *const a_row, const float *const b_row,
                 a_row[i + 7] * b_row[i + 7];
     }
     return total;
+}
+
+float dot_product_eigen(float * const a_row, float * const b_row, const size_t _) {
+    // the _ parameter is assumed to be exactly N
+    auto ma = Eigen::Map<Eigen::Matrix<float, 1, N>, Eigen::Aligned32>(a_row);
+    auto mb = Eigen::Map<Eigen::Matrix<float, N, 1>, Eigen::Aligned32>(b_row);
+    return ma.dot(mb);
 }
 
 template <typename DotProductFunc>
@@ -211,6 +220,15 @@ int what() {
     }
 
 #endif
+
+    std::cout << std::endl;
+    std::cout << "dot_product_eigen" << std::endl
+              << "-----------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
+        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_eigen);
+    }
 
     std::cout << std::endl;
     std::cout << "dot_product_unrolled_8" << std::endl

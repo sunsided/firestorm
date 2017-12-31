@@ -3,13 +3,19 @@ project(firestorm)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/cmake/;${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+
 include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h)
 add_executable(firestorm ${SOURCE_FILES})
 
+# Check for Eigen
+
+find_package(Eigen3 3.3.4 REQUIRED NO_MODULE)
+target_link_libraries (firestorm PUBLIC Eigen3::Eigen)
+
 # Check for AVX and AVX2
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(OptimizeForArchitecture)
 OptimizeForArchitecture()
 
