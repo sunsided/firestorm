@@ -55,7 +55,7 @@ endif()
 
 # Check for Boost
 
-find_package(Boost 1.62 REQUIRED)
+find_package(Boost 1.61 REQUIRED)
 if(Boost_FOUND)
     message(STATUS "Found Boost ${Boost_VERSION}")
     include_directories(${Boost_INCLUDE_DIRS})
