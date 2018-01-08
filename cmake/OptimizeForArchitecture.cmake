@@ -72,7 +72,9 @@ macro(AutodetectHostArchitecture)
     if(_vendor_id STREQUAL "GenuineIntel")
         if(_cpu_family EQUAL 6)
             # Any recent Intel CPU except NetBurst
-            if(_cpu_model EQUAL 94)    # Core i5/i7-6xxxU CPUs
+            if(_cpu_model EQUAL 158) # Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
+                set(TARGET_ARCHITECTURE "kaby-lake")
+            elseif(_cpu_model EQUAL 94)    # Core i5/i7-6xxxU CPUs
                 set(TARGET_ARCHITECTURE "skylake")
             elseif(_cpu_model EQUAL 69)    # Core i5/i7-4xxxU CPUs
                 set(TARGET_ARCHITECTURE "haswell")
@@ -197,6 +199,12 @@ macro(OptimizeForArchitecture)
         list(APPEND _march_flag_list "corei7")
         list(APPEND _march_flag_list "core2")
         list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2")
+    elseif(TARGET_ARCHITECTURE STREQUAL "kaby-lake")
+        list(APPEND _march_flag_list "core-avx2")
+        list(APPEND _march_flag_list "core-avx-i")
+        list(APPEND _march_flag_list "corei7-avx")
+        list(APPEND _march_flag_list "core2")
+        list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2" "avx" "avx2" "rdrnd" "f16c" "fma")
     elseif(TARGET_ARCHITECTURE STREQUAL "skylake")
         list(APPEND _march_flag_list "core-avx2")
         list(APPEND _march_flag_list "core-avx-i")
