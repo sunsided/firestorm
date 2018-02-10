@@ -244,8 +244,8 @@ int what() {
     }
 
     std::cout << "Cleaning up ..." << std::endl;
-    delete expected;
-    delete result;
+    delete[] expected;
+    delete[] result;
 
     std::cout << "Done." << std::endl;
 }
