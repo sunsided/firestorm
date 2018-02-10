@@ -87,7 +87,7 @@ float dot_product_eigen(float * const a_row, float * const b_row, const size_t _
     return ma.dot(mb);
 }
 
-static const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
+const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
 
 float dot_product_eigen_tensor(const float * const a_row, const float * const b_row, const size_t _) {
     // the _ parameter is assumed to be exactly N
