@@ -7,7 +7,7 @@
 
 #include <memory>
 
-float dot_product_naive(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
+inline float dot_product_naive(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
     auto total = 0.0f;
     for (size_t i = 0; i < N; ++i) {
         total += a_row[i] * b_row[i];
@@ -15,7 +15,7 @@ float dot_product_naive(const float *const __restrict__ a_row, const float *cons
     return total;
 }
 
-float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
+inline float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
     auto total = 0.0f;
     for (size_t i = 0; i < N; i += 8) {
         total += a_row[i] * b_row[i] +

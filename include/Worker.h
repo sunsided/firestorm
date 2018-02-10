@@ -6,7 +6,7 @@
 #define FIRESTORM_WORKER_H
 
 #include <deque>
-#include <vector>
+#include <map>
 #include <boost/optional.hpp>
 #include "mem_chunk_t.h"
 #include "ChunkVisitor.h"
@@ -42,6 +42,20 @@ public:
         return chunk;
     }
 
+    std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
+        std::map<size_t, std::shared_ptr<result_t>> results;
+        for(auto chunk : assigned_chunks) {
+            auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+
+            const auto chunk_ptr = shared_chunk.get();
+            assert(chunk_ptr->dimensions == query.dimensions);
+
+            results[chunk_ptr->index] = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
+        }
+        return results;
+    }
+
     std::vector<std::shared_ptr<result_t>> accept(ChunkVisitor& visitor, const vector_t& query) {
         std::vector<std::shared_ptr<result_t>> results;
         for(auto chunk : assigned_chunks) {
@@ -56,6 +70,19 @@ public:
             results.push_back(std::move(result));
         }
         return results;
+    }
+
+    void accept(ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) {
+        for (const auto chunk : assigned_chunks) {
+            const auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+
+            const auto chunk_ptr = shared_chunk.get();
+            assert(chunk_ptr->dimensions == query.dimensions);
+
+            auto result = results[chunk_ptr->index];
+            visitor.visit(*chunk_ptr, query, result->scores);
+        }
     }
 };
 
