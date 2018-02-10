@@ -10,13 +10,24 @@
 
 /// A single vector.
 struct vector_t {
-    vector_t(size_t dimensions)
+    explicit vector_t(size_t dimensions) noexcept
         : dimensions(dimensions) {
         const bytes_t bytes = dimensions * sizeof(float);
         data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
     }
 
+    // Copy construction is forbidden.
+    vector_t(const vector_t& other) = delete;
+
+    // Move constructor.
+    vector_t(vector_t&& other) noexcept
+        : dimensions(other.dimensions), data(other.data)
+    {
+        other.data = nullptr;
+    }
+
     ~vector_t() {
+        if (data == nullptr) return;
         boost::alignment::aligned_free(data);
         data = nullptr;
     }

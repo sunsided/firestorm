@@ -19,7 +19,6 @@
 
 const size_t N = 2048;
 const size_t M = 10000;
-<<<<<<< HEAD
 
 float dot_product_eigen(float * const a_row, float * const b_row, const size_t _) {
     // the _ parameter is assumed to be exactly N
@@ -96,15 +95,7 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
 int what() {
 
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
-=======
-#else
-const size_t M = 2000;
-#endif
 
-int what() {
-
-    const auto seed = 1337L;
->>>>>>> Add documentation comments
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
@@ -113,10 +104,8 @@ int what() {
     auto result = new float[M];
 
     // We first create two chunk managers that will hold the vectors.
-    // TODO: Simplify to only one chunk manager, find vector back by cosine similarity
     std::cout << "Initializing vectors ..." << std::endl;
     std::shared_ptr<ChunkManager> chunkManager_a = std::make_shared<ChunkManager>();
-    std::shared_ptr<ChunkManager> chunkManager_b = std::make_shared<ChunkManager>();
     constexpr const auto target_chunk_size = 32_MB;
     constexpr size_t num_vectors = target_chunk_size / (N*sizeof(float));
 
@@ -129,15 +118,18 @@ int what() {
     static_assert((target_chunk_size % (sizeof(float)*N)) == 0);
 
     std::shared_ptr<mem_chunk_t> chunk_a = nullptr;
-    std::shared_ptr<mem_chunk_t> chunk_b = nullptr;
     auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
     // TODO: Allocate separate chunk for vector norms
     // TODO: Sort out elements by NaN for unused norms, e.g. https://stackoverflow.com/questions/31818755/comparison-with-nan-using-avx
 
-    // Keep track of the total sum for validation.
-    auto expected_total_sum = 0.0f;
+    // Keep track of the results for validation.
+    auto expected_best_match = 0.0f;
+    auto expected_best_match_idx = static_cast<size_t>(-1);
+
+    // Create a random query vector.
+    vector_t query = create_query_vector();
 
     // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < M; ++j) {
@@ -148,7 +140,8 @@ int what() {
             std::cout << "Allocating chunk." << std::endl;
 
             chunk_a = chunkManager_a->allocate(num_vectors, N);
-            chunk_b = chunkManager_b->allocate(num_vectors, N);
+            assert(chunk_a != nullptr);
+
             remaining_chunk_size = target_chunk_size;
             float_offset = 0;
 
@@ -161,7 +154,7 @@ int what() {
         }
 
         auto a = &chunk_a->data[float_offset];
-        auto b = &chunk_b->data[float_offset];
+        const auto *const b = &query.data[0];
 
         assert(float_offset < M*N);
         assert(remaining_chunk_size >= sizeof(float)*N);
@@ -173,28 +166,16 @@ int what() {
         expected[j] = 0;
         for (size_t i = 0; i < N; ++i) {
             a[i] = random();
-            b[i] = random();
             expected[j] += a[i] * b[i];
         }
-        expected_total_sum += expected[j];
+
+        if (expected[j] > expected_best_match) {
+            expected_best_match = expected[j];
+            expected_best_match_idx = j;
+        }
     }
     std::cout << "- " << M << "/" << M << std::endl
               << "Vectors initialized." << std::endl;
-
-    // Create a simple query vector
-    vector_t query {N};
-    for (size_t i = 0; i < N; ++i) {
-        query.data[i] = random();
-    }
-
-#if AVX2 || AVX
-    auto norm = vec_normalize_avx256(query.data, query.dimensions);
-    auto norm2 = vec_norm_avx256(query.data, query.dimensions);
-#else
-    auto norm = vec_normalize_naive(query.data, query.dimensions);
-    auto norm2 = vec_norm_naive(query.data, query.dimensions);
-#endif
-    std::cout << "Test vector norm before normalizing is " << norm << " (" << norm2 << " after that)." << std::endl;
 
     // Worker test
 #if AVX2 || AVX

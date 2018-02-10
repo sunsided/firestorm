@@ -29,7 +29,7 @@ public:
         auto chunk = std::make_shared<mem_chunk_t>(next_index, vectors, dimensions);
         ++next_index;
 
-        chunks.push_back(std::move(chunk));
+        chunks.push_back(chunk);
         return chunk;
     }
 

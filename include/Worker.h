@@ -25,18 +25,18 @@ private:
     const std::shared_ptr<const ChunkAccessor> accessor;
 
 public:
-    Worker(const std::shared_ptr<const ChunkAccessor> accessor) : accessor(accessor) {}
+    Worker(const std::shared_ptr<const ChunkAccessor>& accessor) : accessor(accessor) {}
 
     void assign_chunk(chunk_idx_t chunk_idx) {
         assigned_chunks.push_back(chunk_idx);
     }
 
     boost::optional<chunk_idx_t> unassign_chunk() {
-        if (assigned_chunks.size() == 0) {
+        if (assigned_chunks.empty()) {
             return boost::none;
         }
 
-        auto chunk = std::move(assigned_chunks.front());
+        auto chunk = assigned_chunks.front();
         assigned_chunks.pop_front();
         return chunk;
     }
