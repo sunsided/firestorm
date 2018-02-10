@@ -15,7 +15,7 @@ public:
     NaiveUnrolledVisitorAvx() = default;
     virtual ~NaiveUnrolledVisitorAvx() = default;
 
-    void visit(const mem_chunk_t& chunk, const vector_t& query, const vector_t& out_scores) const override {
+    void visit(const mem_chunk_t& chunk, const vector_t& query, std::vector<float>& out_scores) const override {
         assert(chunk.dimensions == query.dimensions);
 
         const size_t N = query.dimensions;
@@ -24,8 +24,7 @@ public:
 
         for (size_t start_idx = 0, vector = 0; start_idx < element_count; start_idx += N, ++vector) {
             const auto a_row = &chunk.data[start_idx];
-
-            out_scores.data[vector] = dot_product_unrolled_8(a_row, b_row, N);
+            out_scores[vector] = dot_product_unrolled_8(a_row, b_row, N);
         }
     };
 };

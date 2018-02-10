@@ -5,15 +5,21 @@
 #ifndef FIRESTORM_RESULT_T_H
 #define FIRESTORM_RESULT_T_H
 
+#include <memory>
 #include "chunk_idx_t.h"
-#include "vector_t.h"
 
 struct result_t {
-    result_t(const chunk_idx_t chunk_idx, const size_t num_vectors)
-        : chunk(chunk_idx), vector(num_vectors) {}
+    result_t(const chunk_idx_t chunk_idx, const size_t num_vectors) noexcept
+            : chunk(chunk_idx), scores(num_vectors) {}
+
+    result_t(const result_t& other) = delete;
+
+    result_t(result_t&& other) noexcept
+        : chunk(other.chunk), scores(std::move(other.scores))
+    { }
 
     const chunk_idx_t chunk;
-    const vector_t vector;
+    std::vector<float> scores;
 };
 
 #endif //FIRESTORM_RESULT_T_H

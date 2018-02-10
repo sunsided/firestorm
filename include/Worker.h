@@ -6,6 +6,7 @@
 #define FIRESTORM_WORKER_H
 
 #include <deque>
+#include <vector>
 #include <boost/optional.hpp>
 #include "mem_chunk_t.h"
 #include "ChunkVisitor.h"
@@ -41,8 +42,8 @@ public:
         return chunk;
     }
 
-    std::vector<std::unique_ptr<result_t>> accept(ChunkVisitor& visitor, const vector_t& query) {
-        std::vector<std::unique_ptr<result_t>> results;
+    std::vector<std::shared_ptr<result_t>> accept(ChunkVisitor& visitor, const vector_t& query) {
+        std::vector<std::shared_ptr<result_t>> results;
         for(auto chunk : assigned_chunks) {
             auto shared_chunk = accessor->get_ro(chunk);
             if (shared_chunk == nullptr) continue;
@@ -50,8 +51,8 @@ public:
             const auto chunk_ptr = shared_chunk.get();
             assert(chunk_ptr->dimensions == query.dimensions);
 
-            auto result = std::make_unique<result_t>(chunk_ptr->index, chunk_ptr->vectors);
-            visitor.visit(*chunk_ptr, query, result->vector);
+            auto result = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
+            visitor.visit(*chunk_ptr, query, result->scores);
             results.push_back(std::move(result));
         }
         return results;
