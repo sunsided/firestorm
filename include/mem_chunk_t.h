@@ -9,7 +9,7 @@
 #include <bytes_t.h>
 #include "chunk_idx_t.h"
 
-/// A memory chunk consisting of an arbitrary number of vectors.
+/// A memory chunk consisting of a defined number of vectors.
 struct mem_chunk_t {
     /// Initializes a new memory chunk.
     ///

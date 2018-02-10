@@ -19,6 +19,7 @@
 
 const size_t N = 2048;
 const size_t M = 10000;
+<<<<<<< HEAD
 
 float dot_product_eigen(float * const a_row, float * const b_row, const size_t _) {
     // the _ parameter is assumed to be exactly N
@@ -95,6 +96,15 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
 int what() {
 
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
+=======
+#else
+const size_t M = 2000;
+#endif
+
+int what() {
+
+    const auto seed = 1337L;
+>>>>>>> Add documentation comments
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
@@ -102,12 +112,16 @@ int what() {
     auto expected = new float[M];
     auto result = new float[M];
 
+    // We first create two chunk managers that will hold the vectors.
+    // TODO: Simplify to only one chunk manager, find vector back by cosine similarity
     std::cout << "Initializing vectors ..." << std::endl;
     std::shared_ptr<ChunkManager> chunkManager_a = std::make_shared<ChunkManager>();
     std::shared_ptr<ChunkManager> chunkManager_b = std::make_shared<ChunkManager>();
     constexpr const auto target_chunk_size = 32_MB;
     constexpr size_t num_vectors = target_chunk_size / (N*sizeof(float));
 
+    // A worker is a visitor that is performs a calculation on the chunks of a
+    // registered manager.
     std::unique_ptr<Worker> worker = std::make_unique<Worker>(chunkManager_a);
 
     // To simplify experiments, we require the block to exactly match our expectations
@@ -120,27 +134,28 @@ int what() {
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
     // TODO: Allocate separate chunk for vector norms
-    // TODO: Simplify to only one chunk manager, find vector back by cosine similarity
     // TODO: Sort out elements by NaN for unused norms, e.g. https://stackoverflow.com/questions/31818755/comparison-with-nan-using-avx
 
     // Keep track of the total sum for validation.
     auto expected_total_sum = 0.0f;
 
+    // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < M; ++j) {
 
-        // Initial condition, also reached during runtime: If one block is full,
-        // allocate another one.
+        // Initial condition, also reached during runtime:
+        // If one memory chunk is "full", allocate another one.
         if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
-            chunk_a = chunkManager_a->allocate(num_vectors, N).lock();
-            chunk_b = chunkManager_b->allocate(num_vectors, N).lock();
+            chunk_a = chunkManager_a->allocate(num_vectors, N);
+            chunk_b = chunkManager_b->allocate(num_vectors, N);
             remaining_chunk_size = target_chunk_size;
             float_offset = 0;
 
             worker->assign_chunk(chunk_a->index);
         }
 
+        // Some progress printing.
         if (j % 2500 == 0) {
             std::cout << "- " << j << "/" << M << std::endl;
         }
@@ -179,7 +194,7 @@ int what() {
     auto norm = vec_normalize_naive(query.data, query.dimensions);
     auto norm2 = vec_norm_naive(query.data, query.dimensions);
 #endif
-    std::cout << "Test vector norm is " << norm << " and " << norm2 << std::endl;
+    std::cout << "Test vector norm before normalizing is " << norm << " (" << norm2 << " after that)." << std::endl;
 
     // Worker test
 #if AVX2 || AVX
