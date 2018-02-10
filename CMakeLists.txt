@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/cmake/;${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
-set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h include/ChunkVisitor.h include/ChunkAccessor.h include/DotProductVisitorAvx.h include/result_t.h include/dot_product_avx256.h dot_product_avx256.cpp)
+set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h include/ChunkVisitor.h include/ChunkAccessor.h include/DotProductVisitorAvx.h include/NaiveUnrolledVisitorAvx.h include/result_t.h include/dot_product_avx256.h dot_product_avx256.cpp include/dot_product_naive.h)
 add_executable(firestorm ${SOURCE_FILES})
 
 # Require ComputeCPP
@@ -29,6 +29,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/")
 include_directories("${INCLUDE_DIRECTORIES};${CMAKE_CURRENT_SOURCE_DIR}/external/eigen;${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/unsupported")
 
 # Check for AVX and AVX2
+# TODO: This is local machine-centric. Make this cross-compilable easily.
 
 include(OptimizeForArchitecture)
 OptimizeForArchitecture()
@@ -42,7 +43,7 @@ elseif (USE_AVX)
     set(__AVX__ 1)
     add_definitions(-DAVX_VERSION=1)
 else()
-    message(WARNING "The target machine does not support AVX. At least AVX is required for optimal performance.")
+    message(WARNING "The current machine does not support AVX. At least AVX is required for optimal performance.")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Vc_ARCHITECTURE_FLAGS}")

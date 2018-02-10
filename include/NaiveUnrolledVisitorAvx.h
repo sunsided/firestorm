@@ -1,20 +1,19 @@
 //
-// Created by Markus on 28.05.2017.
+// Created by Markus on 10.02.2018.
 //
 
-#ifndef FIRESTORM_DOTPRODUCTVISITORAVX_H
-#define FIRESTORM_DOTPRODUCTVISITORAVX_H
+#ifndef FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
+#define FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
 
-#if AVX2 || AVX
-
-#include "Simd.h"
 #include "ChunkVisitor.h"
-#include "dot_product_avx256.h"
+#include "dot_product_naive.h"
 
-class DotProductVisitorAvx : public ChunkVisitor {
+// TODO: Create type templated on the dot_product function
+
+class NaiveUnrolledVisitorAvx : public ChunkVisitor {
 public:
-    DotProductVisitorAvx() = default;
-    virtual ~DotProductVisitorAvx() = default;
+    NaiveUnrolledVisitorAvx() = default;
+    virtual ~NaiveUnrolledVisitorAvx() = default;
 
     void visit(const mem_chunk_t& chunk, const vector_t& query, const vector_t& out_scores) const override {
         assert(chunk.dimensions == query.dimensions);
@@ -26,11 +25,9 @@ public:
         for (size_t start_idx = 0, vector = 0; start_idx < element_count; start_idx += N, ++vector) {
             const auto a_row = &chunk.data[start_idx];
 
-            out_scores.data[vector] = dot_product_avx256(a_row, b_row, N);
+            out_scores.data[vector] = dot_product_unrolled_8(a_row, b_row, N);
         }
     };
 };
 
-#endif
-
-#endif //FIRESTORM_DOTPRODUCTVISITORAVX_H
+#endif //FIRESTORM_NAIVEUNROLLEDVISITORAVX_H

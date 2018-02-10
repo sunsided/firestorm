@@ -10,9 +10,12 @@
 #include "ChunkManager.h"
 #include "Worker.h"
 #include "DotProductVisitorAvx.h"
+#include "NaiveUnrolledVisitorAvx.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
+// TODO: OpenMP backed loops
+// TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
 const size_t N = 2048;
 const size_t M = 10000;
@@ -169,12 +172,22 @@ int what() {
         query.data[i] = random();
     }
 
+#if AVX2 || AVX
     auto norm = vec_normalize_avx256(query.data, query.dimensions);
     auto norm2 = vec_norm_avx256(query.data, query.dimensions);
+#else
+    auto norm = vec_normalize_naive(query.data, query.dimensions);
+    auto norm2 = vec_norm_naive(query.data, query.dimensions);
+#endif
     std::cout << "Test vector norm is " << norm << " and " << norm2 << std::endl;
 
     // Worker test
+#if AVX2 || AVX
     DotProductVisitorAvx visitor;
+#else
+    NaiveUnrolledVisitorAvx visitor;
+#endif
+
     auto results = worker->accept(visitor, query);
     std::cout << results.at(0)->vector.data[0] << std::endl;
 
