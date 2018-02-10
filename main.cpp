@@ -162,10 +162,15 @@ int what() {
         remaining_chunk_size -= (sizeof(float)*N);
         float_offset += N;
 
-        // Write one vector and one expected result.
-        expected[j] = 0;
+        // Create a vector.
         for (size_t i = 0; i < N; ++i) {
             a[i] = random();
+        }
+        vec_normalize_naive(a, chunk_a->dimensions);
+
+        // Obtain the expected result.
+        expected[j] = 0;
+        for (size_t i = 0; i < N; ++i) {
             expected[j] += a[i] * b[i];
         }
 
