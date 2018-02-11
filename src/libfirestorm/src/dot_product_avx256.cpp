@@ -2,10 +2,10 @@
 // Created by Markus on 28.05.2017.
 //
 
-#include "Simd.h"
-#include "dot_product_avx256.h"
+#include "firestorm/Simd.h"
+#include "firestorm/dot_product_avx256.h"
 
-#if AVX2 || AVX
+#if AVX_VERSION
 
 float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
     auto total = _mm256_set1_ps(0.0f);

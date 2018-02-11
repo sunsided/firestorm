@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <memory>
-#include <ChunkAccessor.h>
+#include "ChunkAccessor.h"
 
 /// This class implements memory chunk handling for vectors
 /// stored in consecutive memory.

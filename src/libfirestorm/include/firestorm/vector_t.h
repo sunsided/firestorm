@@ -6,7 +6,7 @@
 #define FIRESTORM_VECTORT_H
 
 #include <boost/align/aligned_alloc.hpp>
-#include <bytes_t.h>
+#include "bytes_t.h"
 
 /// A single vector.
 struct vector_t {

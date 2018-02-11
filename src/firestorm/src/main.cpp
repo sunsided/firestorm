@@ -6,11 +6,12 @@
 
 #include <gperftools/profiler.h>
 
-#include "Simd.h"
-#include "ChunkManager.h"
-#include "Worker.h"
-#include "DotProductVisitor.h"
-#include "dot_product_naive.h"
+#include "firestorm/Simd.h"
+#include "firestorm/ChunkManager.h"
+#include "firestorm/Worker.h"
+#include "firestorm/DotProductVisitor.h"
+#include "firestorm/dot_product_naive.h"
+#include "firestorm/dot_product_avx256.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -32,7 +33,7 @@ vector_t create_query_vector() {
         query.data[i] = random();
     }
 
-#if AVX2 || AVX
+#if AVX_VERSION
     auto norm = vec_normalize_avx256(query.data, query.dimensions);
     auto norm2 = vec_norm_avx256(query.data, query.dimensions);
 #else
@@ -230,7 +231,7 @@ void what() {
               << "Vectors initialized." << std::endl;
 
     // Worker test
-#if AVX2 || AVX
+#if AVX_VERSION
     DotProductVisitor<dot_product_avx256_t> visitor;
 #else
     DotProductVisitor<dot_product_unrolled_8_t> visitor;
@@ -240,22 +241,23 @@ void what() {
 
 #if AVX_VERSION
 
-    std::cout << std::endl;
-    std::cout << "dot_product_avx256" << std::endl
-              << "------------------" << std::endl;
-    for (size_t repetition = 0; repetition < repetitions; ++repetition)
-    {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_avx256_t>(result, *chunkManager, query, chunk_size, expected_best_match_idx);
-    }
+    if (avx2_enabled() || avx_enabled()) {
+        std::cout << std::endl;
+        std::cout << "dot_product_avx256" << std::endl
+                  << "------------------" << std::endl;
+        for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+            std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+            run_test_round<dot_product_avx256_t>(result, *chunkManager, query, target_chunk_size,
+                                                 expected_best_match_idx);
+        }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_avx256 (Worker)" << std::endl
-              << "---------------------------" << std::endl;
-    for (size_t repetition = 0; repetition < repetitions; ++repetition)
-    {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
+        std::cout << std::endl;
+        std::cout << "dot_product_avx256 (Worker)" << std::endl
+                  << "---------------------------" << std::endl;
+        for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+            std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+            run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
+        }
     }
 
 #endif

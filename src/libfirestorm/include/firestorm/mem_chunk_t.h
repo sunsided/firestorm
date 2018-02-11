@@ -6,7 +6,7 @@
 #define FIRESTORM_MEM_CHUNK_H
 
 #include <boost/align/aligned_alloc.hpp>
-#include <bytes_t.h>
+#include "bytes_t.h"
 #include "chunk_idx_t.h"
 
 /// A memory chunk consisting of a defined number of vectors.

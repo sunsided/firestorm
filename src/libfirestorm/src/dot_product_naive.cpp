@@ -4,7 +4,7 @@
 
 #include <cmath>
 #include <memory>
-#include "dot_product_naive.h"
+#include "firestorm/dot_product_naive.h"
 
 float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) const noexcept {
     auto total = 0.0f;
