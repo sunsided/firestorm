@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.6)
-project(firestorm)
+cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+project(firestorm VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/cmake/;${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 set(SOURCE_FILES
@@ -32,21 +32,6 @@ add_executable(firestorm ${SOURCE_FILES})
 # Require ComputeCPP
 set(COMPUTECPP_PACKAGE_ROOT_DIR /opt/computecpp CACHE PATH "Path to ComputeCpp")
 include(FindComputeCpp)
-
-# Check for Eigen
-
-# find_package(Eigen3 3.3.4 REQUIRED NO_MODULE)
-# target_link_libraries (firestorm PUBLIC Eigen3::Eigen)
-
-set(EIGEN_TEST_SYCL TRUE)
-set(EIGEN_TEST_CXX11 TRUE)
-
-set(EIGEN_BUILD_BTL FALSE)
-set(EIGEN_COVERAGE_TESTING FALSE)
-set(EIGEN_BUILD_PKGCONFIG FALSE)
-
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/")
-include_directories("${INCLUDE_DIRECTORIES};${CMAKE_CURRENT_SOURCE_DIR}/external/eigen;${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/unsupported")
 
 # Check for AVX and AVX2
 # TODO: This is local machine-centric. Make this cross-compilable easily.
