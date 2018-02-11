@@ -3,6 +3,12 @@ project(firestorm VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# Set default compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
+# Set module paths for extra functionality.
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
@@ -58,7 +64,6 @@ endif()
 
 # Check for Boost
 find_package(Boost 1.61 REQUIRED)
-
 if(Boost_FOUND)
     message(STATUS "Found Boost ${Boost_VERSION}")
     include_directories(${Boost_INCLUDE_DIRS})
