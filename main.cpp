@@ -10,8 +10,8 @@
 #include "Simd.h"
 #include "ChunkManager.h"
 #include "Worker.h"
-#include "DotProductVisitorAvx.h"
-#include "DotProductVisitorNaiveUnrolled.h"
+#include "DotProductVisitor.h"
+#include "dot_product_naive.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -209,9 +209,9 @@ int what() {
 
     // Worker test
 #if AVX2 || AVX
-    DotProductVisitorAvx visitor;
+    DotProductVisitor<dot_product_avx256_t> visitor;
 #else
-    DotProductVisitorNaiveUnrolled visitor;
+    DotProductVisitor<dot_product_unrolled_8_t> visitor;
 #endif
 
     const size_t repetitions = 20;

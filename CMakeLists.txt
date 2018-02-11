@@ -19,8 +19,7 @@ set(SOURCE_FILES
         include/chunk_idx_t.h
         include/ChunkVisitor.h
         include/ChunkAccessor.h
-        include/DotProductVisitorAvx.h
-        include/DotProductVisitorNaiveUnrolled.h
+        include/DotProductVisitor.h
         include/vector_t.h
         include/result_t.h
         include/dot_product_avx256.h

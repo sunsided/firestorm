@@ -1,19 +1,18 @@
 //
-// Created by Markus on 10.02.2018.
+// Created by Markus on 11.02.2018.
 //
 
-#ifndef FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
-#define FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
+#ifndef FIRESTORM_DOTPRODUCTVISITOR_H
+#define FIRESTORM_DOTPRODUCTVISITOR_H
 
 #include "ChunkVisitor.h"
-#include "dot_product_naive.h"
+#include "dot_product_functor.h"
 
-// TODO: Create type templated on the dot_product function
-
-class DotProductVisitorNaiveUnrolled : public ChunkVisitor {
+template <typename T>
+class DotProductVisitor : public ChunkVisitor {
 public:
-    DotProductVisitorNaiveUnrolled() = default;
-    virtual ~DotProductVisitorNaiveUnrolled() = default;
+    DotProductVisitor() = default;
+    virtual ~DotProductVisitor() = default;
 
     void visit(const mem_chunk_t& chunk, const vector_t& query, std::vector<float>& out_scores) const final {
         assert(chunk.dimensions == query.dimensions);
@@ -30,7 +29,7 @@ public:
     };
 
 private:
-    const dot_product_unrolled_8_t calculate{};
+    const T calculate{};
 };
 
-#endif //FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
+#endif //FIRESTORM_DOTPRODUCTVISITOR_H
