@@ -18,7 +18,7 @@
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
 const size_t N = 2048;
-const size_t M = 10000;
+const size_t M = 2000;
 
 vector_t create_query_vector() {
     const auto seed = 0L;
@@ -44,16 +44,21 @@ vector_t create_query_vector() {
     return query;
 }
 
-template <typename DotProductFunc>
+template <typename T>
 void run_test_round(float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum,
-                    DotProductFunc && calculate) {
+                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
+
+    static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
+    const T calculate {};
 
     // Keep track of the total sum for validation.
-    auto total_sum = 0.0f;
+    auto best_match = 0.0f;
+    auto best_match_idx = static_cast<size_t>(-1);
 
     chunk_idx_t current_chunk = 0;
-    auto chunk_a = chunkManager.get_ro(current_chunk);
+    auto chunk = chunkManager.get_ro(current_chunk);
+    auto query_vector = query.data;
+
     auto float_offset = 0;
 
     const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
@@ -61,35 +66,74 @@ void run_test_round(float *const result, const ChunkManager &chunkManager,
 
     auto start_time = std::chrono::_V2::system_clock::now();
 
-    // Run for a couple of test iterations ...
+    // Run over all vectors ...
     for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
 
         if (remaining_vectors_per_chunk == 0) {
             current_chunk += 1;
-            chunk_a = chunkManager.get_ro(current_chunk);
+            chunk = chunkManager.get_ro(current_chunk);
 
             float_offset = 0;
             remaining_vectors_per_chunk = vectors_per_chunk;
         }
 
-        auto a_row = &chunk_a->data[float_offset];
-        auto b_row = query.data;
+        auto ref_vector = &chunk->data[float_offset];
 
         --remaining_vectors_per_chunk;
         float_offset += N;
 
         // Calculate the dot product of the 2048-element vector
         static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-        const auto dot_product = calculate(a_row, b_row, N);
+        const auto dot_product = calculate(ref_vector, query_vector, N);
 
         result[vector_idx] = dot_product;
-        total_sum += dot_product;
+
+        if (dot_product > best_match) {
+            best_match = dot_product;
+            best_match_idx = vector_idx;
+        }
     }
 
     auto end_time = std::chrono::_V2::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Sum: " << total_sum << " (expected: " << expected_total_sum << ")"
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
+              << " - duration: " << duration << "ms"
+              << " (" << vectors_per_second << " vector/s)"
+              << std::endl;
+}
+
+template <typename T>
+void run_test_round_worker(float *const result, const Worker &worker,
+                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
+
+    const DotProductVisitor<T> visitor {};
+    auto results = worker.create_result_buffer();
+
+    // Keep track of the total sum for validation.
+    auto best_match = 0.0f;
+    auto best_match_idx = static_cast<size_t>(-1);
+
+    auto start_time = std::chrono::_V2::system_clock::now();
+    worker.accept(visitor, query, results);
+    auto end_time = std::chrono::_V2::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
+    // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
+    for (auto chunk_idx = 0; chunk_idx < results.size(); ++chunk_idx ) {
+        // TODO: make use of the chunk index.
+        auto chunk_result = results.at(chunk_idx);
+        for (auto vector_idx = 0; vector_idx < M; ++vector_idx) {
+            const auto score = chunk_result->scores[vector_idx];
+            if (score > best_match) {
+                best_match_idx = static_cast<size_t>(vector_idx);
+                best_match = score;
+            }
+        }
+    }
+
+    auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
               << " - duration: " << duration << "ms"
               << " (" << vectors_per_second << " vector/s)"
               << std::endl;
@@ -201,8 +245,17 @@ int what() {
               << "------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager, chunkManager_b, chunk_size, expected_total_sum, dot_product_avx256_t());
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_avx256_t>(result, *chunkManager, query, chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_avx256 (Worker)" << std::endl
+              << "---------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_avx256_t>(result, *worker, query, chunk_size, expected_best_match_idx);
     }
 
 #endif
@@ -212,8 +265,17 @@ int what() {
               << "----------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, dot_product_unrolled_8_t());
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_unrolled_8_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_unrolled_8 (Worker)" << std::endl
+              << "-------------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_unrolled_8_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
     }
 
     std::cout << std::endl;
@@ -221,8 +283,17 @@ int what() {
               << "-----------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, dot_product_naive_t());
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_naive_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_naive (Worker)" << std::endl
+              << "--------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_naive_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
     }
 
     std::cout << "Cleaning up ..." << std::endl;

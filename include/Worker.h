@@ -54,7 +54,7 @@ public:
         return results;
     }
 
-    std::vector<std::shared_ptr<result_t>> accept(ChunkVisitor& visitor, const vector_t& query) {
+    std::vector<std::shared_ptr<result_t>> accept(const ChunkVisitor& visitor, const vector_t& query) const {
         std::vector<std::shared_ptr<result_t>> results;
         for(auto chunk : assigned_chunks) {
             auto shared_chunk = accessor->get_ro(chunk);
@@ -70,7 +70,7 @@ public:
         return results;
     }
 
-    void accept(ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) {
+    void accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
         for (const auto chunk : assigned_chunks) {
             const auto shared_chunk = accessor->get_ro(chunk);
             if (shared_chunk == nullptr) continue;
