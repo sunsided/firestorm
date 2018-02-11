@@ -77,5 +77,10 @@ if(GPERFTOOLS_FOUND)
     add_definitions(-DWITH_GPERFTOOLS)
 endif()
 
+# Required compiler features
+# see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html
+target_compile_features(firestorm PUBLIC cxx_constexpr)
+
+# Print a summary of the selected options.
 include(FeatureSummary)
 feature_summary(WHAT ALL)
