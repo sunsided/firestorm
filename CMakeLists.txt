@@ -29,10 +29,6 @@ set(SOURCE_FILES
         dot_product_naive.cpp)
 add_executable(firestorm ${SOURCE_FILES})
 
-# Require ComputeCPP
-set(COMPUTECPP_PACKAGE_ROOT_DIR /opt/computecpp CACHE PATH "Path to ComputeCpp")
-include(FindComputeCpp)
-
 # Check for AVX and AVX2
 # TODO: This is local machine-centric. Make this cross-compilable easily.
 
