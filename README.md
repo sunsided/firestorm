@@ -7,8 +7,10 @@ query vector.
 Different operation types are implemented for evaluation:
 
 - plain, naive for-loop
-- unrolled for-loop
+- 8-fold unrolled for-loop
 - hand-tuned AVX optimized for-loop
+- hand-tuned SSE4.2 optimized for-loop
+- OpenMP SIMD optimized for-loop
 
 ## CPU Profiling
 

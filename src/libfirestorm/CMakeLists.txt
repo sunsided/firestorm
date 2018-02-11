@@ -5,7 +5,8 @@ project(libfirestorm VERSION 0.1 LANGUAGES C CXX)
 set(SOURCE_FILES
         src/dot_product_avx256.cpp
         src/dot_product_naive.cpp
-        src/dot_product_openmp.cpp)
+        src/dot_product_openmp.cpp
+        src/dot_product_sse42.cpp)
 
 set(HEADER_FILES
         include/firestorm/bytes_t.h
@@ -18,6 +19,7 @@ set(HEADER_FILES
         include/firestorm/dot_product_avx256.h
         include/firestorm/dot_product_naive.h
         include/firestorm/dot_product_functor.h
+        include/firestorm/dot_product_sse42.h
         include/firestorm/DotProductVisitor.h
         include/firestorm/index_t.h
         include/firestorm/mem_chunk_t.h
