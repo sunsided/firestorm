@@ -104,8 +104,8 @@ void run_test_round(float *const result, const ChunkManager &chunkManager,
 }
 
 template <typename T>
-void run_test_round_worker(float *const result, const Worker &worker,
-                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
+void run_test_round_worker(const Worker &worker,
+                    const vector_t& query, float expected_total_sum) {
 
     const DotProductVisitor<T> visitor {};
     auto results = worker.create_result_buffer();
@@ -120,10 +120,10 @@ void run_test_round_worker(float *const result, const Worker &worker,
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
     // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
-    for (auto chunk_idx = 0; chunk_idx < results.size(); ++chunk_idx ) {
+    for (size_t chunk_idx = 0; chunk_idx < results.size(); ++chunk_idx ) {
         // TODO: make use of the chunk index.
         auto chunk_result = results.at(chunk_idx);
-        for (auto vector_idx = 0; vector_idx < M; ++vector_idx) {
+        for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
             const auto score = chunk_result->scores[vector_idx];
             if (score > best_match) {
                 best_match_idx = static_cast<size_t>(vector_idx);
@@ -139,7 +139,7 @@ void run_test_round_worker(float *const result, const Worker &worker,
               << std::endl;
 }
 
-int what() {
+void what() {
 
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -255,7 +255,7 @@ int what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_avx256_t>(result, *worker, query, chunk_size, expected_best_match_idx);
+        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
     }
 
 #endif
@@ -275,7 +275,7 @@ int what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_unrolled_8_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
+        run_test_round_worker<dot_product_unrolled_8_t>(*worker, query, expected_best_match_idx);
     }
 
     std::cout << std::endl;
@@ -293,7 +293,7 @@ int what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_naive_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
+        run_test_round_worker<dot_product_naive_t>(*worker, query, expected_best_match_idx);
     }
 
     std::cout << "Cleaning up ..." << std::endl;
