@@ -23,7 +23,7 @@ to profile using its CPU Profiler, enable support in CMake,
 then run the program with the following environment variables set:
 
 ```bash
-CPUPROFILE=/tmp/firestorm-prof.out
+CPUPROFILE=/tmp/firestorm.prof
 CPUPROFILE_FREQUENCY=1000
 ```
 
@@ -31,7 +31,14 @@ This will create the file specified in the `CPUPROFILE` containing
 the sampling information.
 
 ```bash
-pprof --web firestorm /tmp/firestorm-prof.out
+pprof --web firestorm firestorm.prof
+```
+
+Or, if `kcachegrind` is available:
+
+```bash
+pprof --callgrind firestorm firestorm.prof > firestorm.callgrind
+kcachegrind firestorm.callgrind
 ```
 
 If the file is empty, the application likely didn't exit normally.
@@ -52,3 +59,7 @@ You can then visualize the results using that file with
 ```bash
 kcachegrind callgrind.out.18360
 ```
+
+### Cache and branch prediciton profiling
+
+Read [here](http://valgrind.org/docs/manual/cg-manual.html) for further information.
