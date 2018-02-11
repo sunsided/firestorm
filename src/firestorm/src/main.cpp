@@ -165,7 +165,7 @@ void what() {
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
-    static_assert((target_chunk_size % (sizeof(float)*N)) == 0);
+    static_assert((target_chunk_size % (sizeof(float)*N)) == 0, "Chunk size must be able to fully contain all vectors.");
 
     std::shared_ptr<mem_chunk_t> chunk = nullptr;
     auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
