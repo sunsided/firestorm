@@ -31,6 +31,7 @@ include_directories("${INCLUDE_DIRECTORIES};${CMAKE_CURRENT_SOURCE_DIR}/external
 # Check for AVX and AVX2
 # TODO: This is local machine-centric. Make this cross-compilable easily.
 
+# Local machine optimization
 include(OptimizeForArchitecture)
 OptimizeForArchitecture()
 
@@ -55,10 +56,26 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 # Check for Boost
-
 find_package(Boost 1.61 REQUIRED)
+
 if(Boost_FOUND)
     message(STATUS "Found Boost ${Boost_VERSION}")
     include_directories(${Boost_INCLUDE_DIRS})
     target_link_libraries(firestorm ${Boost_LIBRARIES})
 endif()
+
+# Google Performance Tools
+find_package(Gperftools 2.6)
+if(GPERFTOOLS_FOUND)
+    message(STATUS "Found Gperftools")
+    include_directories(${GPERFTOOLS_INCLUDE_DIR})
+
+    # set (FLAGS "-Wl,--no-as-needed -l${GPERFTOOLS_TCMALLOC_AND_PROFILER} -Wl,--as-needed -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free")
+    # set_property (TARGET firestorm APPEND PROPERTY LINK_FLAGS "${FLAGS}")
+    target_link_libraries(firestorm ${GPERFTOOLS_LIBRARIES})
+
+    add_definitions(-DWITH_GPERFTOOLS)
+endif()
+
+include(FeatureSummary)
+feature_summary(WHAT ALL)

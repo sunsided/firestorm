@@ -49,8 +49,6 @@ public:
             if (shared_chunk == nullptr) continue;
 
             const auto chunk_ptr = shared_chunk.get();
-            assert(chunk_ptr->dimensions == query.dimensions);
-
             results[chunk_ptr->index] = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
         }
         return results;

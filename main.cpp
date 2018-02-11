@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <Eigen/CXX11/Tensor>
+#include <gperftools/profiler.h>
 
 #include "Simd.h"
 #include "ChunkManager.h"
@@ -251,6 +252,13 @@ int what() {
 }
 
 int main() {
+
+#if WITH_GPERFTOOLS
+    ProfilerState state {};
+    ProfilerGetCurrentState(&state);
+    std::cout << "Profiling enabled: " << (state.enabled ? "yes" : "no") << std::endl;
+#endif
+
     if (avx2_enabled()) {
         std::cout << "AVX2 available!" << std::endl;
     }
