@@ -7,7 +7,7 @@
 
 #if AVX2 || AVX
 
-inline float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
+float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
     auto total = _mm256_set1_ps(0.0f);
     for (size_t i = 0; i < N; i += 32) {
         // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
@@ -44,7 +44,7 @@ inline float dot_product_avx256(const float *const __restrict__ a_row, const flo
     return ptr[0] + ptr[5];
 }
 
-float vec_norm_avx256(const float *const a_row, const size_t N) {
+float vec_norm_avx256(const float *const a_row, const size_t N) noexcept {
     // TODO: Ideally we can hadd the fields directly and stay in the AVX registers
     // TODO: check wekan for note on hadd alternative (shuffle+vadd)
     const auto squared_norm = dot_product_avx256(a_row, a_row, N);
@@ -57,7 +57,7 @@ float vec_norm_avx256(const float *const a_row, const size_t N) {
     return ptr[0];
 }
 
-float vec_normalize_avx256(float *const a_row, const size_t N) {
+float vec_normalize_avx256(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_avx256(a_row, N);
 
     auto n = _mm256_set1_ps(1.0f/norm);

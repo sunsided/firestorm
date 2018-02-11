@@ -6,7 +6,7 @@
 #include <memory>
 #include "dot_product_naive.h"
 
-float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) const {
+float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) const noexcept {
     auto total = 0.0f;
     for (size_t i = 0; i < N; ++i) {
         total += a_row[i] * b_row[i];
@@ -14,7 +14,7 @@ float dot_product_naive_t::operator()(const float *const __restrict__ a_row, con
     return total;
 }
 
-float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
+float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
     auto total = 0.0f;
     for (size_t i = 0; i < N; i += 8) {
         total += a_row[i] * b_row[i] +
@@ -29,12 +29,12 @@ float dot_product_unrolled_8(const float *const __restrict__ a_row, const float 
     return total;
 }
 
-float vec_norm_naive(const float *const a_row, const size_t N) {
+float vec_norm_naive(const float *const a_row, const size_t N) noexcept {
     const auto squared_norm = dot_product_unrolled_8(a_row, a_row, N);
     return sqrtf(squared_norm);
 }
 
-float vec_normalize_naive(float *const a_row, const size_t N) {
+float vec_normalize_naive(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_naive(a_row, N);
 
     auto n = 1.0f / norm;
