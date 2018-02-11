@@ -4,11 +4,34 @@ project(libfirestorm VERSION 0.1 LANGUAGES C CXX)
 # Define library. Only source files here!
 set(SOURCE_FILES
         src/dot_product_avx256.cpp
-        src/dot_product_naive.cpp)
+        src/dot_product_naive.cpp
+        src/dot_product_openmp.cpp)
+
+set(HEADER_FILES
+        include/firestorm/bytes_t.h
+        include/firestorm/chunk_idx_t.h
+        include/firestorm/ChunkAccessor.h
+        include/firestorm/ChunkManager.h
+        include/firestorm/ChunkVisitor.h
+        include/firestorm/context_t.h
+        include/firestorm/dot_product_openmp.h
+        include/firestorm/dot_product_avx256.h
+        include/firestorm/dot_product_naive.h
+        include/firestorm/dot_product_functor.h
+        include/firestorm/DotProductVisitor.h
+        include/firestorm/index_t.h
+        include/firestorm/mem_chunk_t.h
+        include/firestorm/result_t.h
+        include/firestorm/Simd.h
+        include/firestorm/vector_idx_t.h
+        include/firestorm/vector_insert_t.h
+        include/firestorm/vector_t.h
+        include/firestorm/Worker.h)
 
 # Define an executable
 add_library(libfirestorm
-        ${SOURCE_FILES})
+        ${SOURCE_FILES}
+        ${HEADER_FILES})
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build

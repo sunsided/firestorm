@@ -12,6 +12,7 @@
 #include "firestorm/DotProductVisitor.h"
 #include "firestorm/dot_product_naive.h"
 #include "firestorm/dot_product_avx256.h"
+#include "firestorm/dot_product_openmp.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -239,25 +240,23 @@ void what() {
 
     const size_t repetitions = 20;
 
-#if AVX_VERSION
+#if OPENMP
 
-    if (avx2_enabled() || avx_enabled()) {
-        std::cout << std::endl;
-        std::cout << "dot_product_avx256" << std::endl
-                  << "------------------" << std::endl;
-        for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-            std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-            run_test_round<dot_product_avx256_t>(result, *chunkManager, query, target_chunk_size,
-                                                 expected_best_match_idx);
-        }
+    std::cout << std::endl;
+    std::cout << "dot_product_openmp" << std::endl
+              << "------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_openmp_t>(result, *chunkManager, query, target_chunk_size,
+                                             expected_best_match_idx);
+    }
 
-        std::cout << std::endl;
-        std::cout << "dot_product_avx256 (Worker)" << std::endl
-                  << "---------------------------" << std::endl;
-        for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-            std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-            run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
-        }
+    std::cout << std::endl;
+    std::cout << "dot_product_openmp (Worker)" << std::endl
+              << "---------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_openmp_t>(*worker, query, expected_best_match_idx);
     }
 
 #endif

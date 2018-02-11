@@ -35,6 +35,7 @@ endif()
 # Options
 include(OptionSimd)
 include(OptionFastmath)
+include(OptionOpenMP)
 
 # CMake Features
 include(CheckIPOSupported)
