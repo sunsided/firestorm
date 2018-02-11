@@ -5,15 +5,21 @@
 #ifndef FIRESTORM_DOT_PRODUCT_AVX256_H
 #define FIRESTORM_DOT_PRODUCT_AVX256_H
 
-#if USE_AVX2 || USE_AVX
+#if AVX2 || AVX
 
 #include <memory>
 
-float vec_norm_avx256(const float *const a_row, const size_t N);
+float vec_norm_avx256(const float* a_row, size_t N);
 
-float vec_normalize_avx256(float *const a_row, const size_t N);
+float vec_normalize_avx256(float* a_row, size_t N);
 
-float dot_product_avx256(const float *const a_row, const float *const b_row, const size_t N);
+float dot_product_avx256(const float* __restrict__ a_row, const float* __restrict__ b_row, size_t N);
+
+struct dot_product_avx256_t {
+    inline float operator()(const float *const a_row, const float *const b_row, const size_t N) const {
+        return dot_product_avx256(a_row, b_row, N);
+    }
+};
 
 #endif
 

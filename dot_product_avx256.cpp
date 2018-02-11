@@ -2,12 +2,12 @@
 // Created by Markus on 28.05.2017.
 //
 
-#if USE_AVX2 || USE_AVX
-
 #include "Simd.h"
 #include "dot_product_avx256.h"
 
-float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
+#if AVX2 || AVX
+
+inline float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) {
     auto total = _mm256_set1_ps(0.0f);
     for (size_t i = 0; i < N; i += 32) {
         // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.

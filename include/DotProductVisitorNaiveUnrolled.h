@@ -6,10 +6,10 @@
 #define FIRESTORM_NAIVEUNROLLEDVISITORAVX_H
 
 #include "ChunkVisitor.h"
+#include "dot_product_naive.h"
 
 // TODO: Create type templated on the dot_product function
 
-template <typename T>
 class DotProductVisitorNaiveUnrolled : public ChunkVisitor {
 public:
     DotProductVisitorNaiveUnrolled() = default;
@@ -25,9 +25,12 @@ public:
 
         for (size_t start_idx = 0, vector_idx = 0; start_idx < element_count; start_idx += N, ++vector_idx) {
             const auto ref_vector = &chunk.data[start_idx];
-            out_scores[vector_idx] = T(ref_vector, query_vector, N);
+            out_scores[vector_idx] = calculate(ref_vector, query_vector, N);
         }
     };
+
+private:
+    const dot_product_unrolled_8_t calculate{};
 };
 
 #endif //FIRESTORM_NAIVEUNROLLEDVISITORAVX_H

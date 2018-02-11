@@ -21,6 +21,30 @@
 const size_t N = 2048;
 const size_t M = 10000;
 
+vector_t create_query_vector() {
+    const auto seed = 0L;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<float> distribution(0.0f, 2.0f);
+    auto random = std::bind(distribution, generator);
+
+    // Create a simple query vector
+    vector_t query {N};
+    for (size_t i = 0; i < N; ++i) {
+        query.data[i] = random();
+    }
+
+#if AVX2 || AVX
+    auto norm = vec_normalize_avx256(query.data, query.dimensions);
+    auto norm2 = vec_norm_avx256(query.data, query.dimensions);
+#else
+    auto norm = vec_normalize_naive(query.data, query.dimensions);
+    auto norm2 = vec_norm_naive(query.data, query.dimensions);
+#endif
+
+    std::cout << "Test vector norm before normalizing is " << norm << " (" << norm2 << " after that)." << std::endl;
+    return query;
+}
+
 float dot_product_eigen(float * const a_row, float * const b_row, const size_t _) {
     // the _ parameter is assumed to be exactly N
     auto ma = Eigen::Map<Eigen::Matrix<float, 1, N>, Eigen::Aligned32>(a_row);
@@ -49,8 +73,8 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
     auto total_sum = 0.0f;
 
     chunk_idx_t current_chunk = 0;
-    auto chunk_a = chunkManager_a.get(current_chunk).lock();
-    auto chunk_b = chunkManager_b.get(current_chunk).lock();
+    auto chunk_a = chunkManager_a.get_ro(current_chunk).lock();
+    auto chunk_b = chunkManager_b.get_ro(current_chunk).lock();
     auto float_offset = 0;
 
     const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
@@ -63,8 +87,8 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
 
         if (remaining_vectors_per_chunk == 0) {
             current_chunk += 1;
-            chunk_a = chunkManager_a.get(current_chunk).lock();
-            chunk_b = chunkManager_b.get(current_chunk).lock();
+            chunk_a = chunkManager_a.get_rw(current_chunk).lock();
+            chunk_b = chunkManager_b.get_rw(current_chunk).lock();
 
             float_offset = 0;
             remaining_vectors_per_chunk = vectors_per_chunk;
@@ -189,9 +213,6 @@ int what() {
 #else
     DotProductVisitorNaiveUnrolled visitor;
 #endif
-
-    auto results = worker->accept(visitor, query);
-    std::cout << results.at(0)->vector.data[0] << std::endl;
 
     const size_t repetitions = 20;
 
