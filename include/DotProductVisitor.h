@@ -10,6 +10,8 @@
 
 template <typename T>
 class DotProductVisitor : public ChunkVisitor {
+    static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
+
 public:
     DotProductVisitor() = default;
     virtual ~DotProductVisitor() = default;
