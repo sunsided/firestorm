@@ -7,13 +7,13 @@
 
 #include "dot_product_functor.h"
 
-struct dot_product_naive_t : public dot_product_t {
+struct dot_product_naive_t final : public dot_product_t {
     float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, size_t N) const noexcept final;
 };
 
 float dot_product_unrolled_8(const float *__restrict__ a_row, const float *__restrict__ b_row, size_t N) noexcept;
 
-struct dot_product_unrolled_8_t : public dot_product_t {
+struct dot_product_unrolled_8_t final : public dot_product_t {
     inline float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, size_t N) const noexcept final {
         return dot_product_unrolled_8(a_row, b_row, N);
     }
