@@ -8,15 +8,15 @@
 #include <x86intrin.h>
 
 #ifdef __AVX2__
-static inline bool avx2_enabled() { return __builtin_cpu_supports("avx2"); }
+static inline bool avx2_enabled() noexcept { return __builtin_cpu_supports("avx2"); }
 #else
-static inline bool avx2_enabled() { return false; }
+static inline bool avx2_enabled() noexcept { return false; }
 #endif
 
 #ifdef __AVX__
-static inline bool avx_enabled() { return __builtin_cpu_supports("avx"); }
+static inline bool avx_enabled() noexcept { return __builtin_cpu_supports("avx"); }
 #else
-static inline bool avx_enabled() { return false; }
+static inline bool avx_enabled() noexcept { return false; }
 #endif
 
 #endif //FIRESTORM_SIMD_H

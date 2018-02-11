@@ -6,7 +6,12 @@
 #define FIRESTORM_WORKER_H
 
 #include <deque>
+#include <map>
+#include <boost/optional.hpp>
 #include "mem_chunk_t.h"
+#include "ChunkVisitor.h"
+#include "ChunkAccessor.h"
+#include "result_t.h"
 
 /// Worker that processes vectors in the registered chunks.
 class Worker {
@@ -16,20 +21,67 @@ private:
     /// such that adding an item from a worker to the "right" at the back
     /// moves the first item (on the front) to a worker on the "left". This way,
     /// memory is quasi-sequential for each worker.
-    std::deque<std::weak_ptr<mem_chunk_t>> assigned_blocks;
+    std::deque<chunk_idx_t > assigned_chunks;
+
+    const std::shared_ptr<const ChunkAccessor> accessor;
 
 public:
-    void assign_block(std::weak_ptr<mem_chunk_t> block) {
-        assigned_blocks.push_back(block);
+    Worker(const std::shared_ptr<const ChunkAccessor>& accessor) : accessor(accessor) {}
+
+    void assign_chunk(chunk_idx_t chunk_idx) {
+        assigned_chunks.push_back(chunk_idx);
     }
 
-    std::weak_ptr<mem_chunk_t> unassign_block() {
-        auto block = std::move(assigned_blocks.front());
-        assigned_blocks.pop_front();
-        return block;
+    boost::optional<chunk_idx_t> unassign_chunk() {
+        if (assigned_chunks.empty()) {
+            return boost::none;
+        }
+
+        auto chunk = assigned_chunks.front();
+        assigned_chunks.pop_front();
+        return chunk;
     }
 
-    // TODO: Implement visitor pattern
+    std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
+        std::map<size_t, std::shared_ptr<result_t>> results;
+        for(auto chunk : assigned_chunks) {
+            auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+
+            const auto chunk_ptr = shared_chunk.get();
+            results[chunk_ptr->index] = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
+        }
+        return results;
+    }
+
+    std::vector<std::shared_ptr<result_t>> accept(const ChunkVisitor& visitor, const vector_t& query) const {
+        std::vector<std::shared_ptr<result_t>> results;
+        for(auto chunk : assigned_chunks) {
+            auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+
+            const auto chunk_ptr = shared_chunk.get();
+            assert(chunk_ptr->dimensions == query.dimensions);
+
+            auto result = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
+            visitor.visit(*chunk_ptr, query, result->scores);
+            results.push_back(std::move(result));
+        }
+        return results;
+    }
+
+    void accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
+        for (const auto chunk : assigned_chunks) {
+            const auto shared_chunk = accessor->get_ro(chunk);
+            if (shared_chunk == nullptr) continue;
+
+            const auto chunk_ptr = shared_chunk.get();
+            assert(chunk_ptr->dimensions == query.dimensions);
+
+            auto result = results[chunk_ptr->index];
+            visitor.visit(*chunk_ptr, query, result->scores);
+        }
+    }
 };
 
 #endif //FIRESTORM_WORKER_H

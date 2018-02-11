@@ -4,112 +4,61 @@
 #include <functional>
 #include <memory>
 
-#include <Eigen/CXX11/Tensor>
+#include <gperftools/profiler.h>
 
 #include "Simd.h"
 #include "ChunkManager.h"
 #include "Worker.h"
+#include "DotProductVisitor.h"
+#include "dot_product_naive.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
+// TODO: OpenMP backed loops
+// TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
 const size_t N = 2048;
-const size_t M = 10000;
+const size_t M = 2000;
 
-#ifdef AVX_VERSION
+vector_t create_query_vector() {
+    const auto seed = 0L;
+    std::default_random_engine generator(seed);
+    std::normal_distribution<float> distribution(0.0f, 2.0f);
+    auto random = std::bind(distribution, generator);
 
-float dot_product_avx256(const float *const a_row, const float *const b_row, const size_t N) {
-    auto total = _mm256_set1_ps(0.0f);
-    for (size_t i = 0; i < N; i += 32) {
-        // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
-        _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
-        _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
-
-        // Load 32 floats per vector.
-        const auto a0 = _mm256_load_ps(&a_row[i]);
-        const auto b0 = _mm256_load_ps(&b_row[i]);
-        const auto a1 = _mm256_load_ps(&a_row[i + 8]);
-        const auto b1 = _mm256_load_ps(&b_row[i + 8]);
-        const auto a2 = _mm256_load_ps(&a_row[i + 16]);
-        const auto b2 = _mm256_load_ps(&b_row[i + 16]);
-        const auto a3 = _mm256_load_ps(&a_row[i + 24]);
-        const auto b3 = _mm256_load_ps(&b_row[i + 24]);
-
-        // Do separate dot products.
-        const auto c0 = _mm256_dp_ps(a0, b0, 0xff);
-        const auto c1 = _mm256_dp_ps(a1, b1, 0xff);
-        const auto c2 = _mm256_dp_ps(a2, b2, 0xff);
-        const auto c3 = _mm256_dp_ps(a3, b3, 0xff);
-
-        // Do separate partial sums.
-        const auto p0 = _mm256_add_ps(c0, c1);
-        const auto p1 = _mm256_add_ps(c2, c3);
-
-        // Aggregate the partial sums and allocate to running total.
-        const auto s = _mm256_add_ps(p0, p1);
-        total = _mm256_add_ps(total, s);
+    // Create a simple query vector
+    vector_t query {N};
+    for (size_t i = 0; i < N; ++i) {
+        query.data[i] = random();
     }
 
-    alignas(32) float ptr[8];
-    _mm256_store_ps(ptr, total);
-    return ptr[0] + ptr[5];
-}
-
+#if AVX2 || AVX
+    auto norm = vec_normalize_avx256(query.data, query.dimensions);
+    auto norm2 = vec_norm_avx256(query.data, query.dimensions);
+#else
+    auto norm = vec_normalize_naive(query.data, query.dimensions);
+    auto norm2 = vec_norm_naive(query.data, query.dimensions);
 #endif
 
-float dot_product_naive(const float* const a_row, const float* const b_row, const size_t N) {
-    auto total = 0.0f;
-    for (size_t i = 0; i < N; ++i) {
-        total += a_row[i] * b_row[i];
-    }
-    return total;
+    std::cout << "Test vector norm before normalizing is " << norm << " (" << norm2 << " after that)." << std::endl;
+    return query;
 }
 
-float dot_product_unrolled_8(const float *const a_row, const float *const b_row, const size_t N) {
-    auto total = 0.0f;
-    for (size_t i = 0; i < N; i += 8) {
-        total += a_row[i] * b_row[i] +
-                a_row[i + 1] * b_row[i + 1] +
-                a_row[i + 2] * b_row[i + 2] +
-                a_row[i + 3] * b_row[i + 3] +
-                a_row[i + 4] * b_row[i + 4] +
-                a_row[i + 5] * b_row[i + 5] +
-                a_row[i + 6] * b_row[i + 6] +
-                a_row[i + 7] * b_row[i + 7];
-    }
-    return total;
-}
+template <typename T>
+void run_test_round(float *const result, const ChunkManager &chunkManager,
+                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
 
-float dot_product_eigen(float * const a_row, float * const b_row, const size_t _) {
-    // the _ parameter is assumed to be exactly N
-    auto ma = Eigen::Map<Eigen::Matrix<float, 1, N>, Eigen::Aligned32>(a_row);
-    auto mb = Eigen::Map<Eigen::Matrix<float, N, 1>, Eigen::Aligned32>(b_row);
-    return ma.dot(mb);
-}
-
-const Eigen::array<Eigen::IndexPair<int>, Eigen::RowMajor> contraction_pair00 { Eigen::IndexPair<int>(0, 0) };
-
-float dot_product_eigen_tensor(const float * const a_row, const float * const b_row, const size_t _) {
-    // the _ parameter is assumed to be exactly N
-    auto ma = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(a_row, N);
-    auto mb = Eigen::TensorMap<Eigen::TensorFixedSize<const float, Eigen::Sizes<N>, Eigen::RowMajor, int>, Eigen::Aligned32>(b_row, N);
-
-    const auto op = ma.contract(mb, contraction_pair00); // ma.dot(mb);
-    const Eigen::TensorFixedSize<float, Eigen::Sizes<>, Eigen::RowMajor, int> result = op;
-    return result(0);
-}
-
-template <typename DotProductFunc>
-void run_test_round(float *const result, const ChunkManager &chunkManager_a,
-                    const ChunkManager &chunkManager_b, const bytes_t chunk_size, float expected_total_sum,
-                    DotProductFunc && calculate) {
+    static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
+    const T calculate {};
 
     // Keep track of the total sum for validation.
-    auto total_sum = 0.0f;
+    auto best_match = 0.0f;
+    auto best_match_idx = static_cast<size_t>(-1);
 
     chunk_idx_t current_chunk = 0;
-    auto chunk_a = chunkManager_a.get(current_chunk).lock();
-    auto chunk_b = chunkManager_b.get(current_chunk).lock();
+    auto chunk = chunkManager.get_ro(current_chunk);
+    auto query_vector = query.data;
+
     auto float_offset = 0;
 
     const auto vectors_per_chunk = chunk_size / (N * sizeof(float));
@@ -117,45 +66,83 @@ void run_test_round(float *const result, const ChunkManager &chunkManager_a,
 
     auto start_time = std::chrono::_V2::system_clock::now();
 
-    // Run for a couple of test iterations ...
+    // Run over all vectors ...
     for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
 
         if (remaining_vectors_per_chunk == 0) {
             current_chunk += 1;
-            chunk_a = chunkManager_a.get(current_chunk).lock();
-            chunk_b = chunkManager_b.get(current_chunk).lock();
+            chunk = chunkManager.get_ro(current_chunk);
 
             float_offset = 0;
             remaining_vectors_per_chunk = vectors_per_chunk;
         }
 
-        auto a_row = &chunk_a->data[float_offset];
-        auto b_row = &chunk_b->data[float_offset];
+        auto ref_vector = &chunk->data[float_offset];
 
         --remaining_vectors_per_chunk;
         float_offset += N;
 
         // Calculate the dot product of the 2048-element vector
         static_assert((N & 31) == 0, "Vector length must be a multiple of 32 elements.");
-        const auto dot_product = calculate(a_row, b_row, N);
+        const auto dot_product = calculate(ref_vector, query_vector, N);
 
         result[vector_idx] = dot_product;
-        total_sum += dot_product;
+
+        if (dot_product > best_match) {
+            best_match = dot_product;
+            best_match_idx = vector_idx;
+        }
     }
 
     auto end_time = std::chrono::_V2::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Sum: " << total_sum << " (expected: " << expected_total_sum << ")"
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
+              << " - duration: " << duration << "ms"
+              << " (" << vectors_per_second << " vector/s)"
+              << std::endl;
+}
+
+template <typename T>
+void run_test_round_worker(float *const result, const Worker &worker,
+                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
+
+    const DotProductVisitor<T> visitor {};
+    auto results = worker.create_result_buffer();
+
+    // Keep track of the total sum for validation.
+    auto best_match = 0.0f;
+    auto best_match_idx = static_cast<size_t>(-1);
+
+    auto start_time = std::chrono::_V2::system_clock::now();
+    worker.accept(visitor, query, results);
+    auto end_time = std::chrono::_V2::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
+    // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
+    for (auto chunk_idx = 0; chunk_idx < results.size(); ++chunk_idx ) {
+        // TODO: make use of the chunk index.
+        auto chunk_result = results.at(chunk_idx);
+        for (auto vector_idx = 0; vector_idx < M; ++vector_idx) {
+            const auto score = chunk_result->scores[vector_idx];
+            if (score > best_match) {
+                best_match_idx = static_cast<size_t>(vector_idx);
+                best_match = score;
+            }
+        }
+    }
+
+    auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
               << " - duration: " << duration << "ms"
               << " (" << vectors_per_second << " vector/s)"
               << std::endl;
 }
 
 int what() {
-    Worker worker;
 
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
+
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
@@ -163,43 +150,58 @@ int what() {
     auto expected = new float[M];
     auto result = new float[M];
 
+    // We first create two chunk managers that will hold the vectors.
     std::cout << "Initializing vectors ..." << std::endl;
-    ChunkManager chunkManager_a;
-    ChunkManager chunkManager_b;
-    constexpr const auto chunk_size = 32_MB;
+    std::shared_ptr<ChunkManager> chunkManager = std::make_shared<ChunkManager>();
+    constexpr const auto target_chunk_size = 32_MB;
+    constexpr size_t num_vectors = target_chunk_size / (N*sizeof(float));
+
+    // A worker is a visitor that is performs a calculation on the chunks of a
+    // registered manager.
+    std::unique_ptr<Worker> worker = std::make_unique<Worker>(chunkManager);
 
     // To simplify experiments, we require the block to exactly match our expectations
     // about vector lengths. Put differently, all bytes in the buffer can be used.
-    static_assert((chunk_size % (sizeof(float)*N)) == 0);
+    static_assert((target_chunk_size % (sizeof(float)*N)) == 0);
 
-    std::shared_ptr<mem_chunk_t> chunk_a = nullptr;
-    std::shared_ptr<mem_chunk_t> chunk_b = nullptr;
+    std::shared_ptr<mem_chunk_t> chunk = nullptr;
     auto remaining_chunk_size = 0_B;    // number of remaining bytes in the current chunk
     size_t float_offset = 0;            // index into the current buffer, counts floats
 
-    // Keep track of the total sum for validation.
-    auto expected_total_sum = 0.0f;
+    // TODO: Allocate separate chunk for vector norms
+    // TODO: Sort out elements by NaN for unused norms, e.g. https://stackoverflow.com/questions/31818755/comparison-with-nan-using-avx
 
+    // Keep track of the results for validation.
+    auto expected_best_match = 0.0f;
+    auto expected_best_match_idx = static_cast<size_t>(-1);
+
+    // Create a random query vector.
+    vector_t query = create_query_vector();
+
+    // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < M; ++j) {
 
-        // Initial condition, also reached during runtime: If one block is full,
-        // allocate another one.
+        // Initial condition, also reached during runtime:
+        // If one memory chunk is "full", allocate another one.
         if (remaining_chunk_size == 0_B) {
             std::cout << "Allocating chunk." << std::endl;
 
-            chunk_a = chunkManager_a.allocate(chunk_size).lock();
-            chunk_b = chunkManager_b.allocate(chunk_size).lock();
-            remaining_chunk_size = chunk_size;
+            chunk = chunkManager->allocate(num_vectors, N);
+            assert(chunk != nullptr);
+
+            remaining_chunk_size = target_chunk_size;
             float_offset = 0;
+
+            worker->assign_chunk(chunk->index);
         }
 
+        // Some progress printing.
         if (j % 2500 == 0) {
             std::cout << "- " << j << "/" << M << std::endl;
         }
 
-        expected[j] = 0;
-        auto a = &chunk_a->data[float_offset];
-        auto b = &chunk_b->data[float_offset];
+        auto a = &chunk->data[float_offset];
+        const auto *const b = &query.data[0];
 
         assert(float_offset < M*N);
         assert(remaining_chunk_size >= sizeof(float)*N);
@@ -207,16 +209,32 @@ int what() {
         remaining_chunk_size -= (sizeof(float)*N);
         float_offset += N;
 
-        // Write one vector and one expected result.
+        // Create a vector.
         for (size_t i = 0; i < N; ++i) {
             a[i] = random();
-            b[i] = random();
+        }
+        vec_normalize_naive(a, chunk->dimensions);
+
+        // Obtain the expected result.
+        expected[j] = 0;
+        for (size_t i = 0; i < N; ++i) {
             expected[j] += a[i] * b[i];
-            expected_total_sum += a[i] * b[i];
+        }
+
+        if (expected[j] > expected_best_match) {
+            expected_best_match = expected[j];
+            expected_best_match_idx = j;
         }
     }
     std::cout << "- " << M << "/" << M << std::endl
               << "Vectors initialized." << std::endl;
+
+    // Worker test
+#if AVX2 || AVX
+    DotProductVisitor<dot_product_avx256_t> visitor;
+#else
+    DotProductVisitor<dot_product_unrolled_8_t> visitor;
+#endif
 
     const size_t repetitions = 20;
 
@@ -227,37 +245,37 @@ int what() {
               << "------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_avx256);
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_avx256_t>(result, *chunkManager, query, chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_avx256 (Worker)" << std::endl
+              << "---------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_avx256_t>(result, *worker, query, chunk_size, expected_best_match_idx);
     }
 
 #endif
-
-    std::cout << std::endl;
-    std::cout << "dot_product_eigen" << std::endl
-              << "-----------------" << std::endl;
-    for (size_t repetition = 0; repetition < repetitions; ++repetition)
-    {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_eigen);
-    }
-
-    std::cout << std::endl;
-    std::cout << "dot_product_eigen_tensor (SYCL)" << std::endl
-              << "-------------------------------" << std::endl;
-    for (size_t repetition = 0; repetition < repetitions; ++repetition)
-    {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_eigen_tensor);
-    }
 
     std::cout << std::endl;
     std::cout << "dot_product_unrolled_8" << std::endl
               << "----------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_unrolled_8);
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_unrolled_8_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_unrolled_8 (Worker)" << std::endl
+              << "-------------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_unrolled_8_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
     }
 
     std::cout << std::endl;
@@ -265,18 +283,34 @@ int what() {
               << "-----------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ..." << std::endl;
-        run_test_round(result, chunkManager_a, chunkManager_b, chunk_size, expected_total_sum, dot_product_naive);
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_naive_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_naive (Worker)" << std::endl
+              << "--------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition)
+    {
+        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_naive_t>(result, *worker, query, target_chunk_size, expected_best_match_idx);
     }
 
     std::cout << "Cleaning up ..." << std::endl;
-    delete expected;
-    delete result;
+    delete[] expected;
+    delete[] result;
 
     std::cout << "Done." << std::endl;
 }
 
 int main() {
+
+#if WITH_GPERFTOOLS
+    ProfilerState state {};
+    ProfilerGetCurrentState(&state);
+    std::cout << "Profiling enabled: " << (state.enabled ? "yes" : "no") << std::endl;
+#endif
+
     if (avx2_enabled()) {
         std::cout << "AVX2 available!" << std::endl;
     }
