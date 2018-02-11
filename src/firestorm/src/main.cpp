@@ -241,6 +241,27 @@ void what() {
 
     const size_t repetitions = 20;
 
+#if AVX_VERSION
+
+    std::cout << std::endl;
+    std::cout << "dot_product_avx256" << std::endl
+              << "------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+        run_test_round<dot_product_avx256_t>(result, *chunkManager, query, target_chunk_size,
+                                             expected_best_match_idx);
+    }
+
+    std::cout << std::endl;
+    std::cout << "dot_product_avx256 (Worker)" << std::endl
+              << "---------------------------" << std::endl;
+    for (size_t repetition = 0; repetition < repetitions; ++repetition) {
+        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
+        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
+    }
+
+#endif
+
 #if OPENMP
 
     std::cout << std::endl;
