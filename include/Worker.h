@@ -8,6 +8,7 @@
 #include <deque>
 #include <map>
 #include <boost/optional.hpp>
+#include <utility>
 #include "mem_chunk_t.h"
 #include "ChunkVisitor.h"
 #include "ChunkAccessor.h"
@@ -26,7 +27,7 @@ private:
     const std::shared_ptr<const ChunkAccessor> accessor;
 
 public:
-    Worker(const std::shared_ptr<const ChunkAccessor>& accessor) : accessor(accessor) {}
+    explicit Worker(std::shared_ptr<const ChunkAccessor> accessor) : accessor(std::move(accessor)) {}
 
     void assign_chunk(chunk_idx_t chunk_idx) {
         assigned_chunks.push_back(chunk_idx);
@@ -50,22 +51,6 @@ public:
 
             const auto chunk_ptr = shared_chunk.get();
             results[chunk_ptr->index] = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
-        }
-        return results;
-    }
-
-    std::vector<std::shared_ptr<result_t>> accept(const ChunkVisitor& visitor, const vector_t& query) const {
-        std::vector<std::shared_ptr<result_t>> results;
-        for(auto chunk : assigned_chunks) {
-            auto shared_chunk = accessor->get_ro(chunk);
-            if (shared_chunk == nullptr) continue;
-
-            const auto chunk_ptr = shared_chunk.get();
-            assert(chunk_ptr->dimensions == query.dimensions);
-
-            auto result = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
-            visitor.visit(*chunk_ptr, query, result->scores);
-            results.push_back(std::move(result));
         }
         return results;
     }
