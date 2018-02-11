@@ -2,7 +2,7 @@
   <configuration default="false" name="firestorm (Profiling)" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="firestorm" TARGET_NAME="firestorm" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="firestorm" RUN_TARGET_NAME="firestorm">
     <envs>
       <env name="CPUPROFILE" value="firestorm.prof" />
-      <env name="CPUPROFILE_FREQUENCY" value="1000" />
+      <env name="CPUPROFILE_FREQUENCY" value="10000" />
     </envs>
     <method />
   </configuration>

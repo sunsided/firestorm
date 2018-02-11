@@ -11,7 +11,7 @@
 #include "ChunkManager.h"
 #include "Worker.h"
 #include "DotProductVisitorAvx.h"
-#include "NaiveUnrolledVisitorAvx.h"
+#include "DotProductVisitorNaiveUnrolled.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -187,7 +187,7 @@ int what() {
 #if AVX2 || AVX
     DotProductVisitorAvx visitor;
 #else
-    NaiveUnrolledVisitorAvx visitor;
+    DotProductVisitorNaiveUnrolled visitor;
 #endif
 
     auto results = worker->accept(visitor, query);

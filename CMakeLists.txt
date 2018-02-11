@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/cmake/;${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
-set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h include/ChunkVisitor.h include/ChunkAccessor.h include/DotProductVisitorAvx.h include/NaiveUnrolledVisitorAvx.h include/vector_t.h include/result_t.h include/dot_product_avx256.h dot_product_avx256.cpp include/dot_product_naive.h dot_product_naive.cpp)
+set(SOURCE_FILES main.cpp include/Simd.h include/mem_chunk_t.h include/ChunkManager.h include/bytes_t.h include/context_t.h include/index_t.h include/vector_insert_t.h include/Worker.h include/chunk_idx_t.h include/ChunkVisitor.h include/ChunkAccessor.h include/DotProductVisitorAvx.h include/DotProductVisitorNaiveUnrolled.h include/vector_t.h include/result_t.h include/dot_product_avx256.h dot_product_avx256.cpp include/dot_product_naive.h dot_product_naive.cpp)
 add_executable(firestorm ${SOURCE_FILES})
 
 # Require ComputeCPP
