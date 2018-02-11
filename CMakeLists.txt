@@ -22,6 +22,7 @@ set(SOURCE_FILES
         include/DotProductVisitor.h
         include/vector_t.h
         include/result_t.h
+        include/dot_product_functor.h
         include/dot_product_avx256.h
         include/dot_product_naive.h
         dot_product_avx256.cpp
