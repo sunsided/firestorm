@@ -53,7 +53,7 @@ vector_t create_query_vector() {
 
 template <typename T>
 void run_test_round(float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size, float expected_total_sum) {
+                    const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score) {
 
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
     const T calculate {};
@@ -104,7 +104,7 @@ void run_test_round(float *const result, const ChunkManager &chunkManager,
     auto end_time = std::chrono::_V2::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_best_score << " at " << expected_best_idx << ")"
               << " - duration: " << duration << "ms"
               << " (" << vectors_per_second << " vector/s)"
               << std::endl;
@@ -112,7 +112,7 @@ void run_test_round(float *const result, const ChunkManager &chunkManager,
 
 template <typename T>
 void run_test_round_worker(const Worker &worker,
-                    const vector_t& query, float expected_total_sum) {
+                    const vector_t& query, const size_t expected_best_idx, const float expected_best_score) {
 
     const DotProductVisitor<T> visitor {};
     auto results = worker.create_result_buffer();
@@ -138,7 +138,7 @@ void run_test_round_worker(const Worker &worker,
     }
 
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_total_sum << ")"
+    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_best_score << " at " << expected_best_idx << ")"
               << " - duration: " << duration << "ms"
               << " (" << vectors_per_second << " vector/s)"
               << std::endl;
@@ -251,7 +251,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
         run_test_round<dot_product_avx256_t>(result, *chunkManager, query, target_chunk_size,
-                                             expected_best_match_idx);
+                                             expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -259,7 +259,7 @@ void what() {
               << "---------------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx);
+        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
@@ -272,7 +272,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
         run_test_round<dot_product_openmp_t>(result, *chunkManager, query, target_chunk_size,
-                                             expected_best_match_idx);
+                                             expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -280,7 +280,7 @@ void what() {
               << "---------------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_openmp_t>(*worker, query, expected_best_match_idx);
+        run_test_round_worker<dot_product_openmp_t>(*worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
@@ -293,7 +293,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
         run_test_round<dot_product_sse42_t>(result, *chunkManager, query, target_chunk_size,
-                                             expected_best_match_idx);
+                                             expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -301,7 +301,7 @@ void what() {
               << "--------------------------" << std::endl;
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_sse42_t>(*worker, query, expected_best_match_idx);
+        run_test_round_worker<dot_product_sse42_t>(*worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
@@ -312,7 +312,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_unrolled_8_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+        run_test_round<dot_product_unrolled_8_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -321,7 +321,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_unrolled_8_t>(*worker, query, expected_best_match_idx);
+        run_test_round_worker<dot_product_unrolled_8_t>(*worker, query, expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -330,7 +330,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_naive_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx);
+        run_test_round<dot_product_naive_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
     }
 
     std::cout << std::endl;
@@ -339,7 +339,7 @@ void what() {
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
         std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_naive_t>(*worker, query, expected_best_match_idx);
+        run_test_round_worker<dot_product_naive_t>(*worker, query, expected_best_match_idx, expected_best_match);
     }
 
     std::cout << "Cleaning up ..." << std::endl;
