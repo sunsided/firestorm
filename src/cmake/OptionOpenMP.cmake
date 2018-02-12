@@ -1,6 +1,6 @@
 OPTION (FSTM_USE_OpenMP "Use OpenMP" ON)
 if (FSTM_USE_OpenMP)
-    find_package(OpenMP 4.5)
+    find_package(OpenMP 4.0)
     if(OpenMP_CXX_FOUND)
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         add_definitions(-DOPENMP=1)
