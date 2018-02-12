@@ -45,12 +45,12 @@ public:
 
     std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
         std::map<size_t, std::shared_ptr<result_t>> results;
-        for(auto chunk : assigned_chunks) {
-            auto shared_chunk = accessor->get_ro(chunk);
+        for(auto chunk_idx : assigned_chunks) {
+            auto shared_chunk = accessor->get_ro(chunk_idx);
             if (shared_chunk == nullptr) continue;
 
-            const auto chunk_ptr = shared_chunk.get();
-            results[chunk_ptr->index] = std::make_shared<result_t>(chunk_ptr->index, chunk_ptr->vectors);
+            const auto& chunk_ptr = *shared_chunk;
+            results[chunk_ptr.index] = std::make_shared<result_t>(chunk_ptr.index, chunk_ptr.vectors);
         }
         return results;
     }
@@ -60,11 +60,11 @@ public:
             const auto shared_chunk = accessor->get_ro(chunk);
             if (shared_chunk == nullptr) continue;
 
-            const auto chunk_ptr = shared_chunk.get();
+            const auto& chunk_ptr = *shared_chunk;
             assert(chunk_ptr->dimensions == query.dimensions);
 
-            auto result = results[chunk_ptr->index];
-            visitor.visit(*chunk_ptr, query, result->scores);
+            auto result = results[chunk_ptr.index];
+            visitor.visit(chunk_ptr, query, result->scores);
         }
     }
 };
