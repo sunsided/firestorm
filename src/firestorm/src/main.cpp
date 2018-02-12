@@ -21,7 +21,11 @@
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
 const size_t N = 2048;
-const size_t M = 2000;
+#if AVX_VERSION
+const size_t M = 100000;
+#else
+const size_t M = 2500;
+#endif
 
 vector_t create_query_vector() {
     const auto seed = 0L;
@@ -123,14 +127,12 @@ void run_test_round_worker(const Worker &worker,
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
     // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
-    for (size_t chunk_idx = 0; chunk_idx < results.size(); ++chunk_idx ) {
-        // TODO: make use of the chunk index.
-        auto chunk_result = results.at(chunk_idx);
+    for (auto chunk_result : results) {
         for (size_t vector_idx = 0; vector_idx < M; ++vector_idx) {
-            const auto score = chunk_result->scores[vector_idx];
+            const auto score = chunk_result.second->scores[vector_idx];
             if (score > best_match) {
-                best_match_idx = static_cast<size_t>(vector_idx);
                 best_match = score;
+                best_match_idx = vector_idx;
             }
         }
     }
