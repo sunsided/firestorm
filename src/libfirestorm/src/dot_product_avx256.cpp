@@ -2,14 +2,17 @@
 // Created by Markus on 28.05.2017.
 //
 
+#include <cstddef>
 #include "firestorm/Simd.h"
 #include "firestorm/dot_product_avx256.h"
 
+using namespace std;
+
 #if AVX_VERSION
 
-float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
+float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const ptrdiff_t N) noexcept {
     auto total = _mm256_set1_ps(0.0f);
-    for (size_t i = 0; i < N; i += 32) {
+    for (ptrdiff_t i = 0; i < N; i += 32) {
         // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
         _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
         _mm_prefetch(&b_row[i + 32 * 8], _MM_HINT_T1);
@@ -44,7 +47,7 @@ float dot_product_avx256(const float *const __restrict__ a_row, const float *con
     return ptr[0] + ptr[5];
 }
 
-float vec_norm_avx256(const float *const a_row, const size_t N) noexcept {
+float vec_norm_avx256(const float *const a_row, const ptrdiff_t N) noexcept {
     // TODO: Ideally we can hadd the fields directly and stay in the AVX registers
     // TODO: check wekan for note on hadd alternative (shuffle+vadd)
     const auto squared_norm = dot_product_avx256(a_row, a_row, N);
@@ -57,11 +60,11 @@ float vec_norm_avx256(const float *const a_row, const size_t N) noexcept {
     return ptr[0];
 }
 
-float vec_normalize_avx256(float *const a_row, const size_t N) noexcept {
+float vec_normalize_avx256(float *const a_row, const ptrdiff_t N) noexcept {
     const auto norm = vec_norm_avx256(a_row, N);
 
     auto n = _mm256_set1_ps(1.0f/norm);
-    for (size_t i = 0; i < N; i += 32) {
+    for (ptrdiff_t i = 0; i < N; i += 32) {
         // Prefetch the next batch into L2 - saves around 40ms on 2 million 2048-float rows.
         _mm_prefetch(&a_row[i + 32 * 8], _MM_HINT_T1);
 

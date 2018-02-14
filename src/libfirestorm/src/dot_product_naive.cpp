@@ -2,21 +2,23 @@
 // Created by sunside on 11.02.18.
 //
 
+#include <cstddef>
 #include <cmath>
-#include <memory>
 #include "firestorm/dot_product_naive.h"
 
-float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) const noexcept {
+using namespace std;
+
+float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const ptrdiff_t N) const noexcept {
     auto total = 0.0f;
-    for (size_t i = 0; i < N; ++i) {
+    for (ptrdiff_t i = 0; i < N; ++i) {
         total += a_row[i] * b_row[i];
     }
     return total;
 }
 
-float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
+float dot_product_unrolled_8(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const ptrdiff_t N) noexcept {
     auto total = 0.0f;
-    for (size_t i = 0; i < N; i += 8) {
+    for (ptrdiff_t i = 0; i < N; i += 8) {
         total += a_row[i] * b_row[i] +
                  a_row[i + 1] * b_row[i + 1] +
                  a_row[i + 2] * b_row[i + 2] +
@@ -29,16 +31,16 @@ float dot_product_unrolled_8(const float *const __restrict__ a_row, const float 
     return total;
 }
 
-float vec_norm_naive(const float *const a_row, const size_t N) noexcept {
+float vec_norm_naive(const float *const a_row, const ptrdiff_t N) noexcept {
     const auto squared_norm = dot_product_unrolled_8(a_row, a_row, N);
     return sqrtf(squared_norm);
 }
 
-float vec_normalize_naive(float *const a_row, const size_t N) noexcept {
+float vec_normalize_naive(float *const a_row, const ptrdiff_t N) noexcept {
     const auto norm = vec_norm_naive(a_row, N);
 
     auto n = 1.0f / norm;
-    for (size_t i = 0; i < N; ++i) {
+    for (ptrdiff_t i = 0; i < N; ++i) {
         a_row[i] *= n;
     }
 
