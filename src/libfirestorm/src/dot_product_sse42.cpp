@@ -12,9 +12,9 @@ using namespace std;
 
 // https://stackoverflow.com/a/35270026/195651
 
-float dot_product_sse42(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const ptrdiff_t N) noexcept {
+float dot_product_sse42(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
     auto total = _mm_setzero_ps();
-    for (ptrdiff_t i = 0; i < N; i += 4) {
+    for (size_t i = 0; i < N; i += 4) {
         const auto a0 = _mm_load_ps(&a_row[i]);
         const auto b0 = _mm_load_ps(&b_row[i]);
 
