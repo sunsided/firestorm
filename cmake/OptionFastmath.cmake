@@ -1,5 +1,5 @@
-option(FSTM_USE_FAST_MATH "Enable fast math optimizations" OFF)
-if(FSTM_USE_FAST_MATH)
+option(FSTM_WITH_FAST_MATH "Enable fast math optimizations" OFF)
+if(FSTM_WITH_FAST_MATH)
     message(STATUS "Firestorm: Build with fast math optimizations")
     if((CMAKE_CXX_COMPILER_ID MATCHES "Clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "GNU"))
         add_compile_options(-ffast-math)

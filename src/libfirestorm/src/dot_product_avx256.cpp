@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#if AVX_VERSION
+#ifdef USE_AVX
 
 float dot_product_avx256(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) noexcept {
     auto total = _mm256_set1_ps(0.0f);

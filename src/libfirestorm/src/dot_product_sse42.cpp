@@ -2,7 +2,7 @@
 // Created by sunside on 11.02.18.
 //
 
-#if SSE_VERSION == 4
+#if USE_SSE == 4
 
 #include <cstddef>
 #include <smmintrin.h>

@@ -5,7 +5,7 @@
 #ifndef FIRESTORM_DOT_PRODUCT_OPENMP_H
 #define FIRESTORM_DOT_PRODUCT_OPENMP_H
 
-#if OPENMP
+#ifdef USE_OPENMP
 
 #include "dot_product_functor.h"
 
@@ -21,6 +21,6 @@ float vec_norm_openmp(const float* a_row, std::size_t N) noexcept;
 
 float vec_normalize_openmp(float* a_row, std::size_t N) noexcept;
 
-#endif //OPENMP
+#endif //USE_OPENMP
 
 #endif //FIRESTORM_DOT_PRODUCT_NAIVE_H

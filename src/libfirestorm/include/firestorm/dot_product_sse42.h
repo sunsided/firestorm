@@ -5,7 +5,7 @@
 #ifndef PROJECT_DOT_PRODUCT_SSE42_H
 #define PROJECT_DOT_PRODUCT_SSE42_H
 
-#if SSE_VERSION == 4
+#if USE_SSE == 4
 
 #include "dot_product_functor.h"
 
@@ -17,6 +17,6 @@ struct dot_product_sse42_t final : public dot_product_t {
     }
 };
 
-#endif //SSE_VERSION
+#endif //USE_SSE
 
 #endif //PROJECT_DOT_PRODUCT_SSE42_H

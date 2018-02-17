@@ -5,7 +5,7 @@
 #ifndef FIRESTORM_DOT_PRODUCT_AVX256_H
 #define FIRESTORM_DOT_PRODUCT_AVX256_H
 
-#if AVX_VERSION
+#ifdef USE_AVX
 
 #include <memory>
 #include "dot_product_functor.h"
@@ -22,6 +22,6 @@ struct dot_product_avx256_t final : public dot_product_t {
     }
 };
 
-#endif //AVX_VERSION
+#endif //USE_AVX
 
 #endif //FIRESTORM_DOT_PRODUCT_AVX256_H

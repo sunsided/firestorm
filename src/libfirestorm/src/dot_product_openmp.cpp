@@ -2,7 +2,7 @@
 // Created by sunside on 11.02.18.
 //
 
-#if OPENMP
+#ifdef USE_OPENMP
 
 #include <cstddef>
 #include <cmath>
