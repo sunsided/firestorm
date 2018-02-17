@@ -4,7 +4,9 @@
 #include <functional>
 #include <memory>
 
+#ifdef USE_GPERFTOOLS
 #include <gperftools/profiler.h>
+#endif
 
 #include "firestorm/Simd.h"
 #include "firestorm/ChunkManager.h"
@@ -39,7 +41,7 @@ vector_t create_query_vector() {
         query.data[i] = random();
     }
 
-#if AVX_VERSION
+#if USE_AVX
     auto norm = vec_normalize_avx256(query.data, query.dimensions);
     auto norm2 = vec_norm_avx256(query.data, query.dimensions);
 #else
@@ -235,7 +237,7 @@ void what() {
               << "Vectors initialized." << std::endl;
 
     // Worker test
-#if AVX_VERSION
+#if USE_AVX
     DotProductVisitor<dot_product_avx256_t> visitor;
 #else
     DotProductVisitor<dot_product_unrolled_8_t> visitor;
@@ -243,7 +245,7 @@ void what() {
 
     const size_t repetitions = 20;
 
-#if AVX_VERSION
+#if USE_AVX
 
     std::cout << std::endl;
     std::cout << "dot_product_avx256" << std::endl
@@ -264,7 +266,7 @@ void what() {
 
 #endif
 
-#if OPENMP
+#if USE_OPENMP
 
     std::cout << std::endl;
     std::cout << "dot_product_openmp" << std::endl
@@ -285,7 +287,7 @@ void what() {
 
 #endif
 
-#if SSE_VERSION == 4
+#if USE_SSE == 4
 
     std::cout << std::endl;
     std::cout << "dot_product_sse42" << std::endl
@@ -351,7 +353,7 @@ void what() {
 
 int main() {
 
-#if WITH_GPERFTOOLS
+#if USE_GPERFTOOLS
     ProfilerState state {};
     ProfilerGetCurrentState(&state);
     std::cout << "Profiling enabled: " << (state.enabled ? "yes" : "no") << std::endl;
