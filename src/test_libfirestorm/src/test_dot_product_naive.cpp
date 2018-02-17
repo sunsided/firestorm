@@ -4,38 +4,43 @@
 
 #include <gtest/gtest.h>
 #include <firestorm/vector_t.h>
-#include <firestorm/test_dot_product_naive.h>
+#include <firestorm/dot_product_naive.h>
+#include <VectorNorm.h>
 
 using namespace std;
 
 namespace {
 
-    TEST(DotProduct, Naive_NormZero) {
+    TEST_P(VectorNorm, Naive_Norm) {
         // arrange
-        const size_t N = 64;
-        const float referenceNorm = 0.0f;
-        vector_t vector {N};
-        vector.data[0] = referenceNorm;
+        const auto test_data = GetParam();
+        const auto& vector = *get<0>(test_data).get();
+        const auto referenceNorm = get<1>(test_data);
 
         // act
-        auto norm = vec_norm_naive(vector.data, N);
+        auto norm = vec_norm_naive(vector.data, vector.dimensions);
 
         // assert
-        EXPECT_EQ(norm, referenceNorm);
+        ASSERT_FLOAT_EQ(norm, referenceNorm);
     }
 
-    TEST(DotProduct, Naive_NormOne) {
+    TEST_P(VectorNorm, Naive_Normalize) {
         // arrange
-        const size_t N = 64;
-        const float referenceNorm = 1.0f;
-        vector_t vector {N};
-        vector.data[0] = referenceNorm;
+        const auto test_data = GetParam();
+        const auto& vector = *get<0>(test_data).get();
+        const auto referenceNorm = get<1>(test_data);
 
         // act
-        auto norm = vec_norm_naive(vector.data, N);
+        auto normBefore = vec_normalize_naive(vector.data, vector.dimensions);
+        auto normAfter = vec_norm_naive(vector.data, vector.dimensions);
 
         // assert
-        EXPECT_EQ(norm, referenceNorm);
+        ASSERT_FLOAT_EQ(normBefore, referenceNorm);
+        if (normBefore > 0.0f) {
+            ASSERT_FLOAT_EQ(normAfter, 1.0f);
+        }
+        else {
+            ASSERT_FLOAT_EQ(normAfter, 0.0f);
+        }
     }
-
 }

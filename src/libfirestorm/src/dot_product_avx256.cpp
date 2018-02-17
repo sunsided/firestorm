@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include "firestorm/Simd.h"
-#include "firestorm/test_dot_product_avx256.h"
+#include "firestorm/dot_product_avx256.h"
 
 using namespace std;
 
@@ -62,6 +62,9 @@ float vec_norm_avx256(const float *const a_row, const size_t N) noexcept {
 
 float vec_normalize_avx256(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_avx256(a_row, N);
+    if (norm == 0.0f) {
+        return 0.0;
+    }
 
     auto n = _mm256_set1_ps(1.0f/norm);
     for (size_t i = 0; i < N; i += 32) {

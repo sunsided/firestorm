@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <cmath>
-#include "firestorm/test_dot_product_naive.h"
+#include "firestorm/dot_product_naive.h"
 
 using namespace std;
 
@@ -27,6 +27,10 @@ float vec_norm_openmp(const float *const a_row, const size_t N) noexcept {
 
 float vec_normalize_openmp(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_naive(a_row, N);
+    if (norm == 0.0f) {
+        return 0.0;
+    }
+
     auto n = 1.0f / norm;
 
     #pragma omp simd aligned(a_row: 32)

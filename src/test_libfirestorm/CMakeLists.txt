@@ -4,11 +4,22 @@ project(test_libfirestorm VERSION 0.1 LANGUAGES C CXX)
 set(SOURCE_FILES
         src/test_dot_product_naive.cpp
         src/test_dot_product_openmp.cpp
-        src/test_dot_product_sse42.cpp)
+        src/test_dot_product_avx256.cpp
+        src/VectorNorm.cpp)
+
+set(HEADER_FILES
+        include/VectorNorm.h)
 
 # Define an executable
 add_executable(test_libfirestorm
-        ${SOURCE_FILES})
+        ${SOURCE_FILES}
+        ${HEADER_FILES})
+
+# Include directories
+target_include_directories(libfirestorm PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE src)
 
 # Add the tests
 gtest_add_tests(test_libfirestorm "" AUTO)

@@ -10,10 +10,10 @@
 #include "firestorm/ChunkManager.h"
 #include "firestorm/Worker.h"
 #include "firestorm/DotProductVisitor.h"
-#include "firestorm/test_dot_product_naive.h"
-#include "firestorm/test_dot_product_avx256.h"
-#include "firestorm/test_dot_product_openmp.h"
-#include "firestorm/test_dot_product_sse42.h"
+#include "firestorm/dot_product_naive.h"
+#include "firestorm/dot_product_avx256.h"
+#include "firestorm/dot_product_openmp.h"
+#include "firestorm/dot_product_sse42.h"
 
 // TODO: Boost
 // TODO: Boost.SIMD

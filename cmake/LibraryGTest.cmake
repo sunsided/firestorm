@@ -35,7 +35,6 @@ if(FSTM_BUILD_TESTS)
 
     # Specify the library directories
     ExternalProject_Get_Property(googletest binary_dir)
-    message(STATUS "-----> ${binary_dir}")
 
     set(gtest_LIBGTEST "${CMAKE_FIND_LIBRARY_PREFIXES}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}")
     set(gtest_LIBGTEST_MAIN "${CMAKE_FIND_LIBRARY_PREFIXES}gtest_main${CMAKE_STATIC_LIBRARY_SUFFIX}")
