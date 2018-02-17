@@ -61,7 +61,7 @@ public:
             if (shared_chunk == nullptr) continue;
 
             const auto& chunk_ptr = *shared_chunk;
-            assert(chunk_ptr->dimensions == query.dimensions);
+            assert(chunk_ptr.dimensions == query.dimensions);
 
             auto result = results[chunk_ptr.index];
             visitor.visit(chunk_ptr, query, result->scores);
