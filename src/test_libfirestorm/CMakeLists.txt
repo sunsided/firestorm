@@ -5,10 +5,11 @@ set(SOURCE_FILES
         src/test_dot_product_naive.cpp
         src/test_dot_product_openmp.cpp
         src/test_dot_product_avx256.cpp
-        src/VectorNorm.cpp)
+        src/VectorNorm.cpp src/DotProduct.cpp)
 
 set(HEADER_FILES
-        include/VectorNorm.h)
+        include/VectorNorm.h
+        include/DotProduct.h)
 
 # Define an executable
 add_executable(test_libfirestorm

@@ -6,6 +6,7 @@
 #include <firestorm/vector_t.h>
 #include <firestorm/dot_product_openmp.h>
 #include <VectorNorm.h>
+#include <DotProduct.h>
 
 using namespace std;
 
@@ -42,5 +43,16 @@ namespace {
         else {
             ASSERT_FLOAT_EQ(normAfter, 0.0f);
         }
+    }
+
+    TEST_F(DotProduct, OpenMP) {
+        // arrange
+        dot_product_openmp_t dot {};
+
+        // act
+        auto result = dot(vector_a.data, vector_b.data, vector_a.dimensions);
+
+        // assert
+        ASSERT_FLOAT_EQ(result, this->result);
     }
 }

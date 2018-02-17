@@ -6,8 +6,9 @@
 
 #include <gtest/gtest.h>
 #include <firestorm/vector_t.h>
-#include <firestorm/test_dot_product_avx256.h>
+#include <firestorm/dot_product_avx256.h>
 #include <VectorNorm.h>
+#include <DotProduct.h>
 
 using namespace std;
 
@@ -44,6 +45,17 @@ namespace {
         else {
             ASSERT_FLOAT_EQ(normAfter, 0.0f);
         }
+    }
+
+    TEST_F(DotProduct, AVX256) {
+        // arrange
+        dot_product_avx256_t dot {};
+
+        // act
+        auto result = dot(vector_a.data, vector_b.data, vector_a.dimensions);
+
+        // assert
+        ASSERT_FLOAT_EQ(result, this->result);
     }
 }
 
