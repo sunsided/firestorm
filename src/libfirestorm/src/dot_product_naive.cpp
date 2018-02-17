@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include <cmath>
-#include "firestorm/dot_product_naive.h"
+#include "firestorm/test_dot_product_naive.h"
 
 using namespace std;
 

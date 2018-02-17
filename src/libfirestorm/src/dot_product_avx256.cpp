@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include "firestorm/Simd.h"
-#include "firestorm/dot_product_avx256.h"
+#include "firestorm/test_dot_product_avx256.h"
 
 using namespace std;
 

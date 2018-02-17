@@ -15,11 +15,11 @@ set(HEADER_FILES
         include/firestorm/ChunkManager.h
         include/firestorm/ChunkVisitor.h
         include/firestorm/context_t.h
-        include/firestorm/dot_product_openmp.h
-        include/firestorm/dot_product_avx256.h
-        include/firestorm/dot_product_naive.h
+        include/firestorm/test_dot_product_openmp.h
+        include/firestorm/test_dot_product_avx256.h
+        include/firestorm/test_dot_product_naive.h
         include/firestorm/dot_product_functor.h
-        include/firestorm/dot_product_sse42.h
+        include/firestorm/test_dot_product_sse42.h
         include/firestorm/DotProductVisitor.h
         include/firestorm/index_t.h
         include/firestorm/mem_chunk_t.h
