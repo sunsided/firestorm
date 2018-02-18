@@ -7,6 +7,9 @@
 DotProduct::DotProduct()
     : vector_a{32}, vector_b{32}, result(1.5)
 {
+    vector_a.zero_out();
+    vector_b.zero_out();
+
     for (size_t i = 0; i < vector_a.dimensions; ++i) {
         vector_a.data[i] = 0.5;
     }

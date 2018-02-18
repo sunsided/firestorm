@@ -32,6 +32,14 @@ struct vector_t {
         data = nullptr;
     }
 
+    /// Clears the content of the vector.
+    inline void zero_out() {
+        #pragma omp simd
+        for (size_t i = 0; i < dimensions; ++i) {
+            data[i] = 0;
+        }
+    }
+
     /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
     static const size_t byte_alignment = 32;
 
