@@ -8,7 +8,7 @@ if(FSTM_BUILD_TESTS)
     include(ExternalProject)
     ExternalProject_Add(googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/googletest"
+            # GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/googletest"
             GIT_REMOTE_NAME origin
             GIT_TAG release-1.8.0
             GIT_SHALLOW On
