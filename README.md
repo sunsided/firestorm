@@ -12,6 +12,19 @@ Different operation types are implemented for evaluation:
 - hand-tuned SSE4.2 optimized for-loop
 - OpenMP SIMD optimized for-loop
 
+## Unit Tests
+
+Unit tests are provided by means of [googletest](https://github.com/google/googletest).
+To enable CTest testing functionality and building of the unit tests project,
+configure CMake with the `-DFSTM_BUILD_TESTS=1` option,
+e.g. using
+
+```bash
+mkdir build && cd build
+cmake -DFSTM_BUILD_TEST=1 ..
+make test
+``` 
+
 ## CPU Profiling
 
 ### Google Performance Tools
