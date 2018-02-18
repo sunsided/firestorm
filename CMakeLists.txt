@@ -2,13 +2,6 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 14)
 
-# TODO: Make that an option!
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
-
 # Set default compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
@@ -29,6 +22,7 @@ include(LibraryGTest)
 include(LibrarySpdlog)
 
 # Options
+include(OptionCcache)
 include(OptionSimd)
 include(OptionFastmath)
 include(OptionOpenMP)
