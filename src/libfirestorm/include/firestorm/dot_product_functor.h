@@ -7,7 +7,7 @@
 
 #include <cstddef>
 
-#define FLOAT_ZERO_EPSILON (1e-5f)
+const float FLOAT_ZERO_EPSILON = 1e-5f;
 
 struct dot_product_t {
     virtual float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept = 0;
