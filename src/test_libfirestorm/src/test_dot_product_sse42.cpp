@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#if USE_SSE == 4
+
 namespace {
 
     TEST_P(VectorNorm, SSE42_Normalize) {
@@ -45,3 +47,5 @@ namespace {
         ASSERT_FLOAT_EQ(result, this->result);
     }
 }
+
+#endif //USE_SSE == 4
