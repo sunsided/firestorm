@@ -3,11 +3,13 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <vector>
 
-#ifdef USE_GPERFTOOLS
+#ifdef USE_PROFILER
 #include <gperftools/profiler.h>
 #endif
 
+#include <spdlog/spdlog.h>
 #include "firestorm/Simd.h"
 #include "firestorm/ChunkManager.h"
 #include "firestorm/Worker.h"
@@ -16,6 +18,9 @@
 #include "firestorm/dot_product_avx256.h"
 #include "firestorm/dot_product_openmp.h"
 #include "firestorm/dot_product_sse42.h"
+
+using namespace std;
+namespace spd = spdlog;
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -147,7 +152,6 @@ void run_test_round_worker(const Worker &worker,
 }
 
 void what() {
-
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
     std::default_random_engine generator(seed);
@@ -352,26 +356,60 @@ void what() {
 }
 
 int main() {
+    // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
 
-#if USE_GPERFTOOLS
+    // Enable spdlog async mode
+    size_t logger_q_size = 8192;
+    spd::set_async_mode(logger_q_size);
+
+    // Define multiple logger sinks.
+    vector<spd::sink_ptr> sinks;
+
+    // Standard console logger.
+    auto stdout_sink = make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+    stdout_sink->set_level(spd::level::info);
+    sinks.push_back(stdout_sink);
+
+    // Create a logger attached to all sinks.
+    auto logger = std::make_shared<spdlog::logger>("firestorm", begin(sinks), end(sinks));
+    logger->set_level(spd::level::info);
+
+    // Register logger globally to make it available by name.
+    spdlog::register_logger(logger);
+
+    logger->info("Firestorm starting.");
+
+#if USE_PROFILER
     ProfilerState state {};
     ProfilerGetCurrentState(&state);
-    std::cout << "Profiling enabled: " << (state.enabled ? "yes" : "no") << std::endl;
+    logger->info("Profiling enabled: {}", state.enabled ? "yes" : "no");
 #endif
 
+    // TODO: Use cpu_features
     if (avx2_enabled()) {
-        std::cout << "AVX2 available!" << std::endl;
+        logger->info("AVX2 support: enabled");
+    } else {
+        logger->info("AVX2 support: disabled ({} on machine)", avx2_available() ? "available" : "missing");
     }
 
     if (avx_enabled()) {
-        std::cout << "AVX available!" << std::endl;
+        logger->info("AVX support: enabled");
+    } else {
+        logger->info("AVX support: disabled ({} on machine)", avx_available() ? "available" : "missing");
     }
 
-    if (!avx2_enabled() && !avx_enabled()) {
-        std::cout << "AVX/AVX2 support is required for optimal performance." << std::endl;
+    if (sse42_enabled()) {
+        logger->info("SSE4.2 support: enabled");
+    } else {
+        logger->info("SSE4.2 support: disabled ({} on machine)", sse42_available() ? "available" : "missing");
+    }
+
+    if (!avx2_enabled() && !avx_enabled() && !sse42_enabled()) {
+        logger->info("AVX/AVX2 or SSE4.2 support is required for optimal performance.");
     }
 
     what();
 
+    spd::drop_all();
     return 0;
 }

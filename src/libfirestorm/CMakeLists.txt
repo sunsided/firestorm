@@ -45,7 +45,9 @@ target_include_directories(libfirestorm PUBLIC
 
 # Define the libraries this project depends upon
 target_link_libraries(libfirestorm
-        boost gperftools)
+        boost
+        gperftools
+        spdlog)
 
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html

@@ -19,6 +19,7 @@ include(GNUInstallDirs)
 include(LibraryBoost)
 include(LibraryGperftools)
 include(LibraryGTest)
+include(LibrarySpdlog)
 
 # Options
 include(OptionSimd)

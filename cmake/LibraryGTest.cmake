@@ -23,8 +23,6 @@ if(FSTM_BUILD_TESTS)
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo
                 -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/googletest/build/out/
                 -Dgtest_force_shared_crt=ON
-            LOG_DOWNLOAD ON
-            LOG_CONFIGURE ON
             LOG_BUILD ON
             )
 
