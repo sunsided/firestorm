@@ -44,7 +44,7 @@ namespace {
         auto result = dot(vector_a.data, vector_b.data, vector_a.dimensions);
 
         // assert
-        ASSERT_FLOAT_EQ(result, this->result);
+        ASSERT_NEAR(result, this->result, 1e-5f);
     }
 }
 

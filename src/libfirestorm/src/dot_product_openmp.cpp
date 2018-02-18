@@ -27,7 +27,7 @@ float vec_norm_openmp(const float *const a_row, const size_t N) noexcept {
 
 float vec_normalize_openmp(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_naive(a_row, N);
-    if (norm == 0.0f) {
+    if (norm < FLOAT_ZERO_EPSILON && norm > -FLOAT_ZERO_EPSILON) {
         return 0.0;
     }
 
