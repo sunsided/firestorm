@@ -9,7 +9,7 @@
 
 static inline bool avx2_available() noexcept { return __builtin_cpu_supports("avx2"); }
 #ifdef __AVX2__
-static inline bool avx2_enabled() noexcept { avx2_available(); }
+static inline bool avx2_enabled() noexcept { return avx2_available(); }
 #else
 static inline bool avx2_enabled() noexcept { return false; }
 #endif
