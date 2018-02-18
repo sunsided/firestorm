@@ -12,19 +12,6 @@ using namespace std;
 
 namespace {
 
-    TEST_P(VectorNorm, OpenMP_Norm) {
-        // arrange
-        const auto test_data = GetParam();
-        const auto& vector = *get<0>(test_data).get();
-        const auto referenceNorm = get<1>(test_data);
-
-        // act
-        auto norm = vec_norm_openmp(vector.data, vector.dimensions);
-
-        // assert
-        ASSERT_FLOAT_EQ(norm, referenceNorm);
-    }
-
     TEST_P(VectorNorm, OpenMP_Normalize) {
         // arrange
         const auto test_data = GetParam();
@@ -32,10 +19,12 @@ namespace {
         const auto referenceNorm = get<1>(test_data);
 
         // act
+        auto norm = vec_norm_openmp(vector.data, vector.dimensions);
         auto normBefore = vec_normalize_openmp(vector.data, vector.dimensions);
         auto normAfter = vec_norm_openmp(vector.data, vector.dimensions);
 
         // assert
+        ASSERT_FLOAT_EQ(norm, normBefore);
         ASSERT_FLOAT_EQ(normBefore, referenceNorm);
         if (normBefore > 0.0f) {
             ASSERT_FLOAT_EQ(normAfter, 1.0f);

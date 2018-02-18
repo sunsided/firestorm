@@ -5,7 +5,7 @@ set(SOURCE_FILES
         src/test_dot_product_naive.cpp
         src/test_dot_product_openmp.cpp
         src/test_dot_product_avx256.cpp
-        src/VectorNorm.cpp src/DotProduct.cpp)
+        src/VectorNorm.cpp src/DotProduct.cpp src/test_dot_product_sse42.cpp)
 
 set(HEADER_FILES
         include/VectorNorm.h
