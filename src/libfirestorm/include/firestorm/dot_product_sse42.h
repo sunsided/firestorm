@@ -17,6 +17,10 @@ struct dot_product_sse42_t final : public dot_product_t {
     }
 };
 
+float vec_norm_sse42(const float * a_row, size_t N) noexcept;
+
+float vec_normalize_sse42(float* a_row, std::size_t N) noexcept;
+
 #endif //USE_SSE
 
 #endif //PROJECT_DOT_PRODUCT_SSE42_H

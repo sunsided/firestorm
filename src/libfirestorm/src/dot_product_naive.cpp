@@ -38,6 +38,9 @@ float vec_norm_naive(const float *const a_row, const size_t N) noexcept {
 
 float vec_normalize_naive(float *const a_row, const size_t N) noexcept {
     const auto norm = vec_norm_naive(a_row, N);
+    if (norm == 0.0f) {
+        return 0.0;
+    }
 
     auto n = 1.0f / norm;
     for (size_t i = 0; i < N; ++i) {

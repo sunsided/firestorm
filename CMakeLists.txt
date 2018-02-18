@@ -18,6 +18,7 @@ include(GNUInstallDirs)
 # Required libraries
 include(LibraryBoost)
 include(LibraryGperftools)
+include(LibraryGTest)
 
 # Options
 include(OptionSimd)
@@ -28,7 +29,6 @@ include(OptionOpenMP)
 include(CheckIPOSupported)
 
 # Targets that we develop here
-enable_testing()
 add_subdirectory(src)
 
 # Print a summary of the selected options.
