@@ -1,12 +1,12 @@
 option(FSTM_WITH_PROFILER "Use profiler from Google Performance Tools" OFF)
 option(FSTM_WITH_TCMALLOC "Use tcmalloc from Google Performance Tools" ON)
 
+add_library(gperftools INTERFACE IMPORTED)
 if(FSTM_WITH_PROFILER OR FSTM_WITH_TCMALLOC)
     set(FSTM_WITH_GPERFTOOLS ON)
     find_package(Gperftools 2.6)
 
     if(GPERFTOOLS_FOUND)
-        add_library(gperftools INTERFACE IMPORTED)
         set_property(TARGET gperftools PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${GPERFTOOLS_INCLUDE_DIR})
 
         # Profiler only
