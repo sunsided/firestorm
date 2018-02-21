@@ -10,12 +10,15 @@
 #endif
 
 #include <spdlog/spdlog.h>
+#include <logging/LoggerFactory.h>
 #include "firestorm/Simd.h"
 #include "firestorm/ChunkManager.h"
 #include "firestorm/Worker.h"
 #include "firestorm/DotProductVisitor.h"
 #include "firestorm/dot_product_naive.h"
+#if USE_AVX
 #include "firestorm/dot_product_avx256.h"
+#endif
 #include "firestorm/dot_product_openmp.h"
 #include "firestorm/dot_product_sse42.h"
 
@@ -355,28 +358,40 @@ void what() {
     std::cout << "Done." << std::endl;
 }
 
-int main() {
+void print_exception(const std::exception& e, int level = 0) {
+    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
+    try {
+        std::rethrow_if_nested(e);
+    } catch(const std::exception& e) {
+        print_exception(e, level+1);
+    } catch(...) {}
+}
+
+unique_ptr<LoggerFactory> configure_logging() {
     // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+    try
+    {
+        auto factory = make_unique<LoggerFactory>();
+        factory->setAsync()
+                .addConsole();
 
-    // Enable spdlog async mode
-    size_t logger_q_size = 8192;
-    spd::set_async_mode(logger_q_size);
+        return factory;
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Initialization of the logging subsystem failed: " << ex.what() << std::endl;
+        print_exception(ex);
+        return nullptr;
+    }
+}
 
-    // Define multiple logger sinks.
-    vector<spd::sink_ptr> sinks;
+int main() {
+    auto loggerFactory = configure_logging();
+    if (loggerFactory == nullptr) {
+        return 1;
+    }
 
-    // Standard console logger.
-    auto stdout_sink = make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
-    stdout_sink->set_level(spd::level::info);
-    sinks.push_back(stdout_sink);
-
-    // Create a logger attached to all sinks.
-    auto logger = std::make_shared<spdlog::logger>("firestorm", begin(sinks), end(sinks));
-    logger->set_level(spd::level::info);
-
-    // Register logger globally to make it available by name.
-    spdlog::register_logger(logger);
-
+    auto logger = loggerFactory->createLogger("firestorm");
     logger->info("Firestorm starting.");
 
 #if USE_PROFILER
@@ -386,6 +401,8 @@ int main() {
 #endif
 
     // TODO: Use cpu_features
+    // TODO: Report OpenMP support
+
     if (avx2_enabled()) {
         logger->info("AVX2 support: enabled");
     } else {
@@ -410,6 +427,5 @@ int main() {
 
     what();
 
-    spd::drop_all();
     return 0;
 }

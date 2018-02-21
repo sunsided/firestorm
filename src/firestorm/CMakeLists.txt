@@ -23,7 +23,8 @@ target_include_directories(firestorm
 target_link_libraries(firestorm
         boost
         gperftools
-        libfirestorm)
+        libfirestorm
+        liblogging)
 
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html
