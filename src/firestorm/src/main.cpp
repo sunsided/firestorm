@@ -35,7 +35,7 @@ const size_t NUM_DIMENSIONS = 2048;
 #if AVX_VERSION
 const size_t NUM_VECTORS = 100000;
 #else
-const size_t NUM_VECTORS = 2500;
+const size_t NUM_VECTORS = 5000;
 #endif
 
 vector_t create_query_vector(const shared_ptr<spdlog::logger> &log) {
