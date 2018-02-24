@@ -45,7 +45,7 @@ float vec_norm_sse42(const float *const a_row, const size_t N) noexcept {
 
 float vec_normalize_sse42(float* a_row, std::size_t N) noexcept {
     const auto norm = vec_norm_sse42(a_row, N);
-    if (norm == 0.0f) {
+    if (norm < FLOAT_ZERO_EPSILON && norm > -FLOAT_ZERO_EPSILON) {
         return 0.0;
     }
 

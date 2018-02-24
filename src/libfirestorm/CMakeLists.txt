@@ -45,12 +45,14 @@ target_include_directories(libfirestorm PUBLIC
 
 # Define the libraries this project depends upon
 target_link_libraries(libfirestorm
-        boost gperftools)
+        boost
+        gperftools)
 
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html
 target_compile_features(libfirestorm
-        PUBLIC cxx_constexpr cxx_auto_type)
+        PUBLIC cxx_constexpr cxx_auto_type cxx_final cxx_override cxx_nullptr cxx_user_literals
+        PRIVATE cxx_alignas)
 
 # Link-Time Optimization
 check_ipo_supported(RESULT result)

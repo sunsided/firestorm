@@ -20,6 +20,7 @@ INSTANTIATE_TEST_CASE_P(EnsureVectorNorms,
 
 static inline shared_ptr<vector_t> create_vector(const float norm, const size_t n) {
     auto vector = make_shared<vector_t>(n);
+    vector->zero_out();
 
     const auto sn = norm;
     vector->data[n - 1] = sn;

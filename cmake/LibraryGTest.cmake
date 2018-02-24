@@ -8,7 +8,7 @@ if(FSTM_BUILD_TESTS)
     include(ExternalProject)
     ExternalProject_Add(googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/googletest"
+            # GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/googletest"
             GIT_REMOTE_NAME origin
             GIT_TAG release-1.8.0
             GIT_SHALLOW On
@@ -23,8 +23,6 @@ if(FSTM_BUILD_TESTS)
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo
                 -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/googletest/build/out/
                 -Dgtest_force_shared_crt=ON
-            LOG_DOWNLOAD ON
-            LOG_CONFIGURE ON
             LOG_BUILD ON
             )
 

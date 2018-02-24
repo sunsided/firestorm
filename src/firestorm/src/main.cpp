@@ -3,19 +3,27 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <vector>
 
-#ifdef USE_GPERFTOOLS
+#ifdef USE_PROFILER
 #include <gperftools/profiler.h>
 #endif
 
+#include <spdlog/spdlog.h>
+#include <logging/LoggerFactory.h>
 #include "firestorm/Simd.h"
 #include "firestorm/ChunkManager.h"
 #include "firestorm/Worker.h"
 #include "firestorm/DotProductVisitor.h"
 #include "firestorm/dot_product_naive.h"
+#if USE_AVX
 #include "firestorm/dot_product_avx256.h"
+#endif
 #include "firestorm/dot_product_openmp.h"
 #include "firestorm/dot_product_sse42.h"
+
+using namespace std;
+namespace spd = spdlog;
 
 // TODO: Boost
 // TODO: Boost.SIMD
@@ -29,7 +37,7 @@ const size_t M = 100000;
 const size_t M = 2500;
 #endif
 
-vector_t create_query_vector() {
+vector_t create_query_vector(const shared_ptr<spdlog::logger> &log) {
     const auto seed = 0L;
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
@@ -49,12 +57,12 @@ vector_t create_query_vector() {
     auto norm2 = vec_norm_naive(query.data, query.dimensions);
 #endif
 
-    std::cout << "Test vector norm before normalizing is " << norm << " (" << norm2 << " after that)." << std::endl;
+    log->debug("Test vector norm before normalizing is {} ({} after that).", norm, norm2);
     return query;
 }
 
 template <typename T>
-void run_test_round(float *const result, const ChunkManager &chunkManager,
+void run_test_round(const shared_ptr<spdlog::logger> &log, float *const result, const ChunkManager &chunkManager,
                     const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score) {
 
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
@@ -106,14 +114,12 @@ void run_test_round(float *const result, const ChunkManager &chunkManager,
     auto end_time = std::chrono::_V2::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_best_score << " at " << expected_best_idx << ")"
-              << " - duration: " << duration << "ms"
-              << " (" << vectors_per_second << " vector/s)"
-              << std::endl;
+    log->info("Best match: {} at {} (expected {} at {}) - duration: {} ms ({} vectors/s)",
+              best_match, best_match_idx, expected_best_score, expected_best_idx, duration, vectors_per_second);
 }
 
 template <typename T>
-void run_test_round_worker(const Worker &worker,
+void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const Worker &worker,
                     const vector_t& query, const size_t expected_best_idx, const float expected_best_score) {
 
     const DotProductVisitor<T> visitor {};
@@ -140,14 +146,11 @@ void run_test_round_worker(const Worker &worker,
     }
 
     auto vectors_per_second = static_cast<float>(M * 1000) / static_cast<float>(duration);
-    std::cout << "Best match: " << best_match << " at " << best_match_idx << " (expected: " << expected_best_score << " at " << expected_best_idx << ")"
-              << " - duration: " << duration << "ms"
-              << " (" << vectors_per_second << " vector/s)"
-              << std::endl;
+    log->info("Best match: {} at {} (expected {} at {}) - duration: {} ms ({} vectors/s)",
+              best_match, best_match_idx, expected_best_score, expected_best_idx, duration, vectors_per_second);
 }
 
-void what() {
-
+void what(const shared_ptr<spdlog::logger> &log) {
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
     std::default_random_engine generator(seed);
@@ -158,7 +161,7 @@ void what() {
     auto result = new float[M];
 
     // We first create two chunk managers that will hold the vectors.
-    std::cout << "Initializing vectors ..." << std::endl;
+    log->info("Initializing vectors ...");
     std::shared_ptr<ChunkManager> chunkManager = std::make_shared<ChunkManager>();
     constexpr const auto target_chunk_size = 32_MB;
     constexpr size_t num_vectors = target_chunk_size / (N*sizeof(float));
@@ -183,7 +186,7 @@ void what() {
     auto expected_best_match_idx = static_cast<size_t>(-1);
 
     // Create a random query vector.
-    vector_t query = create_query_vector();
+    vector_t query = create_query_vector(log);
 
     // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < M; ++j) {
@@ -191,7 +194,7 @@ void what() {
         // Initial condition, also reached during runtime:
         // If one memory chunk is "full", allocate another one.
         if (remaining_chunk_size == 0_B) {
-            std::cout << "Allocating chunk." << std::endl;
+            log->debug("Allocating chunk.");
 
             chunk = chunkManager->allocate(num_vectors, N);
             assert(chunk != nullptr);
@@ -204,7 +207,7 @@ void what() {
 
         // Some progress printing.
         if (j % 2500 == 0) {
-            std::cout << "- " << j << "/" << M << std::endl;
+            log->info("- {}/{}", j, M);
         }
 
         auto a = &chunk->data[float_offset];
@@ -233,8 +236,8 @@ void what() {
             expected_best_match_idx = j;
         }
     }
-    std::cout << "- " << M << "/" << M << std::endl
-              << "Vectors initialized." << std::endl;
+    log->info("- {}/{}", M, M);
+    log->info("Vectors initialized"); // TODO: Add timing
 
     // Worker test
 #if USE_AVX
@@ -247,131 +250,160 @@ void what() {
 
 #if USE_AVX
 
-    std::cout << std::endl;
-    std::cout << "dot_product_avx256" << std::endl
-              << "------------------" << std::endl;
+    log->info("dot_product_avx256");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_avx256_t>(result, *chunkManager, query, target_chunk_size,
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round<dot_product_avx256_t>(log, result, *chunkManager, query, target_chunk_size,
                                              expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_avx256 (Worker)" << std::endl
-              << "---------------------------" << std::endl;
+    log->info("dot_product_avx256 (Worker)");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_avx256_t>(*worker, query, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round_worker<dot_product_avx256_t>(log, *worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
 
 #if USE_OPENMP
 
-    std::cout << std::endl;
-    std::cout << "dot_product_openmp" << std::endl
-              << "------------------" << std::endl;
+    log->info("dot_product_openmp");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_openmp_t>(result, *chunkManager, query, target_chunk_size,
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round<dot_product_openmp_t>(log, result, *chunkManager, query, target_chunk_size,
                                              expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_openmp (Worker)" << std::endl
-              << "---------------------------" << std::endl;
+    log->info("dot_product_openmp (Worker)");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_openmp_t>(*worker, query, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round_worker<dot_product_openmp_t>(log, *worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
 
 #if USE_SSE == 4
 
-    std::cout << std::endl;
-    std::cout << "dot_product_sse42" << std::endl
-              << "-----------------" << std::endl;
+    log->info("dot_product_sse42");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_sse42_t>(result, *chunkManager, query, target_chunk_size,
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round<dot_product_sse42_t>(log, result, *chunkManager, query, target_chunk_size,
                                              expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_sse42 (Worker)" << std::endl
-              << "--------------------------" << std::endl;
+    log->info("dot_product_sse42 (Worker)");
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
-        std::cout << "test round " << (repetition + 1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_sse42_t>(*worker, query, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round_worker<dot_product_sse42_t>(log, *worker, query, expected_best_match_idx, expected_best_match);
     }
 
 #endif
 
-    std::cout << std::endl;
-    std::cout << "dot_product_unrolled_8" << std::endl
-              << "----------------------" << std::endl;
+    log->info("dot_product_unrolled_8");
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_unrolled_8_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round<dot_product_unrolled_8_t>(log, result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_unrolled_8 (Worker)" << std::endl
-              << "-------------------------------" << std::endl;
+    log->info("dot_product_unrolled_8 (Worker)");
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_unrolled_8_t>(*worker, query, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round_worker<dot_product_unrolled_8_t>(log, *worker, query, expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_naive" << std::endl
-              << "-----------------" << std::endl;
+    log->info("dot_product_naive");
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round<dot_product_naive_t>(result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round<dot_product_naive_t>(log, result, *chunkManager, query, target_chunk_size, expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << std::endl;
-    std::cout << "dot_product_naive (Worker)" << std::endl
-              << "--------------------------" << std::endl;
+    log->info("dot_product_naive (Worker)");
     for (size_t repetition = 0; repetition < repetitions; ++repetition)
     {
-        std::cout << "test round " << (repetition+1) << " of " << repetitions << " ... ";
-        run_test_round_worker<dot_product_naive_t>(*worker, query, expected_best_match_idx, expected_best_match);
+        log->info("test round {} of {} ...", repetition + 1, repetitions);
+        run_test_round_worker<dot_product_naive_t>(log, *worker, query, expected_best_match_idx, expected_best_match);
     }
 
-    std::cout << "Cleaning up ..." << std::endl;
+    log->info("Cleaning up ...");
     delete[] expected;
     delete[] result;
 
-    std::cout << "Done." << std::endl;
+    log->info("Done.");
+}
+
+void print_exception(const std::exception& e, int level = 0) {
+    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
+    try {
+        std::rethrow_if_nested(e);
+    } catch(const std::exception& e) {
+        print_exception(e, level+1);
+    } catch(...) {}
+}
+
+unique_ptr<LoggerFactory> configure_logging() {
+    // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+    try
+    {
+        auto factory = make_unique<LoggerFactory>();
+        factory->setAsync()
+                .addConsole();
+
+        return factory;
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Initialization of the logging subsystem failed: " << ex.what() << std::endl;
+        print_exception(ex);
+        return nullptr;
+    }
 }
 
 int main() {
+    auto loggerFactory = configure_logging();
+    if (loggerFactory == nullptr) {
+        return 1;
+    }
 
-#if USE_GPERFTOOLS
+    auto logger = loggerFactory->createLogger("firestorm");
+    logger->info("Firestorm starting.");
+
+    auto benchmarkLogger = loggerFactory->createLogger("benchmark");
+
+#if USE_PROFILER
     ProfilerState state {};
     ProfilerGetCurrentState(&state);
-    std::cout << "Profiling enabled: " << (state.enabled ? "yes" : "no") << std::endl;
+    logger->info("Profiling enabled: {}", state.enabled ? "yes" : "no");
 #endif
 
+    // TODO: Use cpu_features
+    // TODO: Report OpenMP support
+
     if (avx2_enabled()) {
-        std::cout << "AVX2 available!" << std::endl;
+        logger->info("AVX2 support: enabled");
+    } else {
+        logger->info("AVX2 support: disabled ({} on machine)", avx2_available() ? "available" : "missing");
     }
 
     if (avx_enabled()) {
-        std::cout << "AVX available!" << std::endl;
+        logger->info("AVX support: enabled");
+    } else {
+        logger->info("AVX support: disabled ({} on machine)", avx_available() ? "available" : "missing");
     }
 
-    if (!avx2_enabled() && !avx_enabled()) {
-        std::cout << "AVX/AVX2 support is required for optimal performance." << std::endl;
+    if (sse42_enabled()) {
+        logger->info("SSE4.2 support: enabled");
+    } else {
+        logger->info("SSE4.2 support: disabled ({} on machine)", sse42_available() ? "available" : "missing");
     }
 
-    what();
+    if (!avx2_enabled() && !avx_enabled() && !sse42_enabled()) {
+        logger->info("AVX/AVX2 or SSE4.2 support is required for optimal performance.");
+    }
+
+    what(benchmarkLogger);
 
     return 0;
 }
