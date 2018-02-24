@@ -27,12 +27,20 @@ private:
     const std::shared_ptr<const ChunkAccessor> accessor;
 
 public:
-    explicit Worker(std::shared_ptr<const ChunkAccessor> accessor) : accessor(std::move(accessor)) {}
+    /// Initializes an instance of the Worker class.
+    /// \param accessor An accessor to a chunk manager.
+    explicit Worker(std::shared_ptr<const ChunkAccessor> accessor)
+            : accessor{std::move(accessor)}, assigned_chunks{}
+    {}
 
+    /// Assigns a chunk of the manager to this worker.
+    /// \param chunk_idx The index of the chunk to process.
     void assign_chunk(chunk_idx_t chunk_idx) {
         assigned_chunks.push_back(chunk_idx);
     }
 
+    /// Unassigns a chunk of the manager from this worker.
+    /// \return The index of the chunk that was unassigned.
     boost::optional<chunk_idx_t> unassign_chunk() {
         if (assigned_chunks.empty()) {
             return boost::none;
@@ -43,6 +51,8 @@ public:
         return chunk;
     }
 
+    /// Creates a result buffer that is able to hold results for all vector mappings of this manager.
+    /// \return The result buffer.
     std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
         std::map<size_t, std::shared_ptr<result_t>> results;
         for(auto chunk_idx : assigned_chunks) {
@@ -55,6 +65,10 @@ public:
         return results;
     }
 
+    /// Applies the specified visitor with the given query vector to the registered chunks.
+    /// \param visitor The visitor to use.
+    /// \param query The query vector to operate on.
+    /// \param results The result buffer.
     void accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
         for (const auto chunk : assigned_chunks) {
             const auto shared_chunk = accessor->get_ro(chunk);

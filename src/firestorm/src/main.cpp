@@ -38,11 +38,11 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t num_vectors) {
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
 
+    log->info("Initializing vectors ...");
     auto expected = new float[num_vectors];
     auto result = new float[num_vectors];
 
-    // We first create two chunk managers that will hold the vectors.
-    log->info("Initializing vectors ...");
+    // We first create a chunk manager that will hold the vectors.
     std::shared_ptr<ChunkManager> chunkManager = std::make_shared<ChunkManager>();
     constexpr const auto target_chunk_size = 32_MB;
     constexpr size_t num_vectors_per_chunk = target_chunk_size / (NUM_DIMENSIONS*sizeof(float));
@@ -119,13 +119,6 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t num_vectors) {
     }
     log->info("- {}/{}", num_vectors, num_vectors);
     log->info("Vectors initialized"); // TODO: Add timing
-
-    // Worker test
-#if USE_AVX
-    DotProductVisitor<dot_product_avx256_t> visitor;
-#else
-    DotProductVisitor<dot_product_unrolled_8_t> visitor;
-#endif
 
     const size_t repetitions = 20;
 
