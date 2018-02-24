@@ -23,13 +23,11 @@ include(LibrarySpdlog)
 include(LibraryCLI11)
 
 # Options
+include(OptionLto)
 include(OptionCcache)
 include(OptionSimd)
 include(OptionFastmath)
 include(OptionOpenMP)
-
-# CMake Features
-include(CheckIPOSupported)
 
 # Targets that we develop here
 add_subdirectory(src)

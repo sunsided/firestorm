@@ -56,6 +56,6 @@ target_compile_features(libfirestorm
 
 # Link-Time Optimization
 check_ipo_supported(RESULT result)
-if(result)
+if(result AND FSTM_ENABLE_LTO)
     set_property(TARGET libfirestorm PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()

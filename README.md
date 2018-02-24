@@ -12,6 +12,48 @@ Different operation types are implemented for evaluation:
 - hand-tuned SSE4.2 optimized for-loop
 - OpenMP SIMD optimized for-loop
 
+## CMake Options
+
+These options configure the CMake build. To enable an option `OPTION`,
+set `-DOPTION=ON`; to disable, use `-DOPTION=OFF`.
+To build in release mode with link-time optimizations enabled, call e.g.
+
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DFSTM_ENABLE_LTO=ON \
+      ..
+```
+
+### Build and linker options
+
+| Option               | Default | Description |
+|----------------------|---------|-------------|
+| FSTM_ENABLE_LTO      | ON      | Enables link-time optimization (if available). |
+| FSTM_ENABLE_CCACHE   | ON      | Enables `ccache` support when building (if available). |
+
+### Google Performance Tools
+
+| Option               | Default | Description |
+|----------------------|---------|-------------|
+| FSTM_WITH_PROFILER   | OFF     | Builds with performance profiler support. |
+| FSTM_WITH_TCMALLOC   | ON      | Builds with `tcmalloc` support. |
+
+### Functionality and performance options
+
+| Option               | Default | Description |
+|----------------------|---------|-------------|
+| FSTM_WITH_FAST_MATH  | OFF     | Enables fast math optimizations (if available). |
+| FSTM_WITH_OPENMP     | ON      | Enables OpenMP support (if available). |
+| FSTM_WITH_SIMD_AVX2  | OFF     | Builds with AVX2 support |
+| FSTM_WITH_SIMD_AVX   | OFF     | Builds with AVX support |
+| FSTM_WITH_SIMD_SSE42 | ON      | Builds with SSE 4.2 support |
+
+### Development options
+
+| Option               | Default | Description |
+|----------------------|---------|-------------|
+| FSTM_BUILD_TESTS     | ON      | Builds unit tests. |
+
 ## Unit Tests
 
 Unit tests are provided by means of [googletest](https://github.com/google/googletest).
@@ -71,6 +113,6 @@ You can then visualize the results using that file with
 kcachegrind callgrind.out.18360
 ```
 
-### Cache and branch prediciton profiling
+### Cache and branch prediction profiling
 
 Read [here](http://valgrind.org/docs/manual/cg-manual.html) for further information.
