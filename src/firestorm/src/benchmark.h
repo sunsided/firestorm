@@ -22,13 +22,14 @@ vector_t create_query_vector(const std::shared_ptr<spdlog::logger> &log, size_t 
 
 template <typename T>
 void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score, size_t NUM_VECTORS) {
+                    const vector_t& query, const bytes_t chunk_size,
+                    const size_t expected_best_idx, float expected_best_score, size_t num_vectors) {
 
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
     const T calculate {};
 
     const auto vectors_per_chunk = chunk_size / (NUM_DIMENSIONS * sizeof(float));
-    auto duration_ms = static_cast<size_t>(0);
+    auto total_duration_ms = static_cast<size_t>(0);
 
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         auto start_time = std::chrono::_V2::system_clock::now();
@@ -45,7 +46,7 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t rep
         auto remaining_vectors_per_chunk = vectors_per_chunk;
 
         // Run over all vectors ...
-        for (size_t vector_idx = 0; vector_idx < NUM_VECTORS; ++vector_idx) {
+        for (size_t vector_idx = 0; vector_idx < num_vectors; ++vector_idx) {
 
             if (remaining_vectors_per_chunk == 0) {
                 current_chunk += 1;
@@ -74,9 +75,9 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t rep
 
         auto end_time = std::chrono::_V2::system_clock::now();
         auto local_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-        duration_ms += local_duration_ms;
+        total_duration_ms += local_duration_ms;
 
-        auto local_vectors_per_second = static_cast<float>(NUM_VECTORS) * MS_TO_S / static_cast<float>(local_duration_ms);
+        auto local_vectors_per_second = static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
         log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms ({} vectors/s)",
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
@@ -84,18 +85,19 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t rep
                    local_duration_ms, local_vectors_per_second);
     }
 
-    const size_t num_vectors = repetitions * NUM_VECTORS;
-    auto vectors_per_second = static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(duration_ms);
+    const size_t total_num_vectors = repetitions * num_vectors;
+    auto vectors_per_second = static_cast<float>(total_num_vectors) * MS_TO_S / static_cast<float>(total_duration_ms);
     log->info("- Processed {} vectors in {} ms ({} vectors/s)",
-              num_vectors, duration_ms, vectors_per_second);
+              total_num_vectors, total_duration_ms, vectors_per_second);
 }
 
 template <typename T>
 void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const Worker &worker,
-                           const vector_t& query, const size_t expected_best_idx, const float expected_best_score, const size_t NUM_VECTORS) {
+                           const vector_t& query,
+                           const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
 
     const DotProductVisitor<T> visitor {};
-    auto duration_ms = static_cast<size_t>(0);
+    auto total_duration_ms = static_cast<size_t>(0);
 
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         auto start_time = std::chrono::_V2::system_clock::now();
@@ -109,11 +111,11 @@ void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const siz
 
         auto end_time = std::chrono::_V2::system_clock::now();
         auto local_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-        duration_ms += local_duration_ms;
+        total_duration_ms += local_duration_ms;
 
         // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
         for (auto chunk_result : results) {
-            for (size_t vector_idx = 0; vector_idx < NUM_VECTORS; ++vector_idx) {
+            for (size_t vector_idx = 0; vector_idx < num_vectors; ++vector_idx) {
                 const auto score = chunk_result.second->scores[vector_idx];
                 if (score > best_match) {
                     best_match = score;
@@ -122,7 +124,7 @@ void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const siz
             }
         }
 
-        auto local_vectors_per_second = static_cast<float>(NUM_VECTORS) * MS_TO_S / static_cast<float>(local_duration_ms);
+        auto local_vectors_per_second = static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
         log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms ({} vectors/s)",
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
@@ -130,10 +132,10 @@ void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const siz
                    local_duration_ms, local_vectors_per_second);
     }
 
-    const size_t num_vectors = repetitions * NUM_VECTORS;
-    auto vectors_per_second = static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(duration_ms);
+    const size_t total_num_vectors = repetitions * num_vectors;
+    auto vectors_per_second = static_cast<float>(total_num_vectors) * MS_TO_S / static_cast<float>(total_duration_ms);
     log->info("- Processed {} vectors in {} ms ({} vectors/s)",
-              num_vectors, duration_ms, vectors_per_second);
+              total_num_vectors, total_duration_ms, vectors_per_second);
 }
 
 #endif //PROJECT_BENCHMARK_H

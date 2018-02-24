@@ -29,24 +29,23 @@ namespace spd = spdlog;
 
 // TODO: Boost
 // TODO: Boost.SIMD
-// TODO: OpenMP backed loops
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
-void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
+void what(const shared_ptr<spdlog::logger> &log, const size_t num_vectors) {
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
     auto random = std::bind(distribution, generator);
 
-    auto expected = new float[NUM_VECTORS];
-    auto result = new float[NUM_VECTORS];
+    auto expected = new float[num_vectors];
+    auto result = new float[num_vectors];
 
     // We first create two chunk managers that will hold the vectors.
     log->info("Initializing vectors ...");
     std::shared_ptr<ChunkManager> chunkManager = std::make_shared<ChunkManager>();
     constexpr const auto target_chunk_size = 32_MB;
-    constexpr size_t num_vectors = target_chunk_size / (NUM_DIMENSIONS*sizeof(float));
+    constexpr size_t num_vectors_per_chunk = target_chunk_size / (NUM_DIMENSIONS*sizeof(float));
 
     // A worker is a visitor that is performs a calculation on the chunks of a
     // registered manager.
@@ -71,14 +70,14 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
     vector_t query = create_query_vector(log, NUM_DIMENSIONS);
 
     // Create M vectors (1000, 10000, whatever).
-    for (size_t j = 0; j < NUM_VECTORS; ++j) {
+    for (size_t j = 0; j < num_vectors; ++j) {
 
         // Initial condition, also reached during runtime:
         // If one memory chunk is "full", allocate another one.
         if (remaining_chunk_size == 0_B) {
             log->debug("Allocating chunk.");
 
-            chunk = chunkManager->allocate(num_vectors, NUM_DIMENSIONS);
+            chunk = chunkManager->allocate(num_vectors_per_chunk, NUM_DIMENSIONS);
             assert(chunk != nullptr);
 
             remaining_chunk_size = target_chunk_size;
@@ -89,13 +88,13 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
 
         // Some progress printing.
         if (j % 2500 == 0) {
-            log->info("- {}/{}", j, NUM_VECTORS);
+            log->info("- {}/{}", j, num_vectors);
         }
 
         auto a = &chunk->data[float_offset];
         const auto *const b = &query.data[0];
 
-        assert(float_offset < NUM_VECTORS*NUM_DIMENSIONS);
+        assert(float_offset < num_vectors*NUM_DIMENSIONS);
         assert(remaining_chunk_size >= sizeof(float)*NUM_DIMENSIONS);
 
         remaining_chunk_size -= (sizeof(float)*NUM_DIMENSIONS);
@@ -118,7 +117,7 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
             expected_best_match_idx = j;
         }
     }
-    log->info("- {}/{}", NUM_VECTORS, NUM_VECTORS);
+    log->info("- {}/{}", num_vectors, num_vectors);
     log->info("Vectors initialized"); // TODO: Add timing
 
     // Worker test
@@ -145,10 +144,10 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
 
     log->info("dot_product_openmp");
     run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                         expected_best_match_idx, expected_best_match, NUM_VECTORS);
+                                         expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_openmp (Worker)");
-    run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
+    run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, num_vectors);
 
 #endif
 
@@ -156,26 +155,26 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
 
     log->info("dot_product_sse42");
     run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                        expected_best_match_idx, expected_best_match, NUM_VECTORS);
+                                        expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_sse42 (Worker)");
-    run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
+    run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, num_vectors);
 
 #endif
 
     log->info("dot_product_unrolled_8");
     run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                             expected_best_match_idx, expected_best_match, NUM_VECTORS);
+                                             expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_unrolled_8 (Worker)");
-    run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
+    run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_naive");
     run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                        expected_best_match_idx, expected_best_match, NUM_VECTORS);
+                                        expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_naive (Worker)");
-    run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
+    run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("Cleaning up ...");
     delete[] expected;
