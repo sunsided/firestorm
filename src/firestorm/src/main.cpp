@@ -32,7 +32,7 @@ namespace spd = spdlog;
 // TODO: OpenMP backed loops
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
-void what(const shared_ptr<spdlog::logger> &log) {
+void what(const shared_ptr<spdlog::logger> &log, const size_t NUM_VECTORS) {
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
     std::default_random_engine generator(seed);
@@ -145,10 +145,10 @@ void what(const shared_ptr<spdlog::logger> &log) {
 
     log->info("dot_product_openmp");
     run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                         expected_best_match_idx, expected_best_match);
+                                         expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("dot_product_openmp (Worker)");
-    run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match);
+    run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
 #endif
 
@@ -156,26 +156,26 @@ void what(const shared_ptr<spdlog::logger> &log) {
 
     log->info("dot_product_sse42");
     run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                        expected_best_match_idx, expected_best_match);
+                                        expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("dot_product_sse42 (Worker)");
-    run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match);
+    run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
 #endif
 
     log->info("dot_product_unrolled_8");
     run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                             expected_best_match_idx, expected_best_match);
+                                             expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("dot_product_unrolled_8 (Worker)");
-    run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match);
+    run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("dot_product_naive");
     run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                        expected_best_match_idx, expected_best_match);
+                                        expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("dot_product_naive (Worker)");
-    run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match);
+    run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, NUM_VECTORS);
 
     log->info("Cleaning up ...");
     delete[] expected;
@@ -216,9 +216,19 @@ int main(int argc, char **argv) {
     CLI::App app{"firestorm vector search engine"};
 
     auto verbosity = spd::level::info;
+#if USE_AVX
+    size_t num_vectors = 100000;
+#else
+    size_t num_vectors = 5000;
+#endif
+
     add_option(app, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
             ->group("Logging")
             ->envname("FSTM_VERBOSITY");
+
+    app.add_option("-n,--vectors", num_vectors, "Sets the number of vectors to test with.", true)
+            ->group("Benchmark")
+            ->envname("FSTM_NUM_VECTORS");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -269,7 +279,7 @@ int main(int argc, char **argv) {
         logger->info("AVX/AVX2 or SSE4.2 support is required for optimal performance.");
     }
 
-    what(benchmarkLogger);
+    what(benchmarkLogger, num_vectors);
 
     return 0;
 }

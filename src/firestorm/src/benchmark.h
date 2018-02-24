@@ -16,19 +16,13 @@
 #include <firestorm/DotProductVisitor.h>
 
 const auto MS_TO_S = 1000.0F;
-
 const size_t NUM_DIMENSIONS = 2048;
-#if USE_AVX
-const size_t NUM_VECTORS = 100000;
-#else
-const size_t NUM_VECTORS = 5000;
-#endif
 
 vector_t create_query_vector(const std::shared_ptr<spdlog::logger> &log, size_t NUM_DIMENSIONS);
 
 template <typename T>
 void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score) {
+                    const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score, size_t NUM_VECTORS) {
 
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
     const T calculate {};
@@ -98,7 +92,7 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t rep
 
 template <typename T>
 void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const Worker &worker,
-                           const vector_t& query, const size_t expected_best_idx, const float expected_best_score) {
+                           const vector_t& query, const size_t expected_best_idx, const float expected_best_score, const size_t NUM_VECTORS) {
 
     const DotProductVisitor<T> visitor {};
     auto duration_ms = static_cast<size_t>(0);

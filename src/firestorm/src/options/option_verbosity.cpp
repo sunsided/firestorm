@@ -31,7 +31,6 @@ CLI::Option* add_option(CLI::App &app, const std::string name, spd::level::level
         string level;
         bool worked = CLI::detail::lexical_cast(res[0], level);
         if(worked) {
-            cerr << level << endl;
             variable = stringToLevel.at(level);
         }
         return worked;
