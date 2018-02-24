@@ -126,10 +126,10 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t num_vectors) {
 
     log->info("dot_product_avx256");
     run_test_round<dot_product_avx256_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
-                                         expected_best_match_idx, expected_best_match);
+                                         expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_avx256 (Worker)");
-    run_test_round_worker<dot_product_avx256_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match);
+    run_test_round_worker<dot_product_avx256_t>(log, repetitions, *worker, query, expected_best_match_idx, expected_best_match, num_vectors);
 
 #endif
 
