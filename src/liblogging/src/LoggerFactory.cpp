@@ -47,7 +47,7 @@ LoggerFactory& LoggerFactory::setAsync() {
     }
 }
 
-LoggerFactory& LoggerFactory::addConsole(const bool color, const spd::level::level_enum logLevel) {
+LoggerFactory& LoggerFactory::addConsole(const spd::level::level_enum logLevel, const bool color) {
     try {
         auto stdout_sink = color
             ? static_cast<spd::sink_ptr>(make_shared<spd::sinks::ansicolor_stdout_sink_mt>())

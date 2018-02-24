@@ -26,7 +26,7 @@ public:
     /// \param color If true, enables ANSI color output.
     /// \param logLevel The level at which to log.
     /// \return A reference to this instance.
-    LoggerFactory& addConsole(bool color = true, spdlog::level::level_enum logLevel = spdlog::level::info);
+    LoggerFactory& addConsole(spdlog::level::level_enum logLevel = spdlog::level::info, bool color = true);
 
     /// Creates a new logger.
     /// \param logger_name The name of the logger.

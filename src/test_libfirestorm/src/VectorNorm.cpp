@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const size_t N = 64;
+static const size_t NUM_DIMENSIONS = 64;
 
 INSTANTIATE_TEST_CASE_P(EnsureVectorNorms,
                         VectorNorm,
