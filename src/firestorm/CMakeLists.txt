@@ -5,9 +5,13 @@ project(firestorm VERSION 0.1 LANGUAGES C CXX)
 set(SOURCE_FILES
         src/main.cpp)
 
+set(HEADER_FILES
+        src/benchmark.h)
+
 # Define an executable
 add_executable(firestorm
-        ${SOURCE_FILES})
+        ${SOURCE_FILES}
+        ${HEADER_FILES})
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build
