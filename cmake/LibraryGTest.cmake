@@ -20,7 +20,7 @@ if(FSTM_BUILD_TESTS)
             INSTALL_COMMAND ""
             TEST_COMMAND ""
             CMAKE_ARGS
-                -DCMAKE_BUILD_TYPE=RelWithDebInfo
+                -DCMAKE_BUILD_TYPE=Release
                 -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/googletest/build/out/
                 -Dgtest_force_shared_crt=ON
             LOG_BUILD ON

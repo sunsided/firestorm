@@ -6,6 +6,8 @@
 #include <gperftools/profiler.h>
 #endif
 
+#include <CLI/CLI.hpp>
+
 #include <logging/LoggerFactory.h>
 #include <firestorm/Simd.h>
 #include <firestorm/OpenMP.h>
@@ -232,7 +234,11 @@ unique_ptr<LoggerFactory> configure_logging() {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
+    // https://cliutils.gitlab.io/CLI11Tutorial/
+    CLI::App app{"firestorm vector search engine"};
+    CLI11_PARSE(app, argc, argv);
+
     auto loggerFactory = configure_logging();
     if (loggerFactory == nullptr) {
         return 1;

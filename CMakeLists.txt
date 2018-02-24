@@ -20,6 +20,7 @@ include(LibraryBoost)
 include(LibraryGperftools)
 include(LibraryGTest)
 include(LibrarySpdlog)
+include(LibraryCLI11)
 
 # Options
 include(OptionCcache)

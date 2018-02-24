@@ -27,6 +27,7 @@ target_include_directories(firestorm
 target_link_libraries(firestorm
         boost
         gperftools
+        cli11
         libfirestorm
         liblogging)
 
