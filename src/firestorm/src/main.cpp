@@ -8,6 +8,7 @@
 
 #include <logging/LoggerFactory.h>
 #include <firestorm/Simd.h>
+#include <firestorm/OpenMP.h>
 #include <firestorm/ChunkManager.h>
 #include <firestorm/Worker.h>
 #include <firestorm/DotProductVisitor.h>
@@ -243,7 +244,7 @@ int main() {
     auto benchmarkLogger = loggerFactory->createLogger("benchmark", spdlog::level::debug);
 
 #if USE_PROFILER
-    ProfilerState state {};
+    ProfilerState state{};
     ProfilerGetCurrentState(&state);
     logger->info("Profiling enabled: {}", state.enabled ? "yes" : "no");
 #endif
@@ -267,6 +268,12 @@ int main() {
         logger->info("SSE4.2 support: enabled");
     } else {
         logger->info("SSE4.2 support: disabled ({} on machine)", sse42_available() ? "available" : "missing");
+    }
+
+    if (openmp_enabled()) {
+        logger->info("OpenMP support: enabled (version {})", openmp_version());
+    } else {
+        logger->info("OpenMP support: disabled (by configuration)");
     }
 
     if (!avx2_enabled() && !avx_enabled() && !sse42_enabled()) {
