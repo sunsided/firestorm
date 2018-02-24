@@ -15,6 +15,8 @@
 #include "options/options.h"
 #include "benchmark.h"
 
+void report_profiler(shared_ptr<spdlog::logger> &logger);
+
 using namespace std;
 namespace spd = spdlog;
 
@@ -47,6 +49,14 @@ unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verb
         print_exception(ex);
         return nullptr;
     }
+}
+
+void report_profiler(shared_ptr<spdlog::logger> &logger) {
+#if USE_PROFILER
+    ProfilerState state{};
+    ProfilerGetCurrentState(&state);
+    logger->info("Profiling enabled: {}", state.enabled ? "yes" : "no");
+#endif
 }
 
 void report_optimizations(shared_ptr<spdlog::logger> &logger) {
@@ -84,6 +94,7 @@ void report_optimizations(shared_ptr<spdlog::logger> &logger) {
 int main(int argc, char **argv) {
     // https://cliutils.gitlab.io/CLI11Tutorial/
     CLI::App app{"firestorm vector search engine"};
+    CLI::App* benchmark = app.add_subcommand("benchmark", "Runs algorithm benchmarks");
 
     auto verbosity = spd::level::info;
 #if USE_AVX
@@ -92,13 +103,18 @@ int main(int argc, char **argv) {
     size_t num_vectors = 5000;
 #endif
 
+    // Main options
     add_option(app, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
             ->group("Logging")
             ->envname("FSTM_VERBOSITY");
 
-    app.add_option("-n,--vectors", num_vectors, "Sets the number of vectors to test with.", true)
+    // Benchmark options
+    benchmark->add_option("-n,--vectors", num_vectors, "Sets the number of vectors to test with.", true)
             ->group("Benchmark")
             ->envname("FSTM_NUM_VECTORS");
+    add_option(*benchmark, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
+            ->group("Logging")
+            ->envname("FSTM_VERBOSITY");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -108,19 +124,15 @@ int main(int argc, char **argv) {
     }
 
     auto logger = loggerFactory->createLogger("firestorm");
-    logger->info("Firestorm starting.");
+    logger->info("firestorm VSE starting.");
 
-    auto benchmarkLogger = loggerFactory->createLogger("benchmark", spdlog::level::debug);
-
-#if USE_PROFILER
-    ProfilerState state{};
-    ProfilerGetCurrentState(&state);
-    logger->info("Profiling enabled: {}", state.enabled ? "yes" : "no");
-#endif
-
+    report_profiler(logger);
     report_optimizations(logger);
 
-    run_benchmark(benchmarkLogger, num_vectors);
+    if(benchmark->parsed()) {
+        auto benchmarkLogger = loggerFactory->createLogger("benchmark", verbosity);
+        run_benchmark(benchmarkLogger, num_vectors);
+    }
 
     return 0;
 }
