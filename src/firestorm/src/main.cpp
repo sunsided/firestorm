@@ -67,7 +67,7 @@ void what(const shared_ptr<spdlog::logger> &log, const size_t num_vectors) {
     auto expected_best_match_idx = static_cast<size_t>(-1);
 
     // Create a random query vector.
-    vector_t query = create_query_vector(log, NUM_DIMENSIONS);
+    vector_t query = create_query_vector(NUM_DIMENSIONS);
 
     // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < num_vectors; ++j) {

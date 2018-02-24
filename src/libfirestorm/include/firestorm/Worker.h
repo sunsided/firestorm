@@ -30,7 +30,7 @@ public:
     /// Initializes an instance of the Worker class.
     /// \param accessor An accessor to a chunk manager.
     explicit Worker(std::shared_ptr<const ChunkAccessor> accessor)
-            : accessor{std::move(accessor)}, assigned_chunks{}
+            : assigned_chunks{}, accessor{std::move(accessor)}
     {}
 
     /// Assigns a chunk of the manager to this worker.
