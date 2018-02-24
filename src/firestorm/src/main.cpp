@@ -279,7 +279,7 @@ void what(const shared_ptr<spdlog::logger> &log) {
 #if USE_AVX
 
     log->info("dot_product_avx256");
-    run_test_round<dot_product_avx256_t>(log, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_avx256_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
                                          expected_best_match_idx, expected_best_match);
 
     log->info("dot_product_avx256 (Worker)");
