@@ -13,7 +13,7 @@ ExternalProject_Add(gabime_spdlog
         INSTALL_COMMAND ""
         TEST_COMMAND ""
         CMAKE_ARGS
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo
+            -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/spdlog/build/out/
         LOG_BUILD ON
         )

@@ -3,10 +3,13 @@ project(firestorm VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/main.cpp)
+        src/main.cpp
+        src/options/option_verbosity.cpp)
 
 set(HEADER_FILES
-        src/benchmark.h)
+        src/benchmark.h
+        src/options/options.h
+        src/options/options_verbosity.h)
 
 # Define an executable
 add_executable(firestorm
@@ -21,12 +24,14 @@ target_include_directories(firestorm
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
         PRIVATE
-            src)
+            src
+            src/options)
 
 # Define the libraries this project depends upon
 target_link_libraries(firestorm
         boost
         gperftools
+        cli11
         libfirestorm
         liblogging)
 
