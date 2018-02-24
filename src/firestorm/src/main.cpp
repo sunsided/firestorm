@@ -119,7 +119,7 @@ void run_test_round(const shared_ptr<spdlog::logger> &log, const size_t repetiti
         duration_ms += local_duration_ms;
 
         auto local_vectors_per_second = static_cast<float>(NUM_VECTORS) * MS_TO_S / static_cast<float>(local_duration_ms);
-        log->debug("- Round {}/{}: Best match: {} at {} (expected {} at {}) - duration: {} ms ({} vectors/s)",
+        log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms ({} vectors/s)",
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
                    expected_best_score, expected_best_idx,
@@ -165,7 +165,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const size_t r
         }
 
         auto local_vectors_per_second = static_cast<float>(NUM_VECTORS) * MS_TO_S / static_cast<float>(local_duration_ms);
-        log->debug("- Round {}/{}: Best match: {} at {} (expected {} at {}) - duration: {} ms ({} vectors/s)",
+        log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms ({} vectors/s)",
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
                    expected_best_score, expected_best_idx,
