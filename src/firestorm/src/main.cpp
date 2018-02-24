@@ -32,30 +32,6 @@ namespace spd = spdlog;
 // TODO: OpenMP backed loops
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
-vector_t create_query_vector(const shared_ptr<spdlog::logger> &log) {
-    const auto seed = 0L;
-    std::default_random_engine generator(seed);
-    std::normal_distribution<float> distribution(0.0f, 2.0f);
-    auto random = std::bind(distribution, generator);
-
-    // Create a simple query vector
-    vector_t query {NUM_DIMENSIONS};
-    for (size_t i = 0; i < NUM_DIMENSIONS; ++i) {
-        query.data[i] = random();
-    }
-
-#if USE_AVX
-    auto norm = vec_normalize_avx256(query.data, query.dimensions);
-    auto norm2 = vec_norm_avx256(query.data, query.dimensions);
-#else
-    auto norm = vec_normalize_naive(query.data, query.dimensions);
-    auto norm2 = vec_norm_naive(query.data, query.dimensions);
-#endif
-
-    log->debug("Test vector norm before normalizing is {} ({} after that).", norm, norm2);
-    return query;
-}
-
 void what(const shared_ptr<spdlog::logger> &log) {
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -92,7 +68,7 @@ void what(const shared_ptr<spdlog::logger> &log) {
     auto expected_best_match_idx = static_cast<size_t>(-1);
 
     // Create a random query vector.
-    vector_t query = create_query_vector(log);
+    vector_t query = create_query_vector(log, NUM_DIMENSIONS);
 
     // Create M vectors (1000, 10000, whatever).
     for (size_t j = 0; j < NUM_VECTORS; ++j) {

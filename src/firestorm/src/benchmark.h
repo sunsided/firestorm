@@ -24,6 +24,8 @@ const size_t NUM_VECTORS = 100000;
 const size_t NUM_VECTORS = 5000;
 #endif
 
+vector_t create_query_vector(const std::shared_ptr<spdlog::logger> &log, size_t NUM_DIMENSIONS);
+
 template <typename T>
 void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result, const ChunkManager &chunkManager,
                     const vector_t& query, const bytes_t chunk_size, const size_t expected_best_idx, float expected_best_score) {

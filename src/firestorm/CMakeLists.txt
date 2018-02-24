@@ -4,7 +4,7 @@ project(firestorm VERSION 0.1 LANGUAGES C CXX)
 # Define library. Only source files here!
 set(SOURCE_FILES
         src/main.cpp
-        src/options/option_verbosity.cpp)
+        src/options/option_verbosity.cpp src/benchmark.cpp)
 
 set(HEADER_FILES
         src/benchmark.h
