@@ -32,7 +32,7 @@ namespace spd = spdlog;
 const auto MS_TO_S = 1000.0F;
 
 const size_t NUM_DIMENSIONS = 2048;
-#if AVX_VERSION
+#if USE_AVX
 const size_t NUM_VECTORS = 100000;
 #else
 const size_t NUM_VECTORS = 5000;
