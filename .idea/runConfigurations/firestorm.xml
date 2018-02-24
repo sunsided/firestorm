@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="firestorm" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--help" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="firestorm" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="firestorm">
+  <configuration default="false" name="firestorm" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--verbosity debug" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="firestorm" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="firestorm">
     <envs />
     <method />
   </configuration>

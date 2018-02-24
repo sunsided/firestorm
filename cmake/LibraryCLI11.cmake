@@ -15,6 +15,9 @@ ExternalProject_Add(cli11_git
         CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/CLI11/build/out/
+            -DCLI_SINGLE_FILE=ON
+            -DCLI_EXAMPLES=OFF
+            -DCLI_TESTING=OFF
         LOG_BUILD ON
         )
 

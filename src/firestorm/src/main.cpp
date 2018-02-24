@@ -21,6 +21,7 @@
 #include <firestorm/dot_product_openmp.h>
 #include <firestorm/dot_product_sse42.h>
 
+#include "options/options.h"
 #include "benchmark.h"
 
 using namespace std;
@@ -216,13 +217,13 @@ void print_exception(const std::exception& e, int level = 0) {
     } catch(...) {}
 }
 
-unique_ptr<LoggerFactory> configure_logging() {
+unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verbosity) {
     // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
     try
     {
         auto factory = make_unique<LoggerFactory>();
         factory->setAsync()
-                .addConsole(spdlog::level::debug);
+                .addConsole(verbosity);
 
         return factory;
     }
@@ -237,9 +238,15 @@ unique_ptr<LoggerFactory> configure_logging() {
 int main(int argc, char **argv) {
     // https://cliutils.gitlab.io/CLI11Tutorial/
     CLI::App app{"firestorm vector search engine"};
+
+    auto verbosity = spd::level::info;
+    add_option(app, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
+            ->group("Logging")
+            ->envname("FSTM_VERBOSITY");
+
     CLI11_PARSE(app, argc, argv);
 
-    auto loggerFactory = configure_logging();
+    auto loggerFactory = configure_logging(verbosity);
     if (loggerFactory == nullptr) {
         return 1;
     }
