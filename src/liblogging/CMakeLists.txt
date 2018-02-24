@@ -28,7 +28,8 @@ target_link_libraries(liblogging
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html
 target_compile_features(liblogging
-        PRIVATE cxx_auto_type)
+        PUBLIC cxx_noexcept cxx_deleted_functions
+        PRIVATE cxx_auto_type cxx_defaulted_move_initializers cxx_defaulted_functions)
 
 # Link-Time Optimization
 check_ipo_supported(RESULT result)

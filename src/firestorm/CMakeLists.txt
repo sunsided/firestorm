@@ -29,7 +29,7 @@ target_link_libraries(firestorm
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html
 target_compile_features(firestorm
-        PUBLIC cxx_constexpr cxx_auto_type)
+        PUBLIC cxx_constexpr cxx_auto_type cxx_nullptr cxx_range_for cxx_static_assert)
 
 # Link-Time Optimization
 check_ipo_supported(RESULT result)
