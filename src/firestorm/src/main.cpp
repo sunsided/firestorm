@@ -123,7 +123,7 @@ void run_test_round(const shared_ptr<spdlog::logger> &log, const size_t repetiti
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
                    expected_best_score, expected_best_idx,
-                   duration_ms, local_vectors_per_second);
+                   local_duration_ms, local_vectors_per_second);
     }
 
     const size_t num_vectors = repetitions * NUM_VECTORS;
@@ -169,7 +169,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const size_t r
                    repetition + 1, repetitions,
                    best_match, best_match_idx,
                    expected_best_score, expected_best_idx,
-                   duration_ms, local_vectors_per_second);
+                   local_duration_ms, local_vectors_per_second);
     }
 
     const size_t num_vectors = repetitions * NUM_VECTORS;
