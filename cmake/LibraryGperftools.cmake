@@ -3,10 +3,9 @@ option(FSTM_WITH_TCMALLOC "Use tcmalloc from Google Performance Tools" ON)
 
 add_library(gperftools INTERFACE IMPORTED)
 if(FSTM_WITH_PROFILER OR FSTM_WITH_TCMALLOC)
-    set(FSTM_WITH_GPERFTOOLS ON)
     find_package(Gperftools 2.6)
-
     if(GPERFTOOLS_FOUND)
+        set(FSTM_WITH_GPERFTOOLS ON)
         set_property(TARGET gperftools PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${GPERFTOOLS_INCLUDE_DIR})
 
         # Profiler only
@@ -24,5 +23,11 @@ if(FSTM_WITH_PROFILER OR FSTM_WITH_TCMALLOC)
             message(STATUS "Firestorm: Build with Gperftools tcmalloc and profiler")
             set_property(TARGET gperftools PROPERTY INTERFACE_LINK_LIBRARIES ${GPERFTOOLS_TCMALLOC_AND_PROFILER})
         endif()
+    elseif(FSTM_WITH_TCMALLOC AND FSTM_WITH_PROFILER)
+        message(WARNING "Firestorm: Building with tfmalloc and profiler requested but Gperftools wasn't found.")
+    elseif(FSTM_WITH_TCMALLOC)
+        message(WARNING "Firestorm: Building with tfmalloc requested but Gperftools wasn't found.")
+    elseif(FSTM_WITH_PROFILER)
+        message(WARNING "Firestorm: Building with profiler requested but Gperftools wasn't found.")
     endif()
 endif()
