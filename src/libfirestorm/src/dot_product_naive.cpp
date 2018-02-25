@@ -8,7 +8,7 @@
 
 using namespace std;
 
-float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row, const size_t N) const noexcept {
+float dot_product_naive_t::operator()(const float *const __restrict__ a_row, const float *const __restrict__ b_row) const noexcept {
     auto total = 0.0f;
     for (size_t i = 0; i < N; ++i) {
         total += a_row[i] * b_row[i];

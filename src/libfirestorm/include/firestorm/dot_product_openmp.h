@@ -12,7 +12,11 @@
 float dot_product_openmp(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) noexcept;
 
 struct dot_product_openmp_t final : public dot_product_t {
-    float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept final {
+    explicit dot_product_openmp_t(const size_t N) noexcept
+            : dot_product_t(N)
+    {}
+
+    float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row) const noexcept final {
         return dot_product_openmp(a_row, b_row, N);
     }
 };

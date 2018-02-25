@@ -10,7 +10,15 @@
 const float FLOAT_ZERO_EPSILON = 1e-5f;
 
 struct dot_product_t {
-    virtual float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept = 0;
+public:
+    explicit dot_product_t(const size_t N) noexcept
+        : N(N)
+    {}
+
+    virtual float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row) const noexcept = 0;
+
+protected:
+    const size_t N;
 };
 
 #endif //FIRESTORM_DOT_PRODUCT_FUNCTOR_H

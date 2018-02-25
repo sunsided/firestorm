@@ -38,10 +38,10 @@ namespace {
 
     TEST_F(DotProduct, AVX256) {
         // arrange
-        dot_product_avx256_t dot {};
+        dot_product_avx256_t dot {vector_a.dimensions};
 
         // act
-        auto result = dot(vector_a.data, vector_b.data, vector_a.dimensions);
+        auto result = dot(vector_a.data, vector_b.data);
 
         // assert
         ASSERT_NEAR(result, this->result, 1e-5f);

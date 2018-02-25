@@ -79,7 +79,7 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const dot_produc
 
             // Calculate the dot product of the 2048-element vector
             static_assert((NUM_DIMENSIONS & 31) == 0, "Vector length must be a multiple of 32 elements.");
-            const auto dot_product = calculate(ref_vector, query_vector, NUM_DIMENSIONS);
+            const auto dot_product = calculate(ref_vector, query_vector);
 
             result[vector_idx] = dot_product;
 
@@ -157,7 +157,7 @@ void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t rep
                     const size_t expected_best_idx, float expected_best_score, size_t num_vectors) {
 
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
-    const T calculate {};
+    const T calculate {num_vectors};
 
     run_test_round(log, calculate, repetitions, result, chunkManager, query, chunk_size, expected_best_idx, expected_best_score, num_vectors);
 }
@@ -167,7 +167,7 @@ void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const siz
                            const vector_t& query,
                            const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
 
-    const DotProductVisitor<T> visitor {};
+    const DotProductVisitor<T> visitor {num_vectors};
     run_test_round_worker(log, visitor, repetitions, worker, query, expected_best_idx, expected_best_score, num_vectors);
 }
 

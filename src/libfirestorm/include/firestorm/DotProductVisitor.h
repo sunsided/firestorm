@@ -13,7 +13,10 @@ class DotProductVisitor final : public ChunkVisitor {
     static_assert(std::is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
 
 public:
-    DotProductVisitor() = default;
+    explicit DotProductVisitor(const size_t N) noexcept
+            : calculate{N}
+    {}
+
     virtual ~DotProductVisitor() = default;
 
     void visit(const mem_chunk_t& chunk, const vector_t& query, std::vector<float>& out_scores) const final {
@@ -26,12 +29,12 @@ public:
 
         for (size_t start_idx = 0, vector_idx = 0; start_idx < element_count; start_idx += N, ++vector_idx) {
             const auto ref_vector = &ref_data[start_idx];
-            out_scores[vector_idx] = calculate(ref_vector, query_vector, N);
+            out_scores[vector_idx] = calculate(ref_vector, query_vector);
         }
     };
 
 private:
-    const T calculate{};
+    const T calculate;
 };
 
 #endif //FIRESTORM_DOTPRODUCTVISITOR_H

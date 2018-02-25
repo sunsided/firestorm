@@ -12,7 +12,11 @@
 float dot_product_sse42(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) noexcept;
 
 struct dot_product_sse42_t final : public dot_product_t {
-    float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept final {
+    explicit dot_product_sse42_t(const size_t N) noexcept
+            : dot_product_t(N)
+    {}
+
+    float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row) const noexcept final {
         return dot_product_sse42(a_row, b_row, N);
     }
 };

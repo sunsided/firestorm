@@ -17,7 +17,11 @@ float vec_normalize_avx256(float* a_row, std::size_t N) noexcept;
 float dot_product_avx256(const float* __restrict__ a_row, const float* __restrict__ b_row, std::size_t N) noexcept;
 
 struct dot_product_avx256_t final : public dot_product_t {
-    inline float operator()(const float *const a_row, const float *const b_row, const std::size_t N) const noexcept final {
+    explicit dot_product_avx256_t(const size_t N) noexcept
+            : dot_product_t(N)
+    {}
+
+    inline float operator()(const float *const a_row, const float *const b_row) const noexcept final {
         return dot_product_avx256(a_row, b_row, N);
     }
 };
