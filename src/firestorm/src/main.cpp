@@ -15,8 +15,6 @@
 #include "options/options.h"
 #include "benchmark.h"
 
-void report_profiler(shared_ptr<spdlog::logger> &logger);
-
 using namespace std;
 namespace spd = spdlog;
 
