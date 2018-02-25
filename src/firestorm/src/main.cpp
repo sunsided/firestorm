@@ -51,7 +51,7 @@ unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verb
     }
 }
 
-void report_profiler(shared_ptr<spdlog::logger> &logger) {
+void report_profiler([[maybe_unused]] shared_ptr<spdlog::logger> &logger) {
 #if USE_PROFILER
     ProfilerState state{};
     ProfilerGetCurrentState(&state);
