@@ -260,7 +260,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
     log->info("- {}/{}", num_vectors, num_vectors);
     log->info("Vectors initialized"); // TODO: Add timing
 
-    const size_t repetitions = 20;
+    const size_t repetitions = 10;
 
 #if USE_AVX
 
