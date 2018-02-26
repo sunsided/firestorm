@@ -81,7 +81,7 @@ CPUPROFILE_FREQUENCY=1000
 ```
 
 This will create the file specified in the `CPUPROFILE` containing
-the sampling information.
+the sampling information. To display the profiling data, call
 
 ```bash
 pprof --web firestorm firestorm.prof
@@ -120,3 +120,4 @@ Read [here](http://valgrind.org/docs/manual/cg-manual.html) for further informat
 ## Reading material
 
 - [hardware_destructive_interference_size](http://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size)
+- [C++11 threads, affinity and hyperthreading](https://eli.thegreenplace.net/2016/c11-threads-affinity-and-hyperthreading/)

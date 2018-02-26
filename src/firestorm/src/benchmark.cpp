@@ -7,6 +7,10 @@
 #include <random>
 #include <algorithm>
 
+#if USE_PTHREADS
+#include <pthread.h>
+#endif
+
 #include <spdlog/spdlog.h>
 
 #include <firestorm/vector_t.h>
@@ -24,6 +28,18 @@ using namespace std;
 
 const auto MS_TO_S = 1000.0F;
 const size_t NUM_DIMENSIONS = 2048;
+
+void set_thread_affinity(const shared_ptr<spdlog::logger> &log, size_t t, thread& thread) {
+#if USE_PTHREADS
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(t, &cpuset);
+    const auto rc = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
+    if (rc != 0) {
+        log->error("Error setting thread affinity (pthread_setaffinity_np: {}).", rc);
+    }
+#endif
+}
 
 /// Builds a query vector to test against.
 /// \param NUM_DIMENSIONS The dimensionality of the test vector.
@@ -173,12 +189,11 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
     vector<map<size_t, shared_ptr<result_t>>> result_buffers;
 
     // Start all threads
-    for (const auto &worker_ptr : workers) {
-        const auto* worker = worker_ptr.get();
+    for (size_t t = 0; t < workers.size(); ++t) {
+        const auto* worker = workers.at(t).get();
         if (!worker->has_work()) continue;
         auto results = worker->create_result_buffer();
-
-        threads.emplace_back([&visitor, &query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker*const worker, map<size_t, shared_ptr<result_t>> results) {
+        auto fun = thread([&visitor, &query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker*const worker, map<size_t, shared_ptr<result_t>> results) {
             const auto& w = *worker;
             const auto& v = visitor;
             const auto& q = query;
@@ -199,6 +214,11 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
                            repetition + 1, repetitions, local_duration_ms, processed, local_vectors_per_second);
             }
         }, worker, results);
+
+        // Set CPU affinity
+        set_thread_affinity(log, t, fun);
+
+        threads.push_back(move(fun));
         result_buffers.push_back(std::move(results));
     }
 

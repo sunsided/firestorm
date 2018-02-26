@@ -21,6 +21,7 @@ include(LibraryGperftools)
 include(LibraryGTest)
 include(LibrarySpdlog)
 include(LibraryCLI11)
+include(LibraryThreads)
 
 # Options
 include(OptionLto)
