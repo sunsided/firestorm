@@ -18,6 +18,7 @@
 /// Runs algorithm benchmarks and prints out the results.
 /// \param log The logger to write to.
 /// \param num_vectors The number of vectors to test.
-void run_benchmark(const std::shared_ptr<spdlog::logger> &log, size_t num_vectors);
+/// \param target_chunk_size The chunk size to work with.
+void run_benchmark(const std::shared_ptr<spdlog::logger> &log, size_t num_vectors, size_t target_chunk_size = 32_MB);
 
 #endif //PROJECT_BENCHMARK_H

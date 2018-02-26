@@ -116,3 +116,7 @@ kcachegrind callgrind.out.18360
 ### Cache and branch prediction profiling
 
 Read [here](http://valgrind.org/docs/manual/cg-manual.html) for further information.
+
+## Reading material
+
+- [hardware_destructive_interference_size](http://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size)

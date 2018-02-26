@@ -98,8 +98,9 @@ int main(int argc, char **argv) {
 #if USE_AVX
     size_t num_vectors = 100000;
 #else
-    size_t num_vectors = 5000;
+    size_t num_vectors = 8192;
 #endif
+    size_t chunk_size_mb = 32;
 
     // Main options
     add_option(app, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
@@ -110,6 +111,9 @@ int main(int argc, char **argv) {
     benchmark->add_option("-n,--vectors", num_vectors, "Sets the number of vectors to test with.", true)
             ->group("Benchmark")
             ->envname("FSTM_NUM_VECTORS");
+    benchmark->add_option("-c,--chunk-size", chunk_size_mb, "Sets the vector chunk size in megabytes.", true)
+            ->group("Benchmark")
+            ->envname("FSTM_CHUNK_SIZE");
     add_option(*benchmark, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
             ->group("Logging")
             ->envname("FSTM_VERBOSITY");
@@ -127,9 +131,12 @@ int main(int argc, char **argv) {
     report_profiler(logger);
     report_optimizations(logger);
 
+    // TODO: Print "unknown" hardware concurrency if zero
+    logger->info("Hardware concurrency: {} threads.", thread::hardware_concurrency());
+
     if(benchmark->parsed()) {
         auto benchmarkLogger = loggerFactory->createLogger("benchmark", verbosity);
-        run_benchmark(benchmarkLogger, num_vectors);
+        run_benchmark(benchmarkLogger, num_vectors, chunk_size_mb * 1024UL * 1024UL);
     }
 
     return 0;

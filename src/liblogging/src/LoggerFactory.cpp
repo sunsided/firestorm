@@ -66,6 +66,7 @@ shared_ptr<spd::logger> LoggerFactory::createLogger(const std::string& logger_na
         auto sinks = impl->getSinks();
         auto logger = make_shared<spd::logger>(logger_name, begin(sinks), end(sinks));
         logger->set_level(logLevel);
+        logger->set_pattern("[%Y-%m-%d %T.%e] [%t] [%n] [%l] %v");
 
         // register by name
         spd::register_logger(logger);

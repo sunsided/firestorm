@@ -33,6 +33,14 @@ public:
             : assigned_chunks{}, accessor{std::move(accessor)}
     {}
 
+    /// Determines whether this worker has chunks assigned.
+    /// \return true if there are chunks registered for processing.
+    inline bool has_work() const { return num_chunks() > 0; }
+
+    /// Determines the number of assigned chunks.
+    /// \return The number of assigned chunks.
+    inline size_t num_chunks() const { return assigned_chunks.size(); }
+
     /// Assigns a chunk of the manager to this worker.
     /// \param chunk_idx The index of the chunk to process.
     void assign_chunk(chunk_idx_t chunk_idx) {
@@ -69,17 +77,23 @@ public:
     /// \param visitor The visitor to use.
     /// \param query The query vector to operate on.
     /// \param results The result buffer.
-    void accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
+    /// \return The number of vectors that were processed.
+    size_t accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
+        size_t vectors_processed = 0;
         for (const auto chunk : assigned_chunks) {
             const auto shared_chunk = accessor->get_ro(chunk);
             if (shared_chunk == nullptr) continue;
 
-            const auto& chunk_ptr = *shared_chunk;
-            assert(chunk_ptr.dimensions == query.dimensions);
+            const auto& chunk_ref = *shared_chunk;
+            assert(chunk_ref.dimensions == query.dimensions);
 
-            auto result = results[chunk_ptr.index];
-            visitor.visit(chunk_ptr, query, result->scores);
+            auto result = results[chunk_ref.index];
+            assert(result != nullptr);
+            visitor.visit(chunk_ref, query, result->scores);
+
+            vectors_processed += chunk_ref.vectors;
         }
+        return vectors_processed;
     }
 };
 
