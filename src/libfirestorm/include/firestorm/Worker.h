@@ -11,7 +11,7 @@
 #include <utility>
 #include <boost/optional.hpp>
 #include "mem_chunk_t.h"
-#include "ChunkVisitor.h"
+#include "ChunkMapper.h"
 #include "ChunkAccessor.h"
 #include "result_t.h"
 
@@ -77,26 +77,24 @@ public:
     /// \param query The query vector to operate on.
     /// \param results The result buffer.
     /// \return The number of vectors that were processed.
-    size_t accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
+    size_t accept(ChunkMapper& visitor, const vector_t& query) const {
+
         size_t vectors_processed = 0;
+        visitor.map_prepare();
+
         for (const auto chunk : assigned_chunks) {
             const auto shared_chunk = chunk.lock();
-            if (shared_chunk == nullptr) {
-                // TODO: At this point the result buffer contains an entry that has no actual results. We need to flag it as empty/invalid.
-                continue;
-            }
-
-            // TODO: We might also encounter chunks here that have no entry in the result buffer. We need to either extend the buffer if necessary or skip the new items (it'd be for one request).
+            if (shared_chunk == nullptr) continue;
 
             const auto& chunk_ref = *shared_chunk;
             assert(chunk_ref.dimensions == query.dimensions);
 
-            auto result = results[chunk_ref.index];
-            assert(result != nullptr);
-            visitor.visit(chunk_ref, query, result->scores);
-
+            visitor.map(chunk_ref, query);
             vectors_processed += chunk_ref.vectors;
         }
+
+        visitor.map_done();
+
         return vectors_processed;
     }
 };

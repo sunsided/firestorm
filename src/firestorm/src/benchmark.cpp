@@ -22,6 +22,8 @@
 #endif
 #include <firestorm/dot_product_openmp.h>
 #include <firestorm/dot_product_sse42.h>
+#include <firestorm/ChunkMapperFactory.h>
+#include <firestorm/DotProductMapperFactory.h>
 #include "benchmark.h"
 
 using namespace std;
@@ -130,20 +132,24 @@ void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t& 
               total_num_vectors, total_duration_ms, vectors_per_second);
 }
 
-void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVisitor& visitor, const size_t repetitions, const Worker &worker,
+void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkMapperFactory& factory, const size_t repetitions, const Worker &worker,
                            const vector_t& query,
                            const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
     auto total_duration_ms = static_cast<size_t>(0);
     auto total_num_vectors = static_cast<size_t>(0);
 
+    // TODO: Should be an interface
+    auto visitor = factory.create();
+    auto visitor_results = dynamic_cast<DotProductMapper_*>(visitor.get());
+
     for (size_t repetition = 0; repetition < repetitions; ++repetition) {
         auto start_time = chrono::_V2::system_clock::now();
-        auto results = worker.create_result_buffer();
 
         // Keep track of the total sum for validation.
         score_t best_match{};
 
-        const auto processed = worker.accept(visitor, query, results);
+        const auto processed = worker.accept(*visitor, query);
+        auto results = visitor_results->scores();
 
         auto end_time = chrono::_V2::system_clock::now();
         auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
@@ -152,13 +158,9 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         total_num_vectors += processed;
 
         // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
-        for (const auto &chunk_result : results) {
-            for (size_t vector_idx = 0; vector_idx < num_vectors; ++vector_idx) {
-                const auto score = chunk_result.second->scores[vector_idx];
-                assert(score.vector_idx() == vector_idx);
-                if (score > best_match || best_match.invalid()) {
-                    best_match = score;
-                }
+        for (const auto &score : results) {
+            if (score > best_match || best_match.invalid()) {
+                best_match = score;
             }
         }
 
@@ -175,7 +177,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
               total_num_vectors, total_duration_ms, vectors_per_second);
 }
 
-void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVisitor& visitor, const size_t repetitions,
+void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkMapperFactory& factory, const size_t repetitions,
                            const vector<unique_ptr<Worker>>& workers, const vector_t& query,
                            // TODO: Actually check the results!
                            [[ maybe_unused ]] const size_t expected_best_idx,
@@ -197,16 +199,19 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         if (!worker->has_work()) continue;
         ++actual_worker_count;
 
+        // NOTE: Will be destroyed upon leaving the loop
+        auto visitor = factory.create();
+
         auto results = worker->create_result_buffer();
-        auto fun = thread([&visitor, &query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker*const worker, map<size_t, shared_ptr<result_t>> results) {
+        auto fun = thread([&query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker*const worker, std::unique_ptr<ChunkMapper> visitor) {
             const auto& w = *worker;
-            const auto& v = visitor;
+            auto& v = *visitor;
             const auto& q = query;
 
             for (size_t repetition = 0; repetition < repetitions; ++repetition) {
                 auto start_time = chrono::_V2::system_clock::now();
 
-                const auto processed = w.accept(v, q, results);
+                const auto processed = w.accept(v, q);
 
                 auto end_time = chrono::_V2::system_clock::now();
                 auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
@@ -218,7 +223,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
                 log->debug("- Round {}/{} took {} ms for {} vectors ({} vectors/s)",
                            repetition + 1, repetitions, local_duration_ms, processed, local_vectors_per_second);
             }
-        }, worker, results);
+        }, worker, std::move(visitor));
 
         // Set CPU affinity
         // TODO: Explicitly setting CPU affinity might actually hurt performance if the core is loaded otherwise
@@ -258,8 +263,8 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const size_t r
                            const vector_t& query,
                            const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
 
-    const DotProductVisitor<T> visitor {};
-    run_test_round_worker(log, visitor, repetitions, worker, query, expected_best_idx, expected_best_score, num_vectors);
+    const DotProductMapperFactory<T> factory {};
+    run_test_round_worker(log, factory, repetitions, worker, query, expected_best_idx, expected_best_score, num_vectors);
 }
 
 template <typename T>
@@ -267,8 +272,8 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const size_t r
                            const vector<unique_ptr<Worker>>& workers, const vector_t& query,
                            const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
 
-    const DotProductVisitor<T> visitor {};
-    run_test_round_worker(log, visitor, repetitions, workers, query, expected_best_idx, expected_best_score, num_vectors);
+    const DotProductMapperFactory<T> factory {};
+    run_test_round_worker(log, factory, repetitions, workers, query, expected_best_idx, expected_best_score, num_vectors);
 }
 
 void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vectors, const size_t target_chunk_size, const boost::optional<size_t> num_workers) {

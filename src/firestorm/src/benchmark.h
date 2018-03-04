@@ -13,7 +13,7 @@
 #include <firestorm/dot_product_functor.h>
 #include <firestorm/vector_t.h>
 #include <firestorm/Worker.h>
-#include <firestorm/DotProductVisitor.h>
+#include <firestorm/DotProductMapper.h>
 
 /// Runs algorithm benchmarks and prints out the results.
 /// \param log The logger to write to.

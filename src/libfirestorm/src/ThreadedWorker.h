@@ -15,8 +15,8 @@
 
 class ThreadedWorker final {
 public:
-    explicit ThreadedWorker(std::unique_ptr<const Worker> worker) noexcept
-            : worker{std::move(worker)}, queue{}, thread{process}
+    explicit ThreadedWorker(std::unique_ptr<Worker> worker) noexcept
+            : worker{std::move(worker)}, queue{}, thread{[this] { process(); }}
     {
         // TODO: Bring up a worker thread
         // TODO: Configure the input queue
@@ -75,16 +75,17 @@ private:
 
     /// Processes a query vector.
     /// \param query The vector to process.
-    void query_vector(const std::shared_ptr<ChunkVisitor>& visitor, const std::shared_ptr<const vector_t>& query) {
+    void query_vector(const std::shared_ptr<ChunkMapper>& visitor, const std::shared_ptr<const vector_t>& query) {
         const auto& w = *worker;
         auto results = w.create_result_buffer();
-        w.accept(*visitor, *query, results);
+
+        w.accept(*visitor, *query);
 
         // TODO: What do we do with the results? Who creates the buffer?
     }
 
 private:
-    const std::unique_ptr<const Worker> worker;
+    const std::unique_ptr<Worker> worker;
     moodycamel::BlockingConcurrentQueue<worker_cmd_t> queue;
     std::thread thread;
 };

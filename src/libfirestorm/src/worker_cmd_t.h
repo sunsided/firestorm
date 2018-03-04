@@ -21,8 +21,12 @@ struct worker_cmd_t final {
             : type{command}, vector{nullptr}, visitor{nullptr}
     {}
 
-    explicit worker_cmd_t(std::shared_ptr<vector_t> vector, std::shared_ptr<ChunkVisitor> visitor) noexcept
+    explicit worker_cmd_t(std::shared_ptr<vector_t> vector, std::shared_ptr<ChunkMapper> visitor) noexcept
             : type{worker_cmd_enum_t::QUERY}, vector{std::move(vector)}, visitor{visitor}
+    {}
+
+    worker_cmd_t(const worker_cmd_t& other) noexcept
+            : type{other.type}, vector{other.vector}, visitor{other.visitor}
     {}
 
     worker_cmd_t(worker_cmd_t&& other) noexcept
@@ -31,14 +35,22 @@ struct worker_cmd_t final {
 
     ~worker_cmd_t() = default;
 
+    worker_cmd_t& operator=(const worker_cmd_t& other) noexcept
+    {
+        type = other.type;
+        vector = other.vector;
+        visitor = other.visitor;
+        return *this;
+    }
+
     /// The type of the command to execute.
-    const worker_cmd_enum_t type;
+    worker_cmd_enum_t type;
 
     /// A vector to execute commands on, if it exists.
-    const std::shared_ptr<vector_t> vector;
+    std::shared_ptr<vector_t> vector;
 
     /// The visitor to process the chunks with.
-    const std::shared_ptr<ChunkVisitor> visitor;
+    std::shared_ptr<ChunkMapper> visitor;
 };
 
 #endif //PROJECT_WORKER_CMD_ENUM_H

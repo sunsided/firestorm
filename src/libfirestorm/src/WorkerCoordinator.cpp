@@ -17,7 +17,7 @@ public:
     void addWorker() {
         // "emplace_back might leak if vector cannot extended"
         // https://stackoverflow.com/a/15784982/195651
-        workers.push_back(make_unique<ThreadedWorker>());
+        workers.push_back(make_unique<ThreadedWorker>(make_unique<Worker>()));
     }
 
     void assign_chunk(weak_ptr<const mem_chunk_t> chunk) {

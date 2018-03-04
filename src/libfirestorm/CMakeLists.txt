@@ -14,14 +14,14 @@ set(HEADER_FILES
         include/firestorm/chunk_idx_t.h
         include/firestorm/ChunkAccessor.h
         include/firestorm/ChunkManager.h
-        include/firestorm/ChunkVisitor.h
+        include/firestorm/ChunkMapper.h
         include/firestorm/context_t.h
         include/firestorm/dot_product_openmp.h
         include/firestorm/dot_product_avx256.h
         include/firestorm/dot_product_naive.h
         include/firestorm/dot_product_functor.h
         include/firestorm/dot_product_sse42.h
-        include/firestorm/DotProductVisitor.h
+        include/firestorm/DotProductMapper.h
         include/firestorm/index_t.h
         include/firestorm/mem_chunk_t.h
         include/firestorm/result_t.h
@@ -31,7 +31,7 @@ set(HEADER_FILES
         include/firestorm/vector_insert_t.h
         include/firestorm/vector_t.h
         include/firestorm/Worker.h
-        include/firestorm/WorkerCoordinator.h src/worker_cmd_t.h src/ThreadedWorker.h)
+        include/firestorm/WorkerCoordinator.h src/worker_cmd_t.h src/ThreadedWorker.h include/firestorm/ChunkMapperFactory.h include/firestorm/DotProductMapperFactory.h)
 
 # Define an executable
 add_library(libfirestorm

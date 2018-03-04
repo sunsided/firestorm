@@ -8,14 +8,10 @@ ExternalProject_Add(concurrentqueue_git
         GIT_PROGRESS On
         SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/concurrentqueue"
         BINARY_DIR "${CMAKE_BINARY_DIR}/external/concurrentqueue/build"
-        # CONFIGURE_COMMAND ""
+        CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
         TEST_COMMAND ""
-        CMAKE_ARGS
-            -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/concurrentqueue/build/out/
-        LOG_BUILD ON
         )
 
 # Specify the include directories
@@ -28,4 +24,4 @@ file(MAKE_DIRECTORY ${concurrentqueue_INCLUDE_DIRS})
 add_library(concurrentqueue INTERFACE IMPORTED)
 set_target_properties(concurrentqueue PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${concurrentqueue_INCLUDE_DIRS}")
-add_dependencies(spdlog concurrentqueue_git)
+add_dependencies(concurrentqueue concurrentqueue_git)
