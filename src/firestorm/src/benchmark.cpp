@@ -61,7 +61,7 @@ vector_t create_query_vector(const size_t NUM_DIMENSIONS) {
 }
 
 void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t& calculate, const size_t repetitions, float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size,
+                    const vector_t& query,
                     const size_t expected_best_idx, float expected_best_score, size_t num_vectors) {
 
     auto total_duration_ms = static_cast<size_t>(0);
@@ -245,13 +245,13 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
 
 template <typename T>
 void run_test_round(const shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result, const ChunkManager &chunkManager,
-                    const vector_t& query, const bytes_t chunk_size,
+                    const vector_t& query,
                     const size_t expected_best_idx, float expected_best_score, size_t num_vectors) {
 
     static_assert(is_convertible<T*, dot_product_t*>::value, "Derived type must inherit dot_product_t as public");
     const T calculate {};
 
-    run_test_round(log, calculate, repetitions, result, chunkManager, query, chunk_size, expected_best_idx, expected_best_score, num_vectors);
+    run_test_round(log, calculate, repetitions, result, chunkManager, query, expected_best_idx, expected_best_score, num_vectors);
 }
 
 template <typename T>
@@ -272,7 +272,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const size_t r
     run_test_round_worker(log, visitor, repetitions, workers, query, expected_best_idx, expected_best_score, num_vectors);
 }
 
-void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vectors, const size_t target_chunk_size) {
+void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vectors, const size_t target_chunk_size, const boost::optional<size_t> num_workers) {
     const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::normal_distribution<float> distribution(0.0f, 2.0f);
@@ -288,15 +288,15 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
 
     // A worker is a visitor that is performs a calculation on the chunks of a
     // registered manager.
-    unique_ptr<Worker> worker_st = make_unique<Worker>(chunkManager);
+    unique_ptr<Worker> worker_st = make_unique<Worker>();
 
     // Add multiple workers for multi-threaded testing
-    size_t concurrency = thread::hardware_concurrency();
+    size_t concurrency = num_workers ? num_workers.get() : thread::hardware_concurrency();
     if (concurrency == 0) concurrency = 8;
     log->info("Use concurrency of {} threads.", concurrency);
     vector<unique_ptr<Worker>> workers_mt;
     for (size_t t = 0; t < concurrency; ++t) {
-        workers_mt.push_back(make_unique<Worker>(chunkManager));
+        workers_mt.push_back(make_unique<Worker>());
     }
 
     // To simplify experiments, we require the block to exactly match our expectations
@@ -334,13 +334,13 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
             remaining_chunk_size = target_chunk_size;
             float_offset = 0;
 
-            worker_st->assign_chunk(chunk->index);
+            worker_st->assign_chunk(chunk);
 
             // Round-robin assign the chunks.
             // TODO: Note that chunks should be shifted "from the right" to maximize likelihood of consecutive memory locations.
             auto chunk_to_add = chunk->index;
             auto worker_idx = chunk_to_add % workers_mt.size();
-            workers_mt.at(worker_idx)->assign_chunk(chunk_to_add);
+            workers_mt.at(worker_idx)->assign_chunk(chunk);
         }
 
         // Some progress printing.
@@ -384,7 +384,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
 #if USE_AVX
 
     log->info("dot_product_avx256");
-    run_test_round<dot_product_avx256_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_avx256_t>(log, repetitions, result, *chunkManager, query,
                                          expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_avx256 (Worker)");
@@ -400,7 +400,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
 #if USE_OPENMP
 
     log->info("dot_product_openmp");
-    run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query,
                                          expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_openmp (Worker)");
@@ -416,7 +416,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
 #if USE_SSE == 4
 
     log->info("dot_product_sse42");
-    run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query,
                                         expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_sse42 (Worker)");
@@ -430,7 +430,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
 #endif
 
     log->info("dot_product_unrolled_8");
-    run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query,
                                              expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_unrolled_8 (Worker)");
@@ -442,7 +442,7 @@ void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vecto
                                                     expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_naive");
-    run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query, target_chunk_size,
+    run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query,
                                         expected_best_match_idx, expected_best_match, num_vectors);
 
     log->info("dot_product_naive (Worker)");
