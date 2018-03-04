@@ -7,8 +7,9 @@
 
 #include <deque>
 #include <map>
-#include <boost/optional.hpp>
+#include <memory>
 #include <utility>
+#include <boost/optional.hpp>
 #include "mem_chunk_t.h"
 #include "ChunkVisitor.h"
 #include "ChunkAccessor.h"
@@ -22,15 +23,13 @@ private:
     /// such that adding an item from a worker to the "right" at the back
     /// moves the first item (on the front) to a worker on the "left". This way,
     /// memory is quasi-sequential for each worker.
-    std::deque<chunk_idx_t > assigned_chunks;
-
-    const std::shared_ptr<const ChunkAccessor> accessor;
+    std::deque<std::weak_ptr<const mem_chunk_t>> assigned_chunks;
 
 public:
     /// Initializes an instance of the Worker class.
     /// \param accessor An accessor to a chunk manager.
-    explicit Worker(std::shared_ptr<const ChunkAccessor> accessor)
-            : assigned_chunks{}, accessor{std::move(accessor)}
+    explicit Worker()
+        : assigned_chunks{}
     {}
 
     /// Determines whether this worker has chunks assigned.
@@ -43,13 +42,13 @@ public:
 
     /// Assigns a chunk of the manager to this worker.
     /// \param chunk_idx The index of the chunk to process.
-    void assign_chunk(chunk_idx_t chunk_idx) {
-        assigned_chunks.push_back(chunk_idx);
+    void assign_chunk(std::weak_ptr<const mem_chunk_t> chunk) {
+        assigned_chunks.push_back(chunk);
     }
 
     /// Unassigns a chunk of the manager from this worker.
     /// \return The index of the chunk that was unassigned.
-    boost::optional<chunk_idx_t> unassign_chunk() {
+    boost::optional<std::weak_ptr<const mem_chunk_t>> unassign_chunk() {
         if (assigned_chunks.empty()) {
             return boost::none;
         }
@@ -63,8 +62,8 @@ public:
     /// \return The result buffer.
     std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
         std::map<size_t, std::shared_ptr<result_t>> results;
-        for(auto chunk_idx : assigned_chunks) {
-            auto shared_chunk = accessor->get_ro(chunk_idx);
+        for(auto chunk : assigned_chunks) {
+            auto shared_chunk = chunk.lock();
             if (shared_chunk == nullptr) continue;
 
             const auto& chunk_ptr = *shared_chunk;
@@ -81,8 +80,13 @@ public:
     size_t accept(const ChunkVisitor& visitor, const vector_t& query, std::map<size_t, std::shared_ptr<result_t>>& results) const {
         size_t vectors_processed = 0;
         for (const auto chunk : assigned_chunks) {
-            const auto shared_chunk = accessor->get_ro(chunk);
-            if (shared_chunk == nullptr) continue;
+            const auto shared_chunk = chunk.lock();
+            if (shared_chunk == nullptr) {
+                // TODO: At this point the result buffer contains an entry that has no actual results. We need to flag it as empty/invalid.
+                continue;
+            }
+
+            // TODO: We might also encounter chunks here that have no entry in the result buffer. We need to either extend the buffer if necessary or skip the new items (it'd be for one request).
 
             const auto& chunk_ref = *shared_chunk;
             assert(chunk_ref.dimensions == query.dimensions);

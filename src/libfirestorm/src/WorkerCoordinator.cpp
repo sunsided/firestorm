@@ -11,24 +11,22 @@ using namespace std;
 
 class WorkerCoordinator::Impl {
 public:
-    explicit Impl(shared_ptr<const ChunkAccessor> accessor) noexcept
-        : accessor{std::move(accessor)}
+    explicit Impl() noexcept
     {
     }
 
     void addWorker() {
         // "emplace_back might leak if vector cannot extended"
         // https://stackoverflow.com/a/15784982/195651
-        workers.push_back(make_unique<Worker>(accessor));
+        workers.push_back(make_unique<Worker>());
     }
 
 private:
-    const shared_ptr<const ChunkAccessor> accessor;
     vector<unique_ptr<Worker>> workers;
 };
 
-WorkerCoordinator::WorkerCoordinator(shared_ptr<const ChunkAccessor> accessor, size_t initialCount) noexcept
-    : impl{make_unique<Impl>(accessor)}
+WorkerCoordinator::WorkerCoordinator(size_t initialCount) noexcept
+    : impl{make_unique<Impl>()}
 {
     for (size_t i = 0; i < initialCount; ++i) {
         impl->addWorker();

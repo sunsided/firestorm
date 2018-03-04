@@ -6,11 +6,10 @@
 #define PROJECT_WORKERCOORDINATOR_H
 
 #include <memory>
-#include "ChunkAccessor.h"
 
 class WorkerCoordinator final {
 public:
-    explicit WorkerCoordinator(std::shared_ptr<const ChunkAccessor> accessor, size_t initialCount) noexcept;
+    explicit WorkerCoordinator(size_t initialCount) noexcept;
     ~WorkerCoordinator();
 
     WorkerCoordinator(WorkerCoordinator&&) noexcept;
