@@ -9,13 +9,15 @@
 
 class WorkerCoordinator final {
 public:
-    explicit WorkerCoordinator(size_t initialCount) noexcept;
+    explicit WorkerCoordinator(size_t workerCount) noexcept;
     ~WorkerCoordinator();
 
     WorkerCoordinator(WorkerCoordinator&&) noexcept;
     WorkerCoordinator& operator=(WorkerCoordinator&&) noexcept;
 
-    void assignChunk(std::weak_ptr<const mem_chunk_t> chunk) const;
+    /// Registers a memory chunk for processing.
+    /// \param chunk The chunk to register.
+    void assign_chunk(std::weak_ptr<const mem_chunk_t> chunk) const;
 
 private:
     class Impl;

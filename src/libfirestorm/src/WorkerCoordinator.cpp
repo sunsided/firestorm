@@ -2,43 +2,50 @@
 // Created by sunside on 04.03.18.
 //
 
-#include <utility>
+#include <thread>
 #include <vector>
 #include <firestorm/Worker.h>
 #include <firestorm/WorkerCoordinator.h>
+#include "ThreadedWorker.h"
 
 using namespace std;
 
 class WorkerCoordinator::Impl {
 public:
-    explicit Impl() noexcept
-        : assignment_idx(0)
-    {}
+    explicit Impl() noexcept = default;
 
     void addWorker() {
         // "emplace_back might leak if vector cannot extended"
         // https://stackoverflow.com/a/15784982/195651
-        workers.push_back(make_unique<Worker>());
-
-        // TODO: Bring up a worker thread
-        // TODO: Configure the input queue
-        // TODO: present results via promise/future
+        workers.push_back(make_unique<ThreadedWorker>());
     }
 
-    void assignChunk(weak_ptr<const mem_chunk_t> chunk) {
-        assignment_idx = (assignment_idx++) % workers.size();
-        workers.at(assignment_idx)->assign_chunk(std::move(chunk));
+    void assign_chunk(weak_ptr<const mem_chunk_t> chunk) {
+        assert(!workers.empty());
+
+        // TODO: We might want to enforce to have nearby chunk addresses in each worker so that pre-fetching might bring in the next chunk already
+        // TODO: We need to rebalance chunks if chunks get evicted by the manager.
+        ThreadedWorker* target = nullptr;
+        size_t count = 0;
+        for(auto& worker : workers) {
+            if (worker->num_chunks() <= count) continue;
+            target = worker.get();
+        }
+
+        assert(target != nullptr);
+        target->assign_chunk(chunk);
     }
 
 private:
-    size_t assignment_idx;
-    vector<unique_ptr<Worker>> workers;
+    vector<unique_ptr<ThreadedWorker>> workers;
 };
 
-WorkerCoordinator::WorkerCoordinator(size_t initialCount) noexcept
+WorkerCoordinator::WorkerCoordinator(size_t workerCount) noexcept
     : impl{make_unique<Impl>()}
 {
-    for (size_t i = 0; i < initialCount; ++i) {
+    // TODO: Throw if stupid
+    workerCount = workerCount > 0 ? workerCount : 1;
+    for (size_t i = 0; i < workerCount; ++i) {
         impl->addWorker();
     }
 }
@@ -47,6 +54,6 @@ WorkerCoordinator::~WorkerCoordinator() = default;
 WorkerCoordinator::WorkerCoordinator(WorkerCoordinator&&) noexcept = default;
 WorkerCoordinator& WorkerCoordinator::operator=(WorkerCoordinator&&) noexcept = default;
 
-void WorkerCoordinator::assignChunk(std::weak_ptr<const mem_chunk_t> chunk) const {
-    impl->assignChunk(std::move(chunk));
+void WorkerCoordinator::assign_chunk(std::weak_ptr<const mem_chunk_t> chunk) const {
+    impl->assign_chunk(std::move(chunk));
 }

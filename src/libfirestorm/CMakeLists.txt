@@ -31,7 +31,7 @@ set(HEADER_FILES
         include/firestorm/vector_insert_t.h
         include/firestorm/vector_t.h
         include/firestorm/Worker.h
-        include/firestorm/WorkerCoordinator.h)
+        include/firestorm/WorkerCoordinator.h src/worker_cmd_t.h src/ThreadedWorker.h)
 
 # Define an executable
 add_library(libfirestorm
@@ -50,6 +50,7 @@ target_include_directories(libfirestorm PUBLIC
 target_link_libraries(libfirestorm
         boost
         gperftools
+        concurrentqueue
         ${CMAKE_THREAD_LIBS_INIT})
 
 # Required compiler features
