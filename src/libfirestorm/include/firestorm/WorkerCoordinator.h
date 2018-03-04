@@ -15,6 +15,8 @@ public:
     WorkerCoordinator(WorkerCoordinator&&) noexcept;
     WorkerCoordinator& operator=(WorkerCoordinator&&) noexcept;
 
+    void assignChunk(std::weak_ptr<const mem_chunk_t> chunk) const;
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl;

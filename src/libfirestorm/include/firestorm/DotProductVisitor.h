@@ -16,7 +16,7 @@ public:
     DotProductVisitor() = default;
     virtual ~DotProductVisitor() = default;
 
-    void visit(const mem_chunk_t& chunk, const vector_t& query, std::vector<float>& out_scores) const final {
+    void visit(const mem_chunk_t& chunk, const vector_t& query, std::vector<score_t>& out_scores) const final {
         assert(chunk.dimensions == query.dimensions);
 
         const size_t N = query.dimensions;
@@ -26,7 +26,8 @@ public:
 
         for (size_t start_idx = 0, vector_idx = 0; start_idx < element_count; start_idx += N, ++vector_idx) {
             const auto ref_vector = &ref_data[start_idx];
-            out_scores[vector_idx] = calculate(ref_vector, query_vector, N);
+            const auto score = calculate(ref_vector, query_vector, N);
+            out_scores[vector_idx] = score_t(static_cast<vector_idx_t >(vector_idx), score);
         }
     };
 

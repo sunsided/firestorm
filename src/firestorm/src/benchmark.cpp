@@ -141,8 +141,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         auto results = worker.create_result_buffer();
 
         // Keep track of the total sum for validation.
-        auto best_match = 0.0f;
-        auto best_match_idx = static_cast<size_t>(0);
+        score_t best_match{};
 
         const auto processed = worker.accept(visitor, query, results);
 
@@ -153,12 +152,12 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         total_num_vectors += processed;
 
         // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
-        for (auto chunk_result : results) {
+        for (const auto &chunk_result : results) {
             for (size_t vector_idx = 0; vector_idx < num_vectors; ++vector_idx) {
                 const auto score = chunk_result.second->scores[vector_idx];
-                if (score > best_match) {
+                assert(score.vector_idx() == vector_idx);
+                if (score > best_match || best_match.invalid()) {
                     best_match = score;
-                    best_match_idx = vector_idx;
                 }
             }
         }
@@ -166,7 +165,7 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         auto local_vectors_per_second = static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
         log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms for {} vectors ({} vectors/s)",
                    repetition + 1, repetitions,
-                   best_match, best_match_idx,
+                   best_match.score(), best_match.vector_idx(),
                    expected_best_score, expected_best_idx,
                    local_duration_ms, processed, local_vectors_per_second);
     }

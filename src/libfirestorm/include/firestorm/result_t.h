@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "chunk_idx_t.h"
+#include "score_t.h"
 
 struct result_t {
     result_t(const chunk_idx_t chunk_idx, const size_t num_vectors) noexcept
@@ -19,7 +20,7 @@ struct result_t {
     { }
 
     const chunk_idx_t chunk;
-    std::vector<float> scores;
+    std::vector<score_t> scores;
 };
 
 #endif //FIRESTORM_RESULT_T_H
