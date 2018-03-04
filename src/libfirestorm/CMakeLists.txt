@@ -6,7 +6,8 @@ set(SOURCE_FILES
         src/dot_product_avx256.cpp
         src/dot_product_naive.cpp
         src/dot_product_openmp.cpp
-        src/dot_product_sse42.cpp)
+        src/dot_product_sse42.cpp
+        src/WorkerCoordinator.cpp)
 
 set(HEADER_FILES
         include/firestorm/bytes_t.h
@@ -28,7 +29,8 @@ set(HEADER_FILES
         include/firestorm/vector_idx_t.h
         include/firestorm/vector_insert_t.h
         include/firestorm/vector_t.h
-        include/firestorm/Worker.h)
+        include/firestorm/Worker.h
+        include/firestorm/WorkerCoordinator.h)
 
 # Define an executable
 add_library(libfirestorm
