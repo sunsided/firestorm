@@ -3,7 +3,7 @@
 //
 
 #include <cstddef>
-#include "firestorm/Simd.h"
+#include "firestorm/simd.h"
 #include "firestorm/dot_product_avx256.h"
 
 using namespace std;

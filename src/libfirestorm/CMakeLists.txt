@@ -25,7 +25,7 @@ set(HEADER_FILES
         include/firestorm/index_t.h
         include/firestorm/mem_chunk_t.h
         include/firestorm/result_t.h
-        include/firestorm/Simd.h
+        include/firestorm/simd.h
         include/firestorm/vector_idx_t.h
         include/firestorm/vector_insert_t.h
         include/firestorm/vector_t.h

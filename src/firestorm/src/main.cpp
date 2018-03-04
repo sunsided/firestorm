@@ -9,8 +9,8 @@
 #include <CLI/CLI.hpp>
 
 #include <logging/LoggerFactory.h>
-#include <firestorm/Simd.h>
-#include <firestorm/OpenMP.h>
+#include <firestorm/simd.h>
+#include <firestorm/openmp.h>
 
 #include "options/options.h"
 #include "benchmark.h"
