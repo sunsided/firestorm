@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
 #else
     size_t num_vectors = 8192;
 #endif
+    size_t num_workers = 0;
     size_t chunk_size_mb = 32;
 
     // Main options
@@ -114,6 +115,9 @@ int main(int argc, char **argv) {
     benchmark->add_option("-c,--chunk-size", chunk_size_mb, "Sets the vector chunk size in megabytes.", true)
             ->group("Benchmark")
             ->envname("FSTM_CHUNK_SIZE");
+    benchmark->add_option("-w,--workers", num_workers, "Sets the number of workers.", false)
+            ->group("Benchmark")
+            ->envname("FSTM_NUM_WORKERS");
     add_option(*benchmark, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
             ->group("Logging")
             ->envname("FSTM_VERBOSITY");
@@ -136,7 +140,10 @@ int main(int argc, char **argv) {
 
     if(benchmark->parsed()) {
         auto benchmarkLogger = loggerFactory->createLogger("benchmark", verbosity);
-        run_benchmark(benchmarkLogger, num_vectors, chunk_size_mb * 1024UL * 1024UL);
+        run_benchmark(benchmarkLogger,
+                      num_vectors,
+                      chunk_size_mb * 1024UL * 1024UL,
+                      num_workers > 0 ? num_workers : boost::optional<size_t>());
     }
 
     return 0;

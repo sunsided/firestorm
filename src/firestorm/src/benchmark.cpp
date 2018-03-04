@@ -178,7 +178,10 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
 
 void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVisitor& visitor, const size_t repetitions,
                            const vector<unique_ptr<Worker>>& workers, const vector_t& query,
-                           const size_t expected_best_idx, const float expected_best_score, const size_t num_vectors) {
+                           // TODO: Actually check the results!
+                           [[ maybe_unused ]] const size_t expected_best_idx,
+                           [[ maybe_unused ]] const float expected_best_score,
+                           [[ maybe_unused ]] const size_t num_vectors) {
     atomic<long> total_duration_ms {0L};
     atomic<size_t> total_num_vectors {0L};
 
@@ -187,11 +190,14 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
 
     vector<thread> threads;
     vector<map<size_t, shared_ptr<result_t>>> result_buffers;
+    auto actual_worker_count = 0;
 
     // Start all threads
     for (size_t t = 0; t < workers.size(); ++t) {
         const auto* worker = workers.at(t).get();
         if (!worker->has_work()) continue;
+        ++actual_worker_count;
+
         auto results = worker->create_result_buffer();
         auto fun = thread([&visitor, &query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker*const worker, map<size_t, shared_ptr<result_t>> results) {
             const auto& w = *worker;
@@ -216,7 +222,9 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         }, worker, results);
 
         // Set CPU affinity
-        set_thread_affinity(log, t, fun);
+        // TODO: Explicitly setting CPU affinity might actually hurt performance if the core is loaded otherwise
+        // TODO: L2 cache is shared between cores .. chunk sizes might affect performance of other cores?
+        // set_thread_affinity(log, t, fun);
 
         threads.push_back(move(fun));
         result_buffers.push_back(std::move(results));
@@ -228,9 +236,11 @@ void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkVis
         t.join();
     });
 
-    auto vectors_per_second = static_cast<float>(total_num_vectors) * MS_TO_S / static_cast<float>(total_duration_ms);
-    log->info("- Processed {} vectors in {} ms ({} vectors/s)",
-              total_num_vectors, total_duration_ms, vectors_per_second);
+    // Since N workers run in parallel, the actual duration is 1/Nth the sum of all individual durations.
+    auto total_duration_ms_adjusted = static_cast<float>(total_duration_ms) / actual_worker_count;
+    auto vectors_per_second = static_cast<float>(total_num_vectors) * MS_TO_S / total_duration_ms_adjusted;
+    log->info("- Processed {} vectors in {} ms ({} vectors/s, {} workers)",
+              total_num_vectors, total_duration_ms_adjusted, vectors_per_second, actual_worker_count);
 }
 
 template <typename T>

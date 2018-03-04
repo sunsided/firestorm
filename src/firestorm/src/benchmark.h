@@ -19,6 +19,7 @@
 /// \param log The logger to write to.
 /// \param num_vectors The number of vectors to test.
 /// \param target_chunk_size The chunk size to work with.
-void run_benchmark(const std::shared_ptr<spdlog::logger> &log, size_t num_vectors, size_t target_chunk_size = 32_MB);
+/// \param num_workers The number of concurrent workers to use. If unset, use native system concurrency.
+void run_benchmark(const std::shared_ptr<spdlog::logger> &log, size_t num_vectors, size_t target_chunk_size = 32_MB, boost::optional<size_t> num_workers = boost::none);
 
 #endif //PROJECT_BENCHMARK_H
