@@ -6,7 +6,7 @@
 #define PROJECT_WORKER_CMD_ENUM_H
 
 #include <memory>
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 namespace firestorm {
 

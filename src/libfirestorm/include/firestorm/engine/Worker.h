@@ -10,10 +10,10 @@
 #include <memory>
 #include <utility>
 #include <boost/optional.hpp>
-#include "mem_chunk_t.h"
-#include "ChunkMapper.h"
-#include "ChunkAccessor.h"
-#include "result_t.h"
+#include "firestorm/engine/types/mem_chunk_t.h"
+#include "firestorm/engine/map_reduce/ChunkMapper.h"
+#include "firestorm/engine/memory/ChunkAccessor.h"
+#include "firestorm/engine/types/result_t.h"
 
 namespace firestorm {
 

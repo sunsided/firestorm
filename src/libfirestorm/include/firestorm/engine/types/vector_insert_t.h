@@ -5,8 +5,8 @@
 #ifndef FIRESTORM_VECTOR_INSERT_T_H
 #define FIRESTORM_VECTOR_INSERT_T_H
 
-#include "mem_chunk_t.h"
-#include "context_t.h"
+#include "firestorm/engine/types/mem_chunk_t.h"
+#include "firestorm/engine/types/context_t.h"
 
 namespace firestorm {
 

@@ -3,38 +3,38 @@ project(libfirestorm VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/dot_product_avx256.cpp
-        src/dot_product_naive.cpp
-        src/dot_product_openmp.cpp
-        src/dot_product_sse42.cpp
+        src/ops/dot_product_avx256.cpp
+        src/ops/dot_product_naive.cpp
+        src/ops/dot_product_openmp.cpp
+        src/ops/dot_product_sse42.cpp
         src/WorkerCoordinator.cpp
         src/thread_support.cpp)
 
 set(HEADER_FILES
-        include/firestorm/engine/bytes_t.h
-        include/firestorm/engine/chunk_idx_t.h
-        include/firestorm/engine/ChunkAccessor.h
-        include/firestorm/engine/ChunkManager.h
-        include/firestorm/engine/ChunkMapper.h
-        include/firestorm/engine/context_t.h
-        include/firestorm/engine/dot_product_openmp.h
-        include/firestorm/engine/dot_product_avx256.h
-        include/firestorm/engine/dot_product_naive.h
-        include/firestorm/engine/dot_product_functor.h
-        include/firestorm/engine/dot_product_sse42.h
-        include/firestorm/engine/DotProductMapper.h
-        include/firestorm/engine/index_t.h
-        include/firestorm/engine/mem_chunk_t.h
-        include/firestorm/engine/result_t.h
-        include/firestorm/engine/score_t.h
+        include/firestorm/engine/types/bytes_t.h
+        include/firestorm/engine/types/chunk_idx_t.h
+        include/firestorm/engine/memory/ChunkAccessor.h
+        include/firestorm/engine/memory/ChunkManager.h
+        include/firestorm/engine/map_reduce/ChunkMapper.h
+        include/firestorm/engine/types/context_t.h
+        include/firestorm/engine/ops/dot_product_openmp.h
+        include/firestorm/engine/ops/dot_product_avx256.h
+        include/firestorm/engine/ops/dot_product_naive.h
+        include/firestorm/engine/ops/dot_product_functor.h
+        include/firestorm/engine/ops/dot_product_sse42.h
+        include/firestorm/engine/map_reduce/DotProductMapper.h
+        include/firestorm/engine/types/index_t.h
+        include/firestorm/engine/types/mem_chunk_t.h
+        include/firestorm/engine/types/result_t.h
+        include/firestorm/engine/types/score_t.h
         include/firestorm/engine/simd.h
-        include/firestorm/engine/vector_idx_t.h
-        include/firestorm/engine/vector_insert_t.h
-        include/firestorm/engine/vector_t.h
+        include/firestorm/engine/types/vector_idx_t.h
+        include/firestorm/engine/types/vector_insert_t.h
+        include/firestorm/engine/types/vector_t.h
         include/firestorm/engine/Worker.h
         include/firestorm/engine/WorkerCoordinator.h
-        include/firestorm/engine/ChunkMapperFactory.h
-        include/firestorm/engine/DotProductMapperFactory.h
+        include/firestorm/engine/map_reduce/ChunkMapperFactory.h
+        include/firestorm/engine/map_reduce/DotProductMapperFactory.h
         include/firestorm/engine/thread_support.h
         src/worker_cmd_t.h
         src/ThreadedWorker.h)

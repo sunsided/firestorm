@@ -10,7 +10,7 @@
 #include <thread>
 #include <blockingconcurrentqueue.h>
 #include <firestorm/engine/Worker.h>
-#include <firestorm/engine/mem_chunk_t.h>
+#include <firestorm/engine/types/mem_chunk_t.h>
 #include "worker_cmd_t.h"
 
 namespace firestorm {

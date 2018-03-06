@@ -7,9 +7,9 @@
 
 #include <any>
 #include <memory>
-#include "mem_chunk_t.h"
-#include "vector_t.h"
-#include "score_t.h"
+#include "firestorm/engine/types/mem_chunk_t.h"
+#include "firestorm/engine/types/vector_t.h"
+#include "firestorm/engine/types/score_t.h"
 
 namespace firestorm {
 

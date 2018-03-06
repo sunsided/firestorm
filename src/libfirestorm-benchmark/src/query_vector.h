@@ -5,7 +5,7 @@
 #ifndef PROJECT_QUERY_VECTOR_H
 #define PROJECT_QUERY_VECTOR_H
 
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 namespace firestorm {
 

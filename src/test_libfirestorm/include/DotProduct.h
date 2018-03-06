@@ -6,7 +6,7 @@
 #define PROJECT_DOTPRODUCT_H
 
 #include <gtest/gtest.h>
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 class DotProduct : public ::testing::Test
 {

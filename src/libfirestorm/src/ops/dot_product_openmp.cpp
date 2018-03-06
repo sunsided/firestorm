@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <cmath>
-#include "firestorm/engine/dot_product_naive.h"
+#include "firestorm/engine/ops/dot_product_naive.h"
 
 using namespace std;
 

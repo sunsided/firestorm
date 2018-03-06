@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 #include <tuple>
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 std::tuple<std::shared_ptr<firestorm::vector_t>, float> create_vector_norm_pair(float norm, size_t dimensions);
 

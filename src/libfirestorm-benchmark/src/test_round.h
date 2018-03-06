@@ -7,12 +7,12 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <firestorm/engine/dot_product_functor.h>
-#include <firestorm/engine/ChunkManager.h>
-#include <firestorm/engine/ChunkMapperFactory.h>
-#include <firestorm/engine/DotProductMapperFactory.h>
+#include <firestorm/engine/ops/dot_product_functor.h>
+#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/map_reduce/ChunkMapperFactory.h>
+#include <firestorm/engine/map_reduce/DotProductMapperFactory.h>
 #include <firestorm/engine/Worker.h>
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 namespace firestorm {
 

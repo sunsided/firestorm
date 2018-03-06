@@ -6,8 +6,8 @@
 #define FIRESTORM_MEM_CHUNK_H
 
 #include <boost/align/aligned_alloc.hpp>
-#include "bytes_t.h"
-#include "chunk_idx_t.h"
+#include "firestorm/engine/types/bytes_t.h"
+#include "firestorm/engine/types/chunk_idx_t.h"
 
 namespace firestorm {
 

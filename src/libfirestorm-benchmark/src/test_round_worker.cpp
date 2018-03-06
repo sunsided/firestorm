@@ -3,7 +3,7 @@
 //
 
 #include "test_round.h"
-#include <firestorm/engine/DotProductMapper.h>
+#include <firestorm/engine/map_reduce/DotProductMapper.h>
 
 using namespace std;
 

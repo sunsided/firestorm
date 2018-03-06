@@ -6,7 +6,7 @@
 #define FIRESTORM_RESULT_T_H
 
 #include <memory>
-#include "chunk_idx_t.h"
+#include "firestorm/engine/types/chunk_idx_t.h"
 #include "score_t.h"
 
 namespace firestorm {

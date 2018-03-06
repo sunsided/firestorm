@@ -6,7 +6,7 @@
 #define FIRESTORM_DOTPRODUCTVISITOR_H
 
 #include "ChunkMapper.h"
-#include "dot_product_functor.h"
+#include "firestorm/engine/ops/dot_product_functor.h"
 
 namespace firestorm {
 

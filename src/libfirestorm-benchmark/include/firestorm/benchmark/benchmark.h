@@ -9,11 +9,11 @@
 #include <chrono>
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <firestorm/engine/ChunkManager.h>
-#include <firestorm/engine/dot_product_functor.h>
-#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/ops/dot_product_functor.h>
+#include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/Worker.h>
-#include <firestorm/engine/DotProductMapper.h>
+#include <firestorm/engine/map_reduce/DotProductMapper.h>
 
 namespace firestorm {
 

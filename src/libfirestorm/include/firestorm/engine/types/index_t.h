@@ -5,7 +5,7 @@
 #ifndef FIRESTORM_INDEX_T_H
 #define FIRESTORM_INDEX_T_H
 
-#include "chunk_idx_t.h"
+#include "firestorm/engine/types/chunk_idx_t.h"
 #include "vector_idx_t.h"
 
 namespace firestorm {
