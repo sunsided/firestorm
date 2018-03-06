@@ -73,7 +73,7 @@ namespace firestorm {
 
         // Keep track of the results for validation.
         auto expected_best_match = 0.0f;
-        auto expected_best_match_idx = static_cast<size_t>(-1);
+        index_t expected_best_match_idx {0, 0};
 
         // Create a random query vector.
         vector_t query = create_query_vector(NUM_DIMENSIONS);
@@ -130,8 +130,9 @@ namespace firestorm {
             }
 
             if (expected[j] > expected_best_match) {
+                // TODO: Make this a score_t
                 expected_best_match = expected[j];
-                expected_best_match_idx = j;
+                expected_best_match_idx = {chunk->index, static_cast<vector_idx_t >(j)};
             }
         }
         log->info("- {}/{}", num_vectors, num_vectors);

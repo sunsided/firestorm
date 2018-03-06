@@ -10,15 +10,39 @@
 
 namespace firestorm {
 
-/// An index entry.
+    /// An index entry.
     struct index_t {
         constexpr index_t(const chunk_idx_t chunk, const vector_idx_t index)
-                : chunk(chunk), index(index) {}
+                : _chunk(chunk), _index(index)
+        {}
 
+        constexpr index_t(const index_t& other)
+                : _chunk(other._chunk), _index(other._index)
+        {}
+
+        constexpr index_t& operator=(const index_t& other)
+        {
+            _index = other._index;
+            _chunk = other._chunk;
+            return *this;
+        }
+
+        inline bool operator==(const index_t &b) const {
+            return _chunk == b._chunk && _index == b._index;
+        }
+
+        inline bool operator!=(const index_t &b) const {
+            return !(*this == b);
+        }
+
+        inline chunk_idx_t chunk() const { return _chunk; }
+        inline vector_idx_t vector_index() const { return _index; }
+
+    private:
         /// Identifies the chunk in the manager.
-        const chunk_idx_t chunk;
+        chunk_idx_t _chunk;
         /// Identifies the index in the chunk.
-        const vector_idx_t index;
+        vector_idx_t _index;
     };
 
 }

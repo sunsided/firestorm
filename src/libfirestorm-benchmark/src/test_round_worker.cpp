@@ -12,7 +12,7 @@ namespace firestorm {
     void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                const size_t repetitions, const Worker &worker,
                                const vector_t &query,
-                               const size_t expected_best_idx, const float expected_best_score,
+                               const index_t expected_best_idx, const float expected_best_score,
                                const size_t num_vectors) {
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
@@ -22,9 +22,6 @@ namespace firestorm {
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
-
-            // Keep track of the total sum for validation.
-            score_t best_match{};
 
             combiner.begin();
             const auto processed = worker.accept(*visitor, combiner, query);
@@ -37,6 +34,7 @@ namespace firestorm {
             total_num_vectors += processed;
 
             // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
+            score_t best_match{};
             for (const auto &score : results) {
                 if (score > best_match || best_match.invalid()) {
                     best_match = score;
@@ -45,10 +43,10 @@ namespace firestorm {
 
             auto local_vectors_per_second =
                     static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
-            log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms for {} vectors ({} vectors/s)",
+            log->debug("- Round {}/{} matched {} at {}.{} (expected {} at {}.{}); took {} ms for {} vectors ({} vectors/s)",
                        repetition + 1, repetitions,
-                       best_match.score(), best_match.vector_idx(),
-                       expected_best_score, expected_best_idx,
+                       best_match.score(), best_match.index().chunk(), best_match.index().vector_index(),
+                       expected_best_score, expected_best_idx.chunk(), expected_best_idx.vector_index(),
                        local_duration_ms, processed, local_vectors_per_second);
         }
 

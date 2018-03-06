@@ -15,7 +15,7 @@ namespace firestorm {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
     public:
-        std::unique_ptr<mapper_t> create() const final {
+        std::shared_ptr<mapper_t> create() const final {
             return std::make_unique<dot_product_mapper<Operation>>();
         }
     };

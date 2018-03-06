@@ -25,6 +25,7 @@ namespace firestorm {
             std::vector<score_t> out_scores {chunk.vectors};
 
             const size_t N = query.dimensions;
+            const auto chunk_idx = chunk.index;
             const auto query_vector = query.data;
             const auto ref_data = chunk.data;
             const size_t element_count =
@@ -34,7 +35,8 @@ namespace firestorm {
                 const auto ref_vector = &ref_data[start_idx];
                 const auto score = calculate(ref_vector, query_vector, N);
 
-                out_scores[vector_idx] = score_t(static_cast<vector_idx_t >(vector_idx), score);
+                index_t index {chunk_idx, static_cast<vector_idx_t>(vector_idx)};
+                out_scores[vector_idx] = score_t(index, score);
             }
 
             return out_scores;

@@ -5,6 +5,7 @@
 #ifndef FIRESTORM_CHUNKCOMBINER_H
 #define FIRESTORM_CHUNKCOMBINER_H
 
+#include <iterator>
 #include <any>
 #include <memory>
 #include "firestorm/engine/types/mem_chunk_t.h"

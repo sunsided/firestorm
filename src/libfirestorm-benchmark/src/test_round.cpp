@@ -13,7 +13,7 @@ namespace firestorm {
     void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, const size_t repetitions,
                         float *const result, const ChunkManager &chunkManager,
                         const vector_t &query,
-                        const size_t expected_best_idx, float expected_best_score, size_t num_vectors) {
+                        const index_t expected_best_idx, float expected_best_score, size_t num_vectors) {
 
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
@@ -23,7 +23,7 @@ namespace firestorm {
 
             // Keep track of the total sum for validation.
             auto best_match = 0.0f;
-            auto best_match_idx = static_cast<size_t>(0);
+            index_t best_match_idx {0, 0};
 
             chunk_idx_t current_chunk = 0;
             auto chunk = chunkManager.get_ro(current_chunk);
@@ -60,7 +60,7 @@ namespace firestorm {
 
                 if (dot_product > best_match) {
                     best_match = dot_product;
-                    best_match_idx = vector_idx;
+                    best_match_idx = {chunk->index, static_cast<vector_idx_t>(vector_idx)};
                 }
             }
 
@@ -70,10 +70,10 @@ namespace firestorm {
 
             auto local_vectors_per_second =
                     static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
-            log->debug("- Round {}/{} matched {} at {} (expected {} at {}); took {} ms ({} vectors/s)",
+            log->debug("- Round {}/{} matched {} at {}.{} (expected {} at {}.{}); took {} ms ({} vectors/s)",
                        repetition + 1, repetitions,
-                       best_match, best_match_idx,
-                       expected_best_score, expected_best_idx,
+                       best_match, best_match_idx.chunk(), best_match_idx.vector_index(),
+                       expected_best_score, expected_best_idx.chunk(), expected_best_idx.vector_index(),
                        local_duration_ms, local_vectors_per_second);
         }
 

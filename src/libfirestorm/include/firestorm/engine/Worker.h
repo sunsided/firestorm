@@ -60,20 +60,6 @@ namespace firestorm {
             return chunk;
         }
 
-        /// Creates a result buffer that is able to hold results for all vector mappings of this manager.
-        /// \return The result buffer.
-        std::map<size_t, std::shared_ptr<result_t>> create_result_buffer() const {
-            std::map<size_t, std::shared_ptr<result_t>> results;
-            for (auto chunk : assigned_chunks) {
-                auto shared_chunk = chunk.lock();
-                if (shared_chunk == nullptr) continue;
-
-                const auto &chunk_ptr = *shared_chunk;
-                results[chunk_ptr.index] = std::make_shared<result_t>(chunk_ptr.index, chunk_ptr.vectors);
-            }
-            return results;
-        }
-
         /// Applies the specified visitor with the given query vector to the registered chunks.
         /// \param visitor The visitor to use.
         /// \param reducer The reducer to use.

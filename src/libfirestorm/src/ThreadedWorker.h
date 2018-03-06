@@ -78,7 +78,6 @@ namespace firestorm {
         /// \param query The vector to process.
         void query_vector(const std::shared_ptr<mapper_t> &visitor, const std::shared_ptr<combiner_t> &reducer, const std::shared_ptr<const vector_t> &query) {
             const auto &w = *worker;
-            auto results = w.create_result_buffer();
 
             w.accept(*visitor, *reducer, *query);
 

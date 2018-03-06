@@ -8,7 +8,7 @@ set(SOURCE_FILES
         src/ops/dot_product_openmp.cpp
         src/ops/dot_product_sse42.cpp
         src/WorkerCoordinator.cpp
-        src/thread_support.cpp)
+        src/thread_support.cpp src/combiner/combiner_factory.cpp)
 
 set(HEADER_FILES
         include/firestorm/engine/types/bytes_t.h

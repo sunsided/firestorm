@@ -14,8 +14,8 @@ namespace firestorm {
 
     class keep_all_combiner_factory final : public combiner_factory {
     public:
-        std::unique_ptr<combiner_t> create() const final {
-            return std::make_unique<keep_all_combiner>();
+        std::shared_ptr<combiner_t> create() const final {
+            return std::make_shared<keep_all_combiner>();
         }
     };
 

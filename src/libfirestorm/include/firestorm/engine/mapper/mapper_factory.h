@@ -16,7 +16,7 @@ namespace firestorm {
     public:
         /// \brief Initializes a new instance of a mapper.
         /// \return The mapper.
-        virtual std::unique_ptr<mapper_t> create() const = 0;
+        virtual std::shared_ptr<mapper_t> create() const = 0;
     };
 
 }

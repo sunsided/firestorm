@@ -7,15 +7,15 @@
 
 #include <cmath>
 #include <memory>
-#include "vector_idx_t.h"
+#include "index_t.h"
 
 namespace firestorm {
 
     struct score_t {
         score_t() noexcept
-                : _vector_idx{0}, _score{std::nanf("")} {}
+                : _vector_idx{0, 0}, _score{std::nanf("")} {}
 
-        score_t(const vector_idx_t vector_idx, const float score) noexcept
+        score_t(const index_t vector_idx, const float score) noexcept
                 : _vector_idx{vector_idx}, _score{score} {}
 
         score_t(const score_t &other) noexcept
@@ -37,7 +37,7 @@ namespace firestorm {
 
         /// Gets the vector index.
         /// \return The vector index.
-        inline vector_idx_t vector_idx() const { return _vector_idx; }
+        inline index_t index() const { return _vector_idx; }
 
         /// Gets the result score.
         /// \return The score.
@@ -92,7 +92,7 @@ namespace firestorm {
         }
 
     private:
-        vector_idx_t _vector_idx;
+        index_t _vector_idx;
         float _score;
     };
 
