@@ -8,13 +8,16 @@
 #include <exception>
 #include <spdlog/spdlog.h>
 
-class LoggingException final: public std::runtime_error
-{
-public:
-    explicit LoggingException(const std::string& what)
-            : std::runtime_error(what)
-    {}
-    ~LoggingException() final = default;
-};
+namespace firestorm {
+
+    class LoggingException final : public std::runtime_error {
+    public:
+        explicit LoggingException(const std::string &what)
+                : std::runtime_error(what) {}
+
+        ~LoggingException() final = default;
+    };
+
+}
 
 #endif //PROJECT_LOGGINGEXCEPTION_H

@@ -9,6 +9,7 @@
 #include <DotProduct.h>
 
 using namespace std;
+using namespace firestorm;
 
 namespace {
 

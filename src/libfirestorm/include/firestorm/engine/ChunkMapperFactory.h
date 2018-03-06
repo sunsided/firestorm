@@ -8,9 +8,13 @@
 #include <memory>
 #include "ChunkMapper.h"
 
-class ChunkMapperFactory {
-public:
-    virtual std::unique_ptr<ChunkMapper> create() const = 0;
-};
+namespace firestorm {
+
+    class ChunkMapperFactory {
+    public:
+        virtual std::unique_ptr<ChunkMapper> create() const = 0;
+    };
+
+}
 
 #endif //PROJECT_CHUNKMAPPERFACTORY_H

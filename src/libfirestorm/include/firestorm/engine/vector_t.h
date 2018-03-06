@@ -8,46 +8,49 @@
 #include <boost/align/aligned_alloc.hpp>
 #include "bytes_t.h"
 
-/// A single vector.
-struct vector_t {
-    explicit vector_t(size_t dimensions) noexcept
-        : dimensions(dimensions) {
-        const bytes_t bytes = dimensions * sizeof(float);
-        data = reinterpret_cast<float*>(boost::alignment::aligned_alloc(byte_alignment, bytes));
-    }
+namespace firestorm {
 
-    // Copy construction is forbidden.
-    vector_t(const vector_t& other) = delete;
-
-    // Move constructor.
-    vector_t(vector_t&& other) noexcept
-        : dimensions(other.dimensions), data(other.data)
-    {
-        other.data = nullptr;
-    }
-
-    ~vector_t() {
-        if (data == nullptr) return;
-        boost::alignment::aligned_free(data);
-        data = nullptr;
-    }
-
-    /// Clears the content of the vector.
-    inline void zero_out() {
-        #pragma omp simd
-        for (size_t i = 0; i < dimensions; ++i) {
-            data[i] = 0;
+    /// A single vector.
+    struct vector_t {
+        explicit vector_t(size_t dimensions) noexcept
+                : dimensions(dimensions) {
+            const bytes_t bytes = dimensions * sizeof(float);
+            data = reinterpret_cast<float *>(boost::alignment::aligned_alloc(byte_alignment, bytes));
         }
-    }
 
-    /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
-    static const size_t byte_alignment = 32;
+        // Copy construction is forbidden.
+        vector_t(const vector_t &other) = delete;
 
-    /// The dimensionality of the query vector.
-    const size_t dimensions;
+        // Move constructor.
+        vector_t(vector_t &&other) noexcept
+                : dimensions(other.dimensions), data(other.data) {
+            other.data = nullptr;
+        }
 
-    /// The actual data buffer.
-    float* data;
-};
+        ~vector_t() {
+            if (data == nullptr) return;
+            boost::alignment::aligned_free(data);
+            data = nullptr;
+        }
+
+        /// Clears the content of the vector.
+        inline void zero_out() {
+            #pragma omp simd
+            for (size_t i = 0; i < dimensions; ++i) {
+                data[i] = 0;
+            }
+        }
+
+        /// Determines the alignment of the data field. Note that AVX requires 32 byte alignments.
+        static const size_t byte_alignment = 32;
+
+        /// The dimensionality of the query vector.
+        const size_t dimensions;
+
+        /// The actual data buffer.
+        float *data;
+    };
+
+}
 
 #endif //FIRESTORM_VECTORT_H

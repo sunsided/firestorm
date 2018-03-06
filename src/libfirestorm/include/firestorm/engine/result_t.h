@@ -9,18 +9,21 @@
 #include "chunk_idx_t.h"
 #include "score_t.h"
 
-struct result_t {
-    result_t(const chunk_idx_t chunk_idx, const size_t num_vectors) noexcept
-            : chunk(chunk_idx), scores(num_vectors) {}
+namespace firestorm {
 
-    result_t(const result_t& other) = delete;
+    struct result_t {
+        result_t(const chunk_idx_t chunk_idx, const size_t num_vectors) noexcept
+                : chunk(chunk_idx), scores(num_vectors) {}
 
-    result_t(result_t&& other) noexcept
-        : chunk(other.chunk), scores(std::move(other.scores))
-    { }
+        result_t(const result_t &other) = delete;
 
-    const chunk_idx_t chunk;
-    std::vector<score_t> scores;
-};
+        result_t(result_t &&other) noexcept
+                : chunk(other.chunk), scores(std::move(other.scores)) {}
+
+        const chunk_idx_t chunk;
+        std::vector<score_t> scores;
+    };
+
+}
 
 #endif //FIRESTORM_RESULT_T_H

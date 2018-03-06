@@ -9,71 +9,78 @@
 namespace spd = spdlog;
 using namespace std;
 
-class LoggerFactory::Impl {
-public:
-    Impl() = default;
-    ~Impl() = default;
+namespace firestorm {
 
-    void add_sink(const spd::sink_ptr& sink) {
-        sinks.push_back(sink);
+    class LoggerFactory::Impl {
+    public:
+        Impl() = default;
+
+        ~Impl() = default;
+
+        void add_sink(const spd::sink_ptr &sink) {
+            sinks.push_back(sink);
+        }
+
+        inline const vector<spd::sink_ptr> &getSinks() const { return sinks; }
+
+    private:
+        vector<spd::sink_ptr> sinks;
+    };
+
+    LoggerFactory::LoggerFactory()
+            : impl{make_unique<LoggerFactory::Impl>()} {
+
     }
 
-    inline const vector<spd::sink_ptr>& getSinks() const { return sinks; }
+    LoggerFactory::LoggerFactory(LoggerFactory &&) noexcept = default;
 
-private:
-    vector<spd::sink_ptr> sinks;
-};
+    LoggerFactory &LoggerFactory::operator=(LoggerFactory &&) noexcept = default;
 
-LoggerFactory::LoggerFactory()
-: impl{make_unique<LoggerFactory::Impl>()} {
-
-}
-
-LoggerFactory::LoggerFactory(LoggerFactory&&) noexcept = default;
-LoggerFactory& LoggerFactory::operator=(LoggerFactory&&) noexcept = default;
-
-LoggerFactory::~LoggerFactory() {
-    spd::drop_all();
-}
-
-LoggerFactory& LoggerFactory::setAsync() {
-    try {
-        size_t logger_q_size = 8192;
-        spd::set_async_mode(logger_q_size);
-        return *this;
+    LoggerFactory::~LoggerFactory() {
+        spd::drop_all();
     }
-    catch (...) {
-        std::throw_with_nested(LoggingException("Unable to configure asynchronous logging."));
-    }
-}
 
-LoggerFactory& LoggerFactory::addConsole(const spd::level::level_enum logLevel, const bool color) {
-    try {
-        auto stdout_sink = color
-            ? static_cast<spd::sink_ptr>(make_shared<spd::sinks::ansicolor_stdout_sink_mt>())
-            : static_cast<spd::sink_ptr>(make_shared<spdlog::sinks::stdout_sink_mt>());
-        stdout_sink->set_level(logLevel);
-        impl->add_sink(stdout_sink);
-        return *this;
+    LoggerFactory &LoggerFactory::setAsync() {
+        try {
+            size_t logger_q_size = 8192;
+            spd::set_async_mode(logger_q_size);
+            return *this;
+        }
+        catch (...) {
+            std::throw_with_nested(LoggingException("Unable to configure asynchronous logging."));
+        }
     }
-    catch (...) {
-        std::throw_with_nested(LoggingException("Unable to register console logging sink."));
-    }
-}
 
-shared_ptr<spd::logger> LoggerFactory::createLogger(const std::string& logger_name, const spd::level::level_enum logLevel) {
-    try {
-        auto sinks = impl->getSinks();
-        auto logger = make_shared<spd::logger>(logger_name, begin(sinks), end(sinks));
-        logger->set_level(logLevel);
-        logger->set_pattern("[%Y-%m-%d %T.%e] [%t] [%n] [%l] %v");
-
-        // register by name
-        spd::register_logger(logger);
-
-        return logger;
+    LoggerFactory &LoggerFactory::addConsole(const spd::level::level_enum logLevel, const bool color) {
+        try {
+            auto stdout_sink = color
+                               ? static_cast<spd::sink_ptr>(make_shared<spd::sinks::ansicolor_stdout_sink_mt>())
+                               : static_cast<spd::sink_ptr>(make_shared<spdlog::sinks::stdout_sink_mt>());
+            stdout_sink->set_level(logLevel);
+            impl->add_sink(stdout_sink);
+            return *this;
+        }
+        catch (...) {
+            std::throw_with_nested(LoggingException("Unable to register console logging sink."));
+        }
     }
-    catch (...) {
-        std::throw_with_nested(LoggingException("Unable to create logger \"" + logger_name + "\"."));
+
+    shared_ptr<spd::logger>
+    LoggerFactory::createLogger(const std::string &logger_name, const spd::level::level_enum logLevel) {
+        try {
+            auto sinks = impl->getSinks();
+            auto logger = make_shared<spd::logger>(logger_name, begin(sinks), end(sinks));
+            logger->set_level(logLevel);
+            logger->set_pattern("[%Y-%m-%d %T.%e] [%t] [%n] [%l] %v");
+
+            // register by name
+            spd::register_logger(logger);
+
+            return logger;
+        }
+        catch (...) {
+            std::throw_with_nested(LoggingException("Unable to create logger \"" + logger_name + "\"."));
+        }
     }
+
 }

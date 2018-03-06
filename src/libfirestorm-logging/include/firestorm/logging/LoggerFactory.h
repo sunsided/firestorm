@@ -8,35 +8,44 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
-/// Factory for loggers.
-class LoggerFactory {
-public:
-    LoggerFactory();
-    LoggerFactory(const LoggerFactory& other) = delete;
-    LoggerFactory(LoggerFactory&& other) noexcept;
-    ~LoggerFactory();
+namespace firestorm {
 
-    LoggerFactory& operator=(LoggerFactory&& other) noexcept;
+    /// Factory for loggers.
+    class LoggerFactory {
+    public:
+        LoggerFactory();
 
-    /// Sets the logging system to asynchronous mode.
-    /// \return A reference to this instance.
-    LoggerFactory& setAsync();
+        LoggerFactory(const LoggerFactory &other) = delete;
 
-    /// Adds a console logger.
-    /// \param color If true, enables ANSI color output.
-    /// \param logLevel The level at which to log.
-    /// \return A reference to this instance.
-    LoggerFactory& addConsole(spdlog::level::level_enum logLevel = spdlog::level::info, bool color = true);
+        LoggerFactory(LoggerFactory &&other) noexcept;
 
-    /// Creates a new logger.
-    /// \param logger_name The name of the logger.
-    /// \param logLevel The level at which to log.
-    /// \return The logger.
-    std::shared_ptr<spdlog::logger> createLogger(const std::string& logger_name, spdlog::level::level_enum logLevel = spdlog::level::info);
+        ~LoggerFactory();
 
-private:
-    class Impl;
-    std::unique_ptr<Impl> impl;
-};
+        LoggerFactory &operator=(LoggerFactory &&other) noexcept;
+
+        /// Sets the logging system to asynchronous mode.
+        /// \return A reference to this instance.
+        LoggerFactory &setAsync();
+
+        /// Adds a console logger.
+        /// \param color If true, enables ANSI color output.
+        /// \param logLevel The level at which to log.
+        /// \return A reference to this instance.
+        LoggerFactory &addConsole(spdlog::level::level_enum logLevel = spdlog::level::info, bool color = true);
+
+        /// Creates a new logger.
+        /// \param logger_name The name of the logger.
+        /// \param logLevel The level at which to log.
+        /// \return The logger.
+        std::shared_ptr<spdlog::logger>
+        createLogger(const std::string &logger_name, spdlog::level::level_enum logLevel = spdlog::level::info);
+
+    private:
+        class Impl;
+
+        std::unique_ptr<Impl> impl;
+    };
+
+}
 
 #endif //PROJECT_LOGGERFACTORY_H

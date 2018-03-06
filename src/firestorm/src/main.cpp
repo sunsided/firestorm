@@ -16,6 +16,7 @@
 #include "options/options.h"
 
 using namespace std;
+using namespace firestorm;
 namespace spd = spdlog;
 
 // TODO: Boost

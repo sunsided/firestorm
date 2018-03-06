@@ -11,8 +11,8 @@
 class DotProduct : public ::testing::Test
 {
 public:
-    vector_t vector_a;
-    vector_t vector_b;
+    firestorm::vector_t vector_a;
+    firestorm::vector_t vector_b;
     float result;
 
     DotProduct();

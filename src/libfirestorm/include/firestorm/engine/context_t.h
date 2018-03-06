@@ -5,8 +5,12 @@
 #ifndef FIRESTORM_CONTEXT_H
 #define FIRESTORM_CONTEXT_H
 
+namespace firestorm {
+
 /// Contextual information for a vector.
-struct context_t {
-};
+    struct context_t {
+    };
+
+}
 
 #endif //FIRESTORM_CONTEXT_H

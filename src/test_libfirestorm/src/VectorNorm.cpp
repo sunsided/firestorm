@@ -6,6 +6,7 @@
 #include "VectorNorm.h"
 
 using namespace std;
+using namespace firestorm;
 
 static const size_t NUM_DIMENSIONS = 64;
 
