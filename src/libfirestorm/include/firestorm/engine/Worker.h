@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 #include "firestorm/engine/types/mem_chunk_t.h"
 #include "firestorm/engine/map_reduce/ChunkMapper.h"
+#include "firestorm/engine/map_reduce/ChunkCombiner.h"
 #include "firestorm/engine/memory/ChunkAccessor.h"
 #include "firestorm/engine/types/result_t.h"
 
@@ -83,7 +84,7 @@ namespace firestorm {
 
             size_t vectors_processed = 0;
 
-            for (const auto chunk : assigned_chunks) {
+            for (const auto &chunk : assigned_chunks) {
                 const auto shared_chunk = chunk.lock();
                 if (shared_chunk == nullptr) continue;
 
@@ -91,7 +92,7 @@ namespace firestorm {
                 assert(chunk_ref.dimensions == query.dimensions);
 
                 auto result = visitor.map(chunk_ref, query);
-                reducer.combine(result);
+                reducer.combine(std::move(result));
 
                 // TODO: We can send the number of processed vectors along with the mapper results
                 vectors_processed += chunk_ref.vectors;

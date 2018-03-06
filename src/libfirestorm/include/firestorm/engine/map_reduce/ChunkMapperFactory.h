@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "ChunkMapper.h"
+#include "ChunkCombiner.h"
 
 namespace firestorm {
 

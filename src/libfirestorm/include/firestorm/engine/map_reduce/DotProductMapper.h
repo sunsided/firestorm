@@ -2,8 +2,8 @@
 // Created by Markus on 11.02.2018.
 //
 
-#ifndef FIRESTORM_DOTPRODUCTVISITOR_H
-#define FIRESTORM_DOTPRODUCTVISITOR_H
+#ifndef FIRESTORM_DOTPRODUCTMAPPER_H
+#define FIRESTORM_DOTPRODUCTMAPPER_H
 
 #include "ChunkMapper.h"
 #include "firestorm/engine/ops/dot_product_functor.h"
@@ -14,13 +14,11 @@ namespace firestorm {
     class DotProductMapper final : public ChunkMapper {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
-
     public:
         DotProductMapper() = default;
-
         ~DotProductMapper() final = default;
 
-        virtual std::any map(const mem_chunk_t &chunk, const vector_t &query) final {
+        std::any map(const mem_chunk_t &chunk, const vector_t &query) final {
             assert(chunk.dimensions == query.dimensions);
 
             std::vector<score_t> out_scores {chunk.vectors};
@@ -44,33 +42,6 @@ namespace firestorm {
     private:
         const Operation calculate{};
     };
-
-    class DotProductCombiner final : public ChunkCombiner {
-    public:
-        DotProductCombiner() = default;
-        ~DotProductCombiner() final = default;
-
-        virtual void begin() final {
-            scores.clear();
-        }
-
-        virtual void combine(const std::any& other) final {
-            // TODO: It might be allowed to destroy/consume the results here, because we're creating memory pressure otherwise
-            auto other_scores = std::any_cast<std::vector<score_t>>(other);
-
-            for (auto result : other_scores) {
-                scores.push_back(result);
-            }
-        }
-
-        virtual std::any finish() final {
-            return scores;
-        }
-
-    private:
-        std::vector<score_t> scores;
-    };
-
 }
 
-#endif //FIRESTORM_DOTPRODUCTVISITOR_H
+#endif //FIRESTORM_DOTPRODUCTMAPPER_H

@@ -7,6 +7,7 @@
 
 #include "ChunkMapperFactory.h"
 #include "DotProductMapper.h"
+#include "DotProductCombiner.h"
 
 namespace firestorm {
 
@@ -15,11 +16,11 @@ namespace firestorm {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
     public:
-        virtual std::unique_ptr<ChunkMapper> create_mapper() const final {
+        std::unique_ptr<ChunkMapper> create_mapper() const final {
             return std::make_unique<DotProductMapper<Operation>>();
         }
 
-        virtual std::unique_ptr<ChunkCombiner> create_combiner() const final {
+        std::unique_ptr<ChunkCombiner> create_combiner() const final {
             return std::make_unique<DotProductCombiner>();
         }
     };

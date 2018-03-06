@@ -2,8 +2,8 @@
 // Created by Markus on 27.05.2017.
 //
 
-#ifndef FIRESTORM_CHUNKVISITOR_H
-#define FIRESTORM_CHUNKVISITOR_H
+#ifndef FIRESTORM_CHUNKMAPPER_H
+#define FIRESTORM_CHUNKMAPPER_H
 
 #include <any>
 #include <memory>
@@ -13,6 +13,7 @@
 
 namespace firestorm {
 
+    /// A stateless class that performs chunk processing operations.
     class ChunkMapper {
     public:
         virtual ~ChunkMapper() = default;
@@ -23,24 +24,6 @@ namespace firestorm {
         virtual std::any map(const mem_chunk_t &chunk, const vector_t &query) = 0;
     };
 
-    /// A stateful class that performs result combination.
-    class ChunkCombiner {
-    public:
-        virtual ~ChunkCombiner() = default;
-
-        /// Initializes a combining operation.
-        virtual void begin() = 0;
-
-        /// Combines the results of two mappers.
-        /// \param other The other visitor to merge into the local results.
-        /// \return The combined result.
-        virtual void combine(const std::any& other) = 0;
-
-        /// Finalizes a combining operation.
-        /// \return The combined result.
-        virtual std::any finish() = 0;
-    };
-
 }
 
-#endif //FIRESTORM_CHUNKVISITOR_H
+#endif //FIRESTORM_CHUNKMAPPER_H
