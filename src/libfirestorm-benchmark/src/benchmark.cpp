@@ -24,7 +24,7 @@
 #include <firestorm/engine/dot_product_sse42.h>
 #include <firestorm/engine/ChunkMapperFactory.h>
 #include <firestorm/engine/DotProductMapperFactory.h>
-#include "../include/firestorm/benchmark/benchmark.h"
+#include "firestorm/benchmark/benchmark.h"
 
 using namespace std;
 

@@ -7,7 +7,9 @@
 #endif
 
 #include <CLI/CLI.hpp>
+#include <boost/optional.hpp>
 
+#include <firestorm/utils/exception.h>
 #include <firestorm/logging/LoggerFactory.h>
 #include <firestorm/engine/simd.h>
 #include <firestorm/engine/openmp.h>
@@ -22,15 +24,6 @@ namespace spd = spdlog;
 // TODO: Boost
 // TODO: Boost.SIMD
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
-
-void print_exception(const std::exception& e, int level = 0) {
-    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
-    try {
-        std::rethrow_if_nested(e);
-    } catch(const std::exception& e) {
-        print_exception(e, level+1);
-    } catch(...) {}
-}
 
 unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verbosity) {
     // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
