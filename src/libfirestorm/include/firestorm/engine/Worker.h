@@ -11,8 +11,8 @@
 #include <utility>
 #include <boost/optional.hpp>
 #include "firestorm/engine/types/mem_chunk_t.h"
-#include "firestorm/engine/map_reduce/ChunkMapper.h"
-#include "firestorm/engine/map_reduce/ChunkCombiner.h"
+#include "firestorm/engine/mapper/mapper_t.h"
+#include "firestorm/engine/combiner/combiner_t.h"
 #include "firestorm/engine/memory/ChunkAccessor.h"
 #include "firestorm/engine/types/result_t.h"
 
@@ -80,7 +80,7 @@ namespace firestorm {
         /// \param query The query vector to operate on.
         /// \param results The result buffer.
         /// \return The number of vectors that were processed.
-        size_t accept(ChunkMapper &visitor, ChunkCombiner &reducer, const vector_t &query) const {
+        size_t accept(mapper_t &visitor, combiner_t &reducer, const vector_t &query) const {
 
             size_t vectors_processed = 0;
 

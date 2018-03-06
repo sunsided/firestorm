@@ -13,7 +13,7 @@
 #include <firestorm/engine/ops/dot_product_functor.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/Worker.h>
-#include <firestorm/engine/map_reduce/DotProductMapper.h>
+#include <firestorm/engine/mapper/dot_product_mapper.h>
 
 namespace firestorm {
 

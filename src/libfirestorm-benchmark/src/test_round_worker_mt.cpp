@@ -4,12 +4,13 @@
 
 #include <atomic>
 #include "test_round.h"
+#include <firestorm/engine/combiner/keep_all_combiner.h>
 
 using namespace std;
 
 namespace firestorm {
 
-    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkMapperFactory &factory,
+    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                const size_t repetitions,
                                const vector<unique_ptr<Worker>> &workers, const vector_t &query,
                                // TODO: Actually check the results!
@@ -33,14 +34,14 @@ namespace firestorm {
             ++actual_worker_count;
 
             // NOTE: Will be destroyed upon leaving the loop
-            auto visitor = factory.create_mapper();
-            auto combiner = factory.create_combiner();
+            auto visitor = factory.create();
+            auto combiner = unique_ptr<combiner_t>(new keep_all_combiner());
 
             auto results = worker->create_result_buffer();
             auto fun = thread(
                     [&query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker *const worker,
-                                                                                        std::unique_ptr<ChunkMapper> visitor,
-                                                                                        std::unique_ptr<ChunkCombiner> combiner) {
+                                                                                        std::unique_ptr<mapper_t> visitor,
+                                                                                        std::unique_ptr<combiner_t> combiner) {
                         const auto &w = *worker;
                         auto &v = *visitor;
                         auto &c = *combiner;

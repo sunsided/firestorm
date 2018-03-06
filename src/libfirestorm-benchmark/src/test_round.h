@@ -9,8 +9,8 @@
 #include <spdlog/spdlog.h>
 #include <firestorm/engine/ops/dot_product_functor.h>
 #include <firestorm/engine/memory/ChunkManager.h>
-#include <firestorm/engine/map_reduce/ChunkMapperFactory.h>
-#include <firestorm/engine/map_reduce/DotProductMapperFactory.h>
+#include <firestorm/engine/mapper/mapper_factory.h>
+#include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/engine/Worker.h>
 #include <firestorm/engine/types/vector_t.h>
 
@@ -37,7 +37,7 @@ namespace firestorm {
                        num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const ChunkMapperFactory &factory,
+    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                size_t repetitions, const Worker &worker,
                                const vector_t &query,
                                size_t expected_best_idx, float expected_best_score,
@@ -49,12 +49,12 @@ namespace firestorm {
                                const size_t expected_best_idx, const float expected_best_score,
                                const size_t num_vectors) {
 
-        const DotProductMapperFactory<T> factory{};
+        const dot_product_mapper_factory<T> factory{};
         run_test_round_worker(log, factory, repetitions, worker, query, expected_best_idx, expected_best_score,
                               num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const ChunkMapperFactory &factory,
+    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                size_t repetitions,
                                const std::vector<std::unique_ptr<Worker>> &workers, const vector_t &query,
                                size_t expected_best_idx,
@@ -67,7 +67,7 @@ namespace firestorm {
                                const size_t expected_best_idx, const float expected_best_score,
                                const size_t num_vectors) {
 
-        const DotProductMapperFactory<T> factory{};
+        const dot_product_mapper_factory<T> factory{};
         run_test_round_worker(log, factory, repetitions, workers, query, expected_best_idx, expected_best_score,
                               num_vectors);
     }

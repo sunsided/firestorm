@@ -14,9 +14,9 @@
 namespace firestorm {
 
     /// A stateless class that performs chunk processing operations.
-    class ChunkMapper {
+    class mapper_t {
     public:
-        virtual ~ChunkMapper() = default;
+        virtual ~mapper_t() = default;
 
         /// Maps a chunk according to the logic of the visitor.
         /// \param chunk The chunk to map.

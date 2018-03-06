@@ -14,9 +14,9 @@
 namespace firestorm {
 
     /// A stateful class that performs result combination.
-    class ChunkCombiner {
+    class combiner_t {
     public:
-        virtual ~ChunkCombiner() = default;
+        virtual ~combiner_t() = default;
 
         /// Initializes a combining operation.
         virtual void begin() = 0;

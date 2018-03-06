@@ -19,8 +19,8 @@
 #endif
 #include <firestorm/engine/ops/dot_product_openmp.h>
 #include <firestorm/engine/ops/dot_product_sse42.h>
-#include <firestorm/engine/map_reduce/ChunkMapperFactory.h>
-#include <firestorm/engine/map_reduce/DotProductMapperFactory.h>
+#include <firestorm/engine/mapper/mapper_factory.h>
+#include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/benchmark/benchmark.h>
 #include "query_vector.h"
 #include "test_round.h"

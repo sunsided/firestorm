@@ -24,8 +24,8 @@ namespace firestorm {
         {}
 
         explicit worker_cmd_t(std::shared_ptr<vector_t> vector,
-                              std::shared_ptr<ChunkMapper> visitor,
-                              std::shared_ptr<ChunkCombiner> reducer) noexcept
+                              std::shared_ptr<mapper_t> visitor,
+                              std::shared_ptr<combiner_t> reducer) noexcept
                 : type{worker_cmd_enum_t::QUERY}, vector{std::move(vector)}, visitor{visitor}, reducer{reducer}
         {}
 
@@ -62,10 +62,10 @@ namespace firestorm {
         std::shared_ptr<vector_t> vector;
 
         /// The visitor to process the chunks with.
-        std::shared_ptr<ChunkMapper> visitor;
+        std::shared_ptr<mapper_t> visitor;
 
         /// The visitor to reduce the results with.
-        std::shared_ptr<ChunkCombiner> reducer;
+        std::shared_ptr<combiner_t> reducer;
     };
 
 }

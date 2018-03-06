@@ -3,13 +3,13 @@
 //
 
 #include "test_round.h"
-#include <firestorm/engine/map_reduce/DotProductMapper.h>
+#include <firestorm/engine/combiner/keep_all_combiner.h>
 
 using namespace std;
 
 namespace firestorm {
 
-    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const ChunkMapperFactory &factory,
+    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                const size_t repetitions, const Worker &worker,
                                const vector_t &query,
                                const size_t expected_best_idx, const float expected_best_score,
@@ -17,9 +17,8 @@ namespace firestorm {
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
 
-        // TODO: Should be an interface
-        auto visitor = factory.create_mapper();
-        auto combiner = factory.create_combiner();
+        auto visitor = factory.create();
+        keep_all_combiner combiner {};
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
@@ -27,9 +26,9 @@ namespace firestorm {
             // Keep track of the total sum for validation.
             score_t best_match{};
 
-            combiner->begin();
-            const auto processed = worker.accept(*visitor, *combiner, query);
-            auto results = any_cast<vector<score_t>>(combiner->finish());
+            combiner.begin();
+            const auto processed = worker.accept(*visitor, combiner, query);
+            auto results = any_cast<vector<score_t>>(combiner.finish());
 
             auto end_time = chrono::_V2::system_clock::now();
             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();

@@ -5,18 +5,18 @@
 #ifndef FIRESTORM_DOTPRODUCTMAPPER_H
 #define FIRESTORM_DOTPRODUCTMAPPER_H
 
-#include "ChunkMapper.h"
+#include "mapper_t.h"
 #include "firestorm/engine/ops/dot_product_functor.h"
 
 namespace firestorm {
 
     template<typename Operation>
-    class DotProductMapper final : public ChunkMapper {
+    class dot_product_mapper final : public mapper_t {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
     public:
-        DotProductMapper() = default;
-        ~DotProductMapper() final = default;
+        dot_product_mapper() = default;
+        ~dot_product_mapper() final = default;
 
         std::any map(const mem_chunk_t &chunk, const vector_t &query) final {
             assert(chunk.dimensions == query.dimensions);

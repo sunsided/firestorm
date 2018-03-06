@@ -6,14 +6,14 @@
 #define FIRESTORM_DOTPRODUCTCOMBINER_H
 
 #include <vector>
-#include "ChunkCombiner.h"
+#include "combiner_t.h"
 
 namespace firestorm {
 
-    class DotProductCombiner final : public ChunkCombiner {
+    class keep_all_combiner final : public combiner_t {
     public:
-        DotProductCombiner() = default;
-        ~DotProductCombiner() final = default;
+        keep_all_combiner() = default;
+        ~keep_all_combiner() final = default;
 
         void begin() final {
             scores.clear();

@@ -76,7 +76,7 @@ namespace firestorm {
 
         /// Processes a query vector.
         /// \param query The vector to process.
-        void query_vector(const std::shared_ptr<ChunkMapper> &visitor, const std::shared_ptr<ChunkCombiner> &reducer, const std::shared_ptr<const vector_t> &query) {
+        void query_vector(const std::shared_ptr<mapper_t> &visitor, const std::shared_ptr<combiner_t> &reducer, const std::shared_ptr<const vector_t> &query) {
             const auto &w = *worker;
             auto results = w.create_result_buffer();
 

@@ -15,14 +15,13 @@ set(HEADER_FILES
         include/firestorm/engine/types/chunk_idx_t.h
         include/firestorm/engine/memory/ChunkAccessor.h
         include/firestorm/engine/memory/ChunkManager.h
-        include/firestorm/engine/map_reduce/ChunkMapper.h
         include/firestorm/engine/types/context_t.h
         include/firestorm/engine/ops/dot_product_openmp.h
         include/firestorm/engine/ops/dot_product_avx256.h
         include/firestorm/engine/ops/dot_product_naive.h
         include/firestorm/engine/ops/dot_product_functor.h
         include/firestorm/engine/ops/dot_product_sse42.h
-        include/firestorm/engine/map_reduce/DotProductMapper.h
+        include/firestorm/engine/mapper/dot_product_mapper.h
         include/firestorm/engine/types/index_t.h
         include/firestorm/engine/types/mem_chunk_t.h
         include/firestorm/engine/types/result_t.h
@@ -33,8 +32,14 @@ set(HEADER_FILES
         include/firestorm/engine/types/vector_t.h
         include/firestorm/engine/Worker.h
         include/firestorm/engine/WorkerCoordinator.h
-        include/firestorm/engine/map_reduce/ChunkMapperFactory.h
-        include/firestorm/engine/map_reduce/DotProductMapperFactory.h
+        include/firestorm/engine/mapper/mapper_t.h
+        include/firestorm/engine/mapper/mapper_factory.h
+        include/firestorm/engine/mapper/dot_product_mapper.h
+        include/firestorm/engine/mapper/dot_product_mapper_factory.h
+        include/firestorm/engine/combiner/combiner_t.h
+        include/firestorm/engine/combiner/combiner_factory.h
+        include/firestorm/engine/combiner/keep_all_combiner.h
+        include/firestorm/engine/combiner/keep_all_combiner_factory.h
         include/firestorm/engine/thread_support.h
         src/worker_cmd_t.h
         src/ThreadedWorker.h)
