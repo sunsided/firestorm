@@ -11,8 +11,11 @@
 
 namespace firestorm {
 
+    /// \brief Factory that creates mappers.
     class mapper_factory {
     public:
+        /// \brief Initializes a new instance of a mapper.
+        /// \return The mapper.
         virtual std::unique_ptr<mapper_t> create() const = 0;
     };
 

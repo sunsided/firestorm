@@ -10,6 +10,7 @@
 
 namespace firestorm {
 
+    /// \brief A mapper that calculates the dot product of a query vector and every item in the chunk.
     template<typename Operation>
     class dot_product_mapper final : public mapper_t {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,

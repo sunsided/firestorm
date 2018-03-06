@@ -13,12 +13,12 @@
 
 namespace firestorm {
 
-    /// A stateless class that performs chunk processing operations.
+    /// \brief A stateless class that processes a specified chunk given a specified query vector.
     class mapper_t {
     public:
         virtual ~mapper_t() = default;
 
-        /// Maps a chunk according to the logic of the visitor.
+        /// \brief Maps a chunk according to the logic of the visitor.
         /// \param chunk The chunk to map.
         /// \param query The query vector to use.
         virtual std::any map(const mem_chunk_t &chunk, const vector_t &query) = 0;
