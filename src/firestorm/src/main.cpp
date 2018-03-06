@@ -11,9 +11,9 @@
 #include <logging/LoggerFactory.h>
 #include <firestorm/simd.h>
 #include <firestorm/openmp.h>
+#include <firestorm/benchmark/benchmark.h>
 
 #include "options/options.h"
-#include "benchmark.h"
 
 using namespace std;
 namespace spd = spdlog;

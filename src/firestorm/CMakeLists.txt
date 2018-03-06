@@ -4,10 +4,9 @@ project(firestorm VERSION 0.1 LANGUAGES C CXX)
 # Define library. Only source files here!
 set(SOURCE_FILES
         src/main.cpp
-        src/options/option_verbosity.cpp src/benchmark.cpp)
+        src/options/option_verbosity.cpp)
 
 set(HEADER_FILES
-        src/benchmark.h
         src/options/options.h
         src/options/options_verbosity.h)
 
@@ -33,6 +32,7 @@ target_link_libraries(firestorm
         gperftools
         cli11
         libfirestorm
+        libfirestorm-benchmark
         liblogging)
 
 # Required compiler features
