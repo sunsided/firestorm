@@ -3,13 +3,11 @@
 //
 
 #include <thread>
-#include <memory>
 #include <random>
 #include <algorithm>
 
 #include <spdlog/spdlog.h>
 
-#include <firestorm/engine/thread_support.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/Worker.h>
@@ -20,7 +18,6 @@
 #include <firestorm/engine/ops/dot_product_openmp.h>
 #include <firestorm/engine/ops/dot_product_sse42.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
-#include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/benchmark/benchmark.h>
 #include "query_vector.h"
 #include "test_round.h"
