@@ -1,6 +1,9 @@
 # TODO: https://rix0r.nl/blog/2015/08/13/cmake-guide/
 project(libfirestorm-utils VERSION 0.1 LANGUAGES C CXX)
 
+# Disable clang diagnostic pragma unknown in GCC warning.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+
 # Define library. Only source files here!
 set(SOURCE_FILES
         src/exception.cpp)

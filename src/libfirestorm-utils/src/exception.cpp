@@ -8,8 +8,8 @@ using namespace std;
 
 namespace firestorm {
 
-    #pragma clang diagnostic push
-    #pragma ide diagnostic ignored "InfiniteRecursion"
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "InfiniteRecursion"
 
     void print_exception(const std::exception &e, size_t level = 0) {
         cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
@@ -22,6 +22,6 @@ namespace firestorm {
         }
     }
 
-    #pragma clang diagnostic pop
+#pragma clang diagnostic pop
 
 }
