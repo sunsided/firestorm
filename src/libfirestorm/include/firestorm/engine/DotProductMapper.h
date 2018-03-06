@@ -10,11 +10,9 @@
 
 namespace firestorm {
 
-    class DotProductMapper_ : public ChunkMapper {
+    class DotProductMapperResults {
     public:
-        DotProductMapper_() = default;
-
-        virtual ~DotProductMapper_() = default;
+        virtual ~DotProductMapperResults() = default;
 
         /// Gets the accumulated scores.
         /// \return The scores.
@@ -22,7 +20,7 @@ namespace firestorm {
     };
 
     template<typename Operation>
-    class DotProductMapper final : public DotProductMapper_ {
+    class DotProductMapper final : public ChunkMapper, public DotProductMapperResults {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
 

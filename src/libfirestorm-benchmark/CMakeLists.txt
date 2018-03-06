@@ -3,10 +3,10 @@ project(libfirestorm-benchmark VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/benchmark.cpp)
+        src/benchmark.cpp src/query_vector.cpp src/test_round.cpp src/test_round_worker.cpp src/test_round_worker_mt.cpp)
 
 set(HEADER_FILES
-        include/firestorm/benchmark/benchmark.h)
+        include/firestorm/benchmark/benchmark.h src/query_vector.h src/test_round.h)
 
 # Define an executable
 add_library(libfirestorm-benchmark
