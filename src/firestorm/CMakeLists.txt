@@ -33,7 +33,7 @@ target_link_libraries(firestorm
         cli11
         libfirestorm
         libfirestorm-benchmark
-        liblogging)
+        libfirestorm-logging)
 
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html

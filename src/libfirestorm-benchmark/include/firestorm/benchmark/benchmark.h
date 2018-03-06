@@ -9,11 +9,11 @@
 #include <chrono>
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <firestorm/ChunkManager.h>
-#include <firestorm/dot_product_functor.h>
-#include <firestorm/vector_t.h>
-#include <firestorm/Worker.h>
-#include <firestorm/DotProductMapper.h>
+#include <firestorm/engine/ChunkManager.h>
+#include <firestorm/engine/dot_product_functor.h>
+#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/Worker.h>
+#include <firestorm/engine/DotProductMapper.h>
 
 /// Runs algorithm benchmarks and prints out the results.
 /// \param log The logger to write to.

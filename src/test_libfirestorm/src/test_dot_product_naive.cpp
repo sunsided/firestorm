@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include <firestorm/vector_t.h>
-#include <firestorm/dot_product_naive.h>
+#include <firestorm/engine/vector_t.h>
+#include <firestorm/engine/dot_product_naive.h>
 #include <VectorNorm.h>
 #include <DotProduct.h>
 

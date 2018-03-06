@@ -10,28 +10,32 @@ set(SOURCE_FILES
         src/WorkerCoordinator.cpp)
 
 set(HEADER_FILES
-        include/firestorm/bytes_t.h
-        include/firestorm/chunk_idx_t.h
-        include/firestorm/ChunkAccessor.h
-        include/firestorm/ChunkManager.h
-        include/firestorm/ChunkMapper.h
-        include/firestorm/context_t.h
-        include/firestorm/dot_product_openmp.h
-        include/firestorm/dot_product_avx256.h
-        include/firestorm/dot_product_naive.h
-        include/firestorm/dot_product_functor.h
-        include/firestorm/dot_product_sse42.h
-        include/firestorm/DotProductMapper.h
-        include/firestorm/index_t.h
-        include/firestorm/mem_chunk_t.h
-        include/firestorm/result_t.h
-        include/firestorm/score_t.h
-        include/firestorm/simd.h
-        include/firestorm/vector_idx_t.h
-        include/firestorm/vector_insert_t.h
-        include/firestorm/vector_t.h
-        include/firestorm/Worker.h
-        include/firestorm/WorkerCoordinator.h src/worker_cmd_t.h src/ThreadedWorker.h include/firestorm/ChunkMapperFactory.h include/firestorm/DotProductMapperFactory.h)
+        include/firestorm/engine/bytes_t.h
+        include/firestorm/engine/chunk_idx_t.h
+        include/firestorm/engine/ChunkAccessor.h
+        include/firestorm/engine/ChunkManager.h
+        include/firestorm/engine/ChunkMapper.h
+        include/firestorm/engine/context_t.h
+        include/firestorm/engine/dot_product_openmp.h
+        include/firestorm/engine/dot_product_avx256.h
+        include/firestorm/engine/dot_product_naive.h
+        include/firestorm/engine/dot_product_functor.h
+        include/firestorm/engine/dot_product_sse42.h
+        include/firestorm/engine/DotProductMapper.h
+        include/firestorm/engine/index_t.h
+        include/firestorm/engine/mem_chunk_t.h
+        include/firestorm/engine/result_t.h
+        include/firestorm/engine/score_t.h
+        include/firestorm/engine/simd.h
+        include/firestorm/engine/vector_idx_t.h
+        include/firestorm/engine/vector_insert_t.h
+        include/firestorm/engine/vector_t.h
+        include/firestorm/engine/Worker.h
+        include/firestorm/engine/WorkerCoordinator.h
+        include/firestorm/engine/ChunkMapperFactory.h
+        include/firestorm/engine/DotProductMapperFactory.h
+        src/worker_cmd_t.h
+        src/ThreadedWorker.h)
 
 # Define an executable
 add_library(libfirestorm
@@ -51,6 +55,7 @@ target_link_libraries(libfirestorm
         boost
         gperftools
         concurrentqueue
+        libfirestorm-logging
         ${CMAKE_THREAD_LIBS_INIT})
 
 # Required compiler features

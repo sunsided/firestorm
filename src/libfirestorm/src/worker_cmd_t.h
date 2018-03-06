@@ -6,7 +6,7 @@
 #define PROJECT_WORKER_CMD_ENUM_H
 
 #include <memory>
-#include <firestorm/vector_t.h>
+#include <firestorm/engine/vector_t.h>
 
 /// Describes a command to be executed by a threaded worker.
 enum worker_cmd_enum_t {
