@@ -7,7 +7,8 @@ set(SOURCE_FILES
         src/dot_product_naive.cpp
         src/dot_product_openmp.cpp
         src/dot_product_sse42.cpp
-        src/WorkerCoordinator.cpp)
+        src/WorkerCoordinator.cpp
+        src/thread_support.cpp)
 
 set(HEADER_FILES
         include/firestorm/engine/bytes_t.h
@@ -34,6 +35,7 @@ set(HEADER_FILES
         include/firestorm/engine/WorkerCoordinator.h
         include/firestorm/engine/ChunkMapperFactory.h
         include/firestorm/engine/DotProductMapperFactory.h
+        include/firestorm/engine/thread_support.h
         src/worker_cmd_t.h
         src/ThreadedWorker.h)
 

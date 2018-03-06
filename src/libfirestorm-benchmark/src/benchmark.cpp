@@ -7,12 +7,9 @@
 #include <random>
 #include <algorithm>
 
-#if USE_PTHREADS
-#include <pthread.h>
-#endif
-
 #include <spdlog/spdlog.h>
 
+#include <firestorm/engine/thread_support.h>
 #include <firestorm/engine/vector_t.h>
 #include <firestorm/engine/ChunkManager.h>
 #include <firestorm/engine/Worker.h>
@@ -33,21 +30,9 @@ namespace firestorm {
     const auto MS_TO_S = 1000.0F;
     const size_t NUM_DIMENSIONS = 2048;
 
-    void set_thread_affinity(const shared_ptr<spdlog::logger> &log, size_t t, thread &thread) {
-#if USE_PTHREADS
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        CPU_SET(t, &cpuset);
-        const auto rc = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
-        if (rc != 0) {
-            log->error("Error setting thread affinity (pthread_setaffinity_np: {}).", rc);
-        }
-#endif
-    }
-
-/// Builds a query vector to test against.
-/// \param NUM_DIMENSIONS The dimensionality of the test vector.
-/// \return
+    /// Builds a query vector to test against.
+    /// \param NUM_DIMENSIONS The dimensionality of the test vector.
+    /// \return
     vector_t create_query_vector(const size_t NUM_DIMENSIONS) {
         const auto seed = 0L;
         default_random_engine generator(seed);
