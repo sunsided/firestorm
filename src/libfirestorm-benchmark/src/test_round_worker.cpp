@@ -18,8 +18,8 @@ namespace firestorm {
         auto total_num_vectors = static_cast<size_t>(0);
 
         // TODO: Should be an interface
-        auto visitor = factory.create();
-        auto visitor_results = dynamic_cast<DotProductMapperResults*>(visitor.get());
+        auto visitor = factory.create_mapper();
+        auto combiner = factory.create_combiner();
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
@@ -27,8 +27,9 @@ namespace firestorm {
             // Keep track of the total sum for validation.
             score_t best_match{};
 
-            const auto processed = worker.accept(*visitor, query);
-            auto results = visitor_results->scores();
+            combiner->begin();
+            const auto processed = worker.accept(*visitor, *combiner, query);
+            auto results = any_cast<vector<score_t>>(combiner->finish());
 
             auto end_time = chrono::_V2::system_clock::now();
             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();

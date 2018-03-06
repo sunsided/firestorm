@@ -75,13 +75,13 @@ namespace firestorm {
 
         /// Applies the specified visitor with the given query vector to the registered chunks.
         /// \param visitor The visitor to use.
+        /// \param reducer The reducer to use.
         /// \param query The query vector to operate on.
         /// \param results The result buffer.
         /// \return The number of vectors that were processed.
-        size_t accept(ChunkMapper &visitor, const vector_t &query) const {
+        size_t accept(ChunkMapper &visitor, ChunkCombiner &reducer, const vector_t &query) const {
 
             size_t vectors_processed = 0;
-            visitor.map_prepare();
 
             for (const auto chunk : assigned_chunks) {
                 const auto shared_chunk = chunk.lock();
@@ -90,11 +90,12 @@ namespace firestorm {
                 const auto &chunk_ref = *shared_chunk;
                 assert(chunk_ref.dimensions == query.dimensions);
 
-                visitor.map(chunk_ref, query);
+                auto result = visitor.map(chunk_ref, query);
+                reducer.combine(result);
+
+                // TODO: We can send the number of processed vectors along with the mapper results
                 vectors_processed += chunk_ref.vectors;
             }
-
-            visitor.map_done();
 
             return vectors_processed;
         }

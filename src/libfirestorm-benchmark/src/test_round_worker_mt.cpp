@@ -27,26 +27,33 @@ namespace firestorm {
         auto actual_worker_count = 0;
 
         // Start all threads
-        for (size_t t = 0; t < workers.size(); ++t) {
-            const auto *worker = workers.at(t).get();
+        for (const auto &t : workers) {
+            const auto *worker = t.get();
             if (!worker->has_work()) continue;
             ++actual_worker_count;
 
             // NOTE: Will be destroyed upon leaving the loop
-            auto visitor = factory.create();
+            auto visitor = factory.create_mapper();
+            auto combiner = factory.create_combiner();
 
             auto results = worker->create_result_buffer();
             auto fun = thread(
                     [&query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker *const worker,
-                                                                                        std::unique_ptr<ChunkMapper> visitor) {
+                                                                                        std::unique_ptr<ChunkMapper> visitor,
+                                                                                        std::unique_ptr<ChunkCombiner> combiner) {
                         const auto &w = *worker;
                         auto &v = *visitor;
+                        auto &c = *combiner;
                         const auto &q = query;
 
                         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
                             auto start_time = chrono::_V2::system_clock::now();
 
-                            const auto processed = w.accept(v, q);
+                            c.begin();
+                            const auto processed = w.accept(v, c, q);
+
+                            // TODO: Collect results ... send somewhere
+                            c.finish();
 
                             auto end_time = chrono::_V2::system_clock::now();
                             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(
@@ -61,7 +68,7 @@ namespace firestorm {
                                        repetition + 1, repetitions, local_duration_ms, processed,
                                        local_vectors_per_second);
                         }
-                    }, worker, std::move(visitor));
+                    }, worker, std::move(visitor), std::move(combiner));
 
             // Set CPU affinity
             // TODO: Explicitly setting CPU affinity might actually hurt performance if the core is loaded otherwise

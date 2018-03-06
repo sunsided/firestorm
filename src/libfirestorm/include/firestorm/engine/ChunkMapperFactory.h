@@ -12,7 +12,8 @@ namespace firestorm {
 
     class ChunkMapperFactory {
     public:
-        virtual std::unique_ptr<ChunkMapper> create() const = 0;
+        virtual std::unique_ptr<ChunkMapper> create_mapper() const = 0;
+        virtual std::unique_ptr<ChunkCombiner> create_combiner() const = 0;
     };
 
 }

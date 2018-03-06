@@ -14,10 +14,13 @@ namespace firestorm {
     class DotProductMapperFactory final : public ChunkMapperFactory {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
-
     public:
-        virtual std::unique_ptr<ChunkMapper> create() const final {
+        virtual std::unique_ptr<ChunkMapper> create_mapper() const final {
             return std::make_unique<DotProductMapper<Operation>>();
+        }
+
+        virtual std::unique_ptr<ChunkCombiner> create_combiner() const final {
+            return std::make_unique<DotProductCombiner>();
         }
     };
 

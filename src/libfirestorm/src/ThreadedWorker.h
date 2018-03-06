@@ -69,18 +69,18 @@ namespace firestorm {
                     // TODO: could implement a liveness check to ensure no thread has crashed
                     return true;
                 case QUERY:
-                    query_vector(command.visitor, command.vector);
+                    query_vector(command.visitor, command.reducer, command.vector);
                     return true;
             }
         }
 
         /// Processes a query vector.
         /// \param query The vector to process.
-        void query_vector(const std::shared_ptr<ChunkMapper> &visitor, const std::shared_ptr<const vector_t> &query) {
+        void query_vector(const std::shared_ptr<ChunkMapper> &visitor, const std::shared_ptr<ChunkCombiner> &reducer, const std::shared_ptr<const vector_t> &query) {
             const auto &w = *worker;
             auto results = w.create_result_buffer();
 
-            w.accept(*visitor, *query);
+            w.accept(*visitor, *reducer, *query);
 
             // TODO: What do we do with the results? Who creates the buffer?
         }

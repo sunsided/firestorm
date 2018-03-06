@@ -10,17 +10,8 @@
 
 namespace firestorm {
 
-    class DotProductMapperResults {
-    public:
-        virtual ~DotProductMapperResults() = default;
-
-        /// Gets the accumulated scores.
-        /// \return The scores.
-        virtual std::vector<score_t> scores() const = 0;
-    };
-
     template<typename Operation>
-    class DotProductMapper final : public ChunkMapper, public DotProductMapperResults {
+    class DotProductMapper final : public ChunkMapper {
         static_assert(std::is_convertible<Operation *, dot_product_t *>::value,
                       "Derived type must inherit dot_product_t as public");
 
@@ -29,12 +20,10 @@ namespace firestorm {
 
         ~DotProductMapper() final = default;
 
-        void map_prepare() final {
-            out_scores.clear();
-        };
-
-        virtual void map(const mem_chunk_t &chunk, const vector_t &query) final {
+        virtual std::any map(const mem_chunk_t &chunk, const vector_t &query) final {
             assert(chunk.dimensions == query.dimensions);
+
+            std::vector<score_t> out_scores {chunk.vectors};
 
             const size_t N = query.dimensions;
             const auto query_vector = query.data;
@@ -46,29 +35,40 @@ namespace firestorm {
                 const auto ref_vector = &ref_data[start_idx];
                 const auto score = calculate(ref_vector, query_vector, N);
 
-                out_scores.emplace_back(static_cast<vector_idx_t >(vector_idx), score);
+                out_scores[vector_idx] = score_t(static_cast<vector_idx_t >(vector_idx), score);
             }
-        };
 
-        virtual void map_done() final {};
-
-        virtual void combine(const ChunkMapper &other) final {
-            // TODO implement result combination
-            auto other_dot = static_cast<const DotProductMapper &>(other);
-            for (auto result : other_dot.out_scores) {
-                out_scores.push_back(result);
-            }
-        }
-
-        /// Gets the accumulated scores.
-        /// \return The scores.
-        virtual std::vector<score_t> scores() const final {
             return out_scores;
-        }
+        };
 
     private:
         const Operation calculate{};
-        std::vector<score_t> out_scores;
+    };
+
+    class DotProductCombiner final : public ChunkCombiner {
+    public:
+        DotProductCombiner() = default;
+        ~DotProductCombiner() final = default;
+
+        virtual void begin() final {
+            scores.clear();
+        }
+
+        virtual void combine(const std::any& other) final {
+            // TODO: It might be allowed to destroy/consume the results here, because we're creating memory pressure otherwise
+            auto other_scores = std::any_cast<std::vector<score_t>>(other);
+
+            for (auto result : other_scores) {
+                scores.push_back(result);
+            }
+        }
+
+        virtual std::any finish() final {
+            return scores;
+        }
+
+    private:
+        std::vector<score_t> scores;
     };
 
 }
