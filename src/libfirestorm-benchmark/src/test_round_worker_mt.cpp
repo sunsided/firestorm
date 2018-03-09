@@ -14,8 +14,7 @@ namespace firestorm {
     void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                const size_t repetitions,
                                const vector<unique_ptr<Worker>> &workers, const vector_t &query,
-                               const index_t expected_best_idx,
-                               const float expected_best_score,
+                               const score_t expected_best_score,
                                [[maybe_unused]] const size_t num_vectors) {
         atomic<long> total_duration_ms{0L};
         atomic<size_t> total_num_vectors{0L};
@@ -96,7 +95,7 @@ namespace firestorm {
 
         log->debug("- Rounds matched {} at {}.{} (expected {} at {}.{}).",
                    best_match.score(), best_match.index().chunk(), best_match.index().vector_index(),
-                   expected_best_score, expected_best_idx.chunk(), expected_best_idx.vector_index());
+                   expected_best_score.score(), expected_best_score.index().chunk(), expected_best_score.index().vector_index());
 
         // Since N workers run in parallel, the actual duration is 1/Nth the sum of all individual durations.
         auto total_duration_ms_adjusted = static_cast<float>(total_duration_ms) / actual_worker_count;

@@ -14,7 +14,7 @@ namespace firestorm {
     void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, const size_t repetitions,
                         float *const result, const ChunkManager &chunkManager,
                         const vector_t &query,
-                        const index_t expected_best_idx, float expected_best_score, size_t num_vectors) {
+                        const score_t expected_best_score, size_t num_vectors) {
 
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
@@ -74,7 +74,7 @@ namespace firestorm {
             log->debug("- Round {}/{} matched {} at {}.{} (expected {} at {}.{}); took {} ms ({} vectors/s)",
                        repetition + 1, repetitions,
                        best_match, best_match_idx.chunk(), best_match_idx.vector_index(),
-                       expected_best_score, expected_best_idx.chunk(), expected_best_idx.vector_index(),
+                       expected_best_score.score(), expected_best_score.index().chunk(), expected_best_score.index().vector_index(),
                        local_duration_ms, local_vectors_per_second);
         }
 
@@ -83,5 +83,4 @@ namespace firestorm {
         log->info("- Processed {} vectors in {} ms ({} vectors/s)",
                   total_num_vectors, total_duration_ms, vectors_per_second);
     }
-
 }

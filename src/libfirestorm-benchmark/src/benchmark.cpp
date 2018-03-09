@@ -69,8 +69,7 @@ namespace firestorm {
         // TODO: Sort out elements by NaN for unused norms, e.g. https://stackoverflow.com/questions/31818755/comparison-with-nan-using-avx
 
         // Keep track of the results for validation.
-        auto expected_best_match = 0.0f;
-        index_t expected_best_match_idx {0, 0};
+        score_t expected_best_match {};
 
         // Create a random query vector.
         vector_t query = create_query_vector(BENCHMARK_NUM_DIMENSIONS);
@@ -126,10 +125,8 @@ namespace firestorm {
                 expected[j] += a[i] * b[i];
             }
 
-            if (expected[j] > expected_best_match) {
-                // TODO: Make this a score_t
-                expected_best_match = expected[j];
-                expected_best_match_idx = {chunk->index, static_cast<vector_idx_t >(j)};
+            if ((expected_best_match < expected[j]) || expected_best_match.invalid()) {
+                expected_best_match = {{chunk->index, static_cast<vector_idx_t >(j)}, expected[j]};
             }
         }
         log->info("- {}/{}", num_vectors, num_vectors);
@@ -141,15 +138,15 @@ namespace firestorm {
 
         log->info("dot_product_avx256");
         run_test_round<dot_product_avx256_t>(log, repetitions, result, *chunkManager, query,
-                                             expected_best_match_idx, expected_best_match, num_vectors);
+                                             expected_best_match, num_vectors);
 
         log->info("dot_product_avx256 (Worker)");
         run_test_round_worker<dot_product_avx256_t>(log, repetitions, *worker_st, query,
-                                                    expected_best_match_idx, expected_best_match, num_vectors);
+                                                    expected_best_match, num_vectors);
 
         log->info("dot_product_avx256 (MT workers)");
         run_test_round_worker<dot_product_avx256_t>(log, repetitions, workers_mt, query,
-                                                    expected_best_match_idx, expected_best_match, num_vectors);
+                                                    expected_best_match, num_vectors);
 
 #endif
 
@@ -157,15 +154,15 @@ namespace firestorm {
 
         log->info("dot_product_openmp");
         run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query,
-                                             expected_best_match_idx, expected_best_match, num_vectors);
+                                             expected_best_match, num_vectors);
 
         log->info("dot_product_openmp (Worker)");
         run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker_st, query,
-                                                    expected_best_match_idx, expected_best_match, num_vectors);
+                                                    expected_best_match, num_vectors);
 
         log->info("dot_product_openmp (MT workers)");
         run_test_round_worker<dot_product_openmp_t>(log, repetitions, workers_mt, query,
-                                                    expected_best_match_idx, expected_best_match, num_vectors);
+                                                    expected_best_match, num_vectors);
 
 #endif
 
@@ -173,40 +170,40 @@ namespace firestorm {
 
         log->info("dot_product_sse42");
         run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query,
-                                            expected_best_match_idx, expected_best_match, num_vectors);
+                                            expected_best_match, num_vectors);
 
         log->info("dot_product_sse42 (Worker)");
         run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker_st, query,
-                                                   expected_best_match_idx, expected_best_match, num_vectors);
+                                                   expected_best_match, num_vectors);
 
         log->info("dot_product_sse42 (MT workers)");
         run_test_round_worker<dot_product_sse42_t>(log, repetitions, workers_mt, query,
-                                                   expected_best_match_idx, expected_best_match, num_vectors);
+                                                   expected_best_match, num_vectors);
 
 #endif
 
         log->info("dot_product_unrolled_8");
         run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query,
-                                                 expected_best_match_idx, expected_best_match, num_vectors);
+                                                 expected_best_match, num_vectors);
 
         log->info("dot_product_unrolled_8 (Worker)");
         run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker_st, query,
-                                                        expected_best_match_idx, expected_best_match, num_vectors);
+                                                        expected_best_match, num_vectors);
 
         log->info("dot_product_unrolled_8 (MT workers)");
         run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, workers_mt, query,
-                                                        expected_best_match_idx, expected_best_match, num_vectors);
+                                                        expected_best_match, num_vectors);
 
         log->info("dot_product_naive");
         run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query,
-                                            expected_best_match_idx, expected_best_match, num_vectors);
+                                            expected_best_match, num_vectors);
 
         log->info("dot_product_naive (Worker)");
         run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker_st, query,
-                                                   expected_best_match_idx, expected_best_match, num_vectors);
+                                                   expected_best_match, num_vectors);
 
         log->info("dot_product_naive (MT workers)");
-        run_test_round_worker<dot_product_naive_t>(log, repetitions, workers_mt, query, expected_best_match_idx,
+        run_test_round_worker<dot_product_naive_t>(log, repetitions, workers_mt, query,
                                                    expected_best_match, num_vectors);
 
         log->info("Cleaning up ...");
