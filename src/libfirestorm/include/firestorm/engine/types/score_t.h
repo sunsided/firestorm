@@ -13,16 +13,16 @@ namespace firestorm {
 
     struct score_t {
         score_t() noexcept
-                : _vector_idx{0, 0}, _score{std::nanf("")} {}
+                : _index{0, 0}, _score{std::nanf("")} {}
 
-        score_t(const index_t vector_idx, const float score) noexcept
-                : _vector_idx{vector_idx}, _score{score} {}
+        score_t(const index_t index, const float score) noexcept
+                : _index{index}, _score{score} {}
 
         score_t(const score_t &other) noexcept
-                : _vector_idx{other._vector_idx}, _score{other._score} {}
+                : _index{other._index}, _score{other._score} {}
 
         score_t &operator=(const score_t &other) noexcept {
-            _vector_idx = other._vector_idx;
+            _index = other._index;
             _score = other._score;
             return *this;
         }
@@ -37,14 +37,14 @@ namespace firestorm {
 
         /// Gets the vector index.
         /// \return The vector index.
-        inline index_t index() const { return _vector_idx; }
+        inline index_t index() const { return _index; }
 
         /// Gets the result score.
         /// \return The score.
         inline float score() const { return _score; }
 
         inline bool operator==(const score_t &b) const {
-            return _vector_idx == b._vector_idx && _score == b._score;
+            return _index == b._index && _score == b._score;
         }
 
         inline bool operator!=(const score_t &b) const {
@@ -67,32 +67,33 @@ namespace firestorm {
             return *this <= b._score;
         }
 
-        inline bool operator==(const float &b) const {
+        // TODO: This lacks comparison from the other side, e.g. float > score_t
+        inline bool operator==(const float b) const {
             return _score == b;
         }
 
-        inline bool operator!=(const float &b) const {
+        inline bool operator!=(const float b) const {
             return _score != b;
         }
 
-        inline bool operator>(const float &b) const {
+        inline bool operator>(const float b) const {
             return _score > b;
         }
 
-        inline bool operator<(const float &b) const {
+        inline bool operator<(const float b) const {
             return _score < b;
         }
 
-        inline bool operator>=(const float &b) const {
+        inline bool operator>=(const float b) const {
             return _score >= b;
         }
 
-        inline bool operator<=(const float &b) const {
+        inline bool operator<=(const float b) const {
             return _score <= b;
         }
 
     private:
-        index_t _vector_idx;
+        index_t _index;
         float _score;
     };
 
