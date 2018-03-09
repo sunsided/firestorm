@@ -3,6 +3,7 @@
 //
 
 #include <chrono>
+#include <firestorm/utils/time_conversion.h>
 #include "test_round.h"
 
 using namespace spdlog;
@@ -50,11 +51,11 @@ namespace firestorm {
                 auto ref_vector = &chunk->data[float_offset];
 
                 --remaining_vectors_per_chunk;
-                float_offset += NUM_DIMENSIONS;
+                float_offset += BENCHMARK_NUM_DIMENSIONS;
 
                 // Calculate the dot product of the 2048-element vector
-                static_assert((NUM_DIMENSIONS & 31) == 0, "Vector length must be a multiple of 32 elements.");
-                const auto dot_product = calculate(ref_vector, query_vector, NUM_DIMENSIONS);
+                static_assert((BENCHMARK_NUM_DIMENSIONS & 31) == 0, "Vector length must be a multiple of 32 elements.");
+                const auto dot_product = calculate(ref_vector, query_vector, BENCHMARK_NUM_DIMENSIONS);
 
                 result[vector_idx] = dot_product;
 
@@ -69,7 +70,7 @@ namespace firestorm {
             total_duration_ms += local_duration_ms;
 
             auto local_vectors_per_second =
-                    static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
+                    static_cast<float>(num_vectors) / ms_to_s(static_cast<float>(local_duration_ms));
             log->debug("- Round {}/{} matched {} at {}.{} (expected {} at {}.{}); took {} ms ({} vectors/s)",
                        repetition + 1, repetitions,
                        best_match, best_match_idx.chunk(), best_match_idx.vector_index(),
@@ -78,7 +79,7 @@ namespace firestorm {
         }
 
         auto vectors_per_second =
-                static_cast<float>(total_num_vectors) * MS_TO_S / static_cast<float>(total_duration_ms);
+                static_cast<float>(total_num_vectors) / ms_to_s(static_cast<float>(total_duration_ms));
         log->info("- Processed {} vectors in {} ms ({} vectors/s)",
                   total_num_vectors, total_duration_ms, vectors_per_second);
     }

@@ -39,7 +39,7 @@ namespace firestorm {
 
         // We first create a chunk manager that will hold the vectors.
         shared_ptr<ChunkManager> chunkManager = make_shared<ChunkManager>();
-        const size_t num_vectors_per_chunk = target_chunk_size / (NUM_DIMENSIONS * sizeof(float));
+        const size_t num_vectors_per_chunk = target_chunk_size / (BENCHMARK_NUM_DIMENSIONS * sizeof(float));
 
         // A worker is a visitor that is performs a calculation on the chunks of a
         // registered manager.
@@ -56,7 +56,7 @@ namespace firestorm {
 
         // To simplify experiments, we require the block to exactly match our expectations
         // about vector lengths. Put differently, all bytes in the buffer can be used.
-        if ((target_chunk_size % (sizeof(float) * NUM_DIMENSIONS)) != 0) {
+        if ((target_chunk_size % (sizeof(float) * BENCHMARK_NUM_DIMENSIONS)) != 0) {
             log->error("Chunk size must be able to fully contain all vectors.");
             return;
         }
@@ -73,7 +73,7 @@ namespace firestorm {
         index_t expected_best_match_idx {0, 0};
 
         // Create a random query vector.
-        vector_t query = create_query_vector(NUM_DIMENSIONS);
+        vector_t query = create_query_vector(BENCHMARK_NUM_DIMENSIONS);
 
         // Create M vectors (1000, 10000, whatever).
         for (size_t j = 0; j < num_vectors; ++j) {
@@ -83,7 +83,7 @@ namespace firestorm {
             if (remaining_chunk_size == 0_B) {
                 log->debug("Allocating chunk.");
 
-                chunk = chunkManager->allocate(num_vectors_per_chunk, NUM_DIMENSIONS);
+                chunk = chunkManager->allocate(num_vectors_per_chunk, BENCHMARK_NUM_DIMENSIONS);
                 assert(chunk != nullptr);
 
                 remaining_chunk_size = target_chunk_size;
@@ -108,21 +108,21 @@ namespace firestorm {
 
             assert(a != nullptr);
             assert(b != nullptr);
-            assert(float_offset < num_vectors * NUM_DIMENSIONS);
-            assert(remaining_chunk_size >= sizeof(float) * NUM_DIMENSIONS);
+            assert(float_offset < num_vectors * BENCHMARK_NUM_DIMENSIONS);
+            assert(remaining_chunk_size >= sizeof(float) * BENCHMARK_NUM_DIMENSIONS);
 
-            remaining_chunk_size -= (sizeof(float) * NUM_DIMENSIONS);
-            float_offset += NUM_DIMENSIONS;
+            remaining_chunk_size -= (sizeof(float) * BENCHMARK_NUM_DIMENSIONS);
+            float_offset += BENCHMARK_NUM_DIMENSIONS;
 
             // Create a vector.
-            for (size_t i = 0; i < NUM_DIMENSIONS; ++i) {
+            for (size_t i = 0; i < BENCHMARK_NUM_DIMENSIONS; ++i) {
                 a[i] = random();
             }
             vec_normalize_naive(a, chunk->dimensions);
 
             // Obtain the expected result.
             expected[j] = 0;
-            for (size_t i = 0; i < NUM_DIMENSIONS; ++i) {
+            for (size_t i = 0; i < BENCHMARK_NUM_DIMENSIONS; ++i) {
                 expected[j] += a[i] * b[i];
             }
 

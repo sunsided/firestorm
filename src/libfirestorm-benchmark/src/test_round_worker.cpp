@@ -3,6 +3,7 @@
 //
 
 #include "test_round.h"
+#include <firestorm/utils/time_conversion.h>
 #include <firestorm/engine/combiner/keep_all_combiner.h>
 
 using namespace std;
@@ -42,7 +43,7 @@ namespace firestorm {
             }
 
             auto local_vectors_per_second =
-                    static_cast<float>(num_vectors) * MS_TO_S / static_cast<float>(local_duration_ms);
+                    static_cast<float>(num_vectors) / ms_to_s(static_cast<float>(local_duration_ms));
             log->debug("- Round {}/{} matched {} at {}.{} (expected {} at {}.{}); took {} ms for {} vectors ({} vectors/s)",
                        repetition + 1, repetitions,
                        best_match.score(), best_match.index().chunk(), best_match.index().vector_index(),
@@ -51,7 +52,7 @@ namespace firestorm {
         }
 
         auto vectors_per_second =
-                static_cast<float>(total_num_vectors) * MS_TO_S / static_cast<float>(total_duration_ms);
+                static_cast<float>(total_num_vectors) / ms_to_s(static_cast<float>(total_duration_ms));
         log->info("- Processed {} vectors in {} ms ({} vectors/s)",
                   total_num_vectors, total_duration_ms, vectors_per_second);
     }

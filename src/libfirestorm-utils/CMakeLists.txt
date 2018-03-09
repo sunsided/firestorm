@@ -9,7 +9,7 @@ set(SOURCE_FILES
         src/exception.cpp)
 
 set(HEADER_FILES
-        include/firestorm/utils/exception.h)
+        include/firestorm/utils/exception.h include/firestorm/utils/time_conversion.h)
 
 # Define an executable
 add_library(libfirestorm-utils

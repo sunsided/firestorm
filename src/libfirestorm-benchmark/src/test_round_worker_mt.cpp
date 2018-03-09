@@ -3,8 +3,9 @@
 //
 
 #include <atomic>
-#include "test_round.h"
+#include <firestorm/utils/time_conversion.h>
 #include <firestorm/engine/combiner/keep_all_combiner_factory.h>
+#include "test_round.h"
 
 using namespace std;
 
@@ -61,7 +62,7 @@ namespace firestorm {
                             total_duration_ms += local_duration_ms;
                             total_num_vectors += processed;
 
-                            auto local_vectors_per_second = static_cast<float>(processed) * MS_TO_S / static_cast<float>(local_duration_ms);
+                            auto local_vectors_per_second = static_cast<float>(processed) / ms_to_s(static_cast<float>(local_duration_ms));
                             log->debug("- Round {}/{} took {} ms for {} vectors ({} vectors/s)",
                                        repetition + 1, repetitions, local_duration_ms, processed,
                                        local_vectors_per_second);
@@ -99,7 +100,7 @@ namespace firestorm {
 
         // Since N workers run in parallel, the actual duration is 1/Nth the sum of all individual durations.
         auto total_duration_ms_adjusted = static_cast<float>(total_duration_ms) / actual_worker_count;
-        auto vectors_per_second = static_cast<float>(total_num_vectors) * MS_TO_S / total_duration_ms_adjusted;
+        auto vectors_per_second = static_cast<float>(total_num_vectors) / ms_to_s(total_duration_ms_adjusted);
         log->info("- Processed {} vectors in {} ms ({} vectors/s, {} workers)",
                   total_num_vectors, total_duration_ms_adjusted, vectors_per_second, actual_worker_count);
     }

@@ -17,8 +17,7 @@
 
 namespace firestorm {
 
-    const auto MS_TO_S = 1000.0F;
-    const size_t NUM_DIMENSIONS = 2048;
+    const size_t BENCHMARK_NUM_DIMENSIONS = 2048;
 
     void run_test_round(const std::shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, size_t repetitions,
                         float* result, const ChunkManager &chunkManager,
