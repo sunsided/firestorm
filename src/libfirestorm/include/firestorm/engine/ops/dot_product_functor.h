@@ -6,14 +6,14 @@
 #define FIRESTORM_DOT_PRODUCT_FUNCTOR_H
 
 #include <cstddef>
+#include <firestorm/engine/types/score_value_t.h>
 
 namespace firestorm {
 
     const float FLOAT_ZERO_EPSILON = 1e-5f;
 
     struct dot_product_t {
-        virtual float
-        operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept = 0;
+        virtual float operator()(const float *__restrict__ a_row, const float *__restrict__ b_row, std::size_t N) const noexcept = 0;
     };
 
 }

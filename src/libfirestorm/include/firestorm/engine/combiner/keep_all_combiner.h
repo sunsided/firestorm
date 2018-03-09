@@ -22,7 +22,6 @@ namespace firestorm {
         void combine(std::any&& other) final {
             auto other_scores = std::any_cast<std::vector<score_t>>(other);
 
-            // TODO: Later this will be a "best N" thing
             for (const auto &result : other_scores) {
                 scores.push_back(result);
             }

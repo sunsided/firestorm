@@ -28,12 +28,11 @@ namespace firestorm {
             const auto chunk_idx = chunk.index;
             const auto query_vector = query.data;
             const auto ref_data = chunk.data;
-            const size_t element_count =
-                    chunk.vectors * chunk.dimensions; ///< The total number of float elements in the buffer.
+            const size_t element_count = chunk.vectors * chunk.dimensions; ///< The total number of float elements in the buffer.
 
             for (size_t start_idx = 0, vector_idx = 0; start_idx < element_count; start_idx += N, ++vector_idx) {
                 const auto ref_vector = &ref_data[start_idx];
-                const auto score = calculate(ref_vector, query_vector, N);
+                const auto score = static_cast<score_value_t >(calculate(ref_vector, query_vector, N));
 
                 index_t index {chunk_idx, static_cast<vector_idx_t>(vector_idx)};
                 out_scores[vector_idx] = score_t(index, score);

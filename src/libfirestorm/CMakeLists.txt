@@ -42,7 +42,7 @@ set(HEADER_FILES
         include/firestorm/engine/combiner/keep_all_combiner_factory.h
         include/firestorm/engine/thread_support.h
         src/worker_cmd_t.h
-        src/ThreadedWorker.h)
+        src/ThreadedWorker.h include/firestorm/engine/types/score_value_t.h)
 
 # Define an executable
 add_library(libfirestorm

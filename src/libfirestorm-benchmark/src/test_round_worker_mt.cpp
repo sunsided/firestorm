@@ -103,5 +103,4 @@ namespace firestorm {
         log->info("- Processed {} vectors in {} ms ({} vectors/s, {} workers)",
                   total_num_vectors, total_duration_ms_adjusted, vectors_per_second, actual_worker_count);
     }
-
 }

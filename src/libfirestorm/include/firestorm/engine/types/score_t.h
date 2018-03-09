@@ -8,6 +8,7 @@
 #include <cmath>
 #include <memory>
 #include "index_t.h"
+#include "score_value_t.h"
 
 namespace firestorm {
 
@@ -15,7 +16,7 @@ namespace firestorm {
         score_t() noexcept
                 : _index{0, 0}, _score{std::nanf("")} {}
 
-        score_t(const index_t index, const float score) noexcept
+        score_t(const index_t index, const score_value_t score) noexcept
                 : _index{index}, _score{score} {}
 
         score_t(const score_t &other) noexcept
@@ -68,33 +69,33 @@ namespace firestorm {
         }
 
         // TODO: This lacks comparison from the other side, e.g. float > score_t
-        inline bool operator==(const float b) const {
+        inline bool operator==(const score_value_t b) const {
             return _score == b;
         }
 
-        inline bool operator!=(const float b) const {
+        inline bool operator!=(const score_value_t b) const {
             return _score != b;
         }
 
-        inline bool operator>(const float b) const {
+        inline bool operator>(const score_value_t b) const {
             return _score > b;
         }
 
-        inline bool operator<(const float b) const {
+        inline bool operator<(const score_value_t b) const {
             return _score < b;
         }
 
-        inline bool operator>=(const float b) const {
+        inline bool operator>=(const score_value_t b) const {
             return _score >= b;
         }
 
-        inline bool operator<=(const float b) const {
+        inline bool operator<=(const score_value_t b) const {
             return _score <= b;
         }
 
     private:
         index_t _index;
-        float _score;
+        score_value_t _score;
     };
 
 }
