@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <firestorm/engine/ops/dot_product_functor.h>
+#include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>

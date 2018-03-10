@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <smmintrin.h>
-#include "firestorm/engine/ops/dot_product_sse42.h"
+#include "firestorm/engine/vector_ops/dot_product_sse42.h"
 
 using namespace std;
 

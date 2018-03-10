@@ -6,7 +6,7 @@
 #include <functional>
 #include "query_vector.h"
 
-#include <firestorm/engine/ops/dot_product_naive.h>
+#include <firestorm/engine/vector_ops/dot_product_naive.h>
 
 using namespace std;
 

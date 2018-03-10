@@ -6,7 +6,7 @@
 #define FIRESTORM_DOTPRODUCTMAPPER_H
 
 #include "mapper_t.h"
-#include "firestorm/engine/ops/dot_product_functor.h"
+#include "firestorm/engine/vector_ops/dot_product_functor.h"
 
 namespace firestorm {
 

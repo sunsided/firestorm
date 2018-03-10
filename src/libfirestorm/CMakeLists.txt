@@ -3,10 +3,10 @@ project(libfirestorm VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/ops/dot_product_avx256.cpp
-        src/ops/dot_product_naive.cpp
-        src/ops/dot_product_openmp.cpp
-        src/ops/dot_product_sse42.cpp
+        src/vector_ops/dot_product_avx256.cpp
+        src/vector_ops/dot_product_naive.cpp
+        src/vector_ops/dot_product_openmp.cpp
+        src/vector_ops/dot_product_sse42.cpp
         src/WorkerCoordinator.cpp
         src/thread_support.cpp src/combiner/combiner_factory.cpp)
 
@@ -16,11 +16,11 @@ set(HEADER_FILES
         include/firestorm/engine/memory/ChunkAccessor.h
         include/firestorm/engine/memory/ChunkManager.h
         include/firestorm/engine/types/context_t.h
-        include/firestorm/engine/ops/dot_product_openmp.h
-        include/firestorm/engine/ops/dot_product_avx256.h
-        include/firestorm/engine/ops/dot_product_naive.h
-        include/firestorm/engine/ops/dot_product_functor.h
-        include/firestorm/engine/ops/dot_product_sse42.h
+        include/firestorm/engine/vector_ops/dot_product_openmp.h
+        include/firestorm/engine/vector_ops/dot_product_avx256.h
+        include/firestorm/engine/vector_ops/dot_product_naive.h
+        include/firestorm/engine/vector_ops/dot_product_functor.h
+        include/firestorm/engine/vector_ops/dot_product_sse42.h
         include/firestorm/engine/mapper/dot_product_mapper.h
         include/firestorm/engine/types/index_t.h
         include/firestorm/engine/types/mem_chunk_t.h

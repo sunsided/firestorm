@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <firestorm/engine/types/vector_t.h>
-#include <firestorm/engine/ops/dot_product_openmp.h>
+#include <firestorm/engine/vector_ops/dot_product_openmp.h>
 #include <VectorNorm.h>
 #include <DotProduct.h>
 

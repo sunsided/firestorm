@@ -11,12 +11,12 @@
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/Worker.h>
-#include <firestorm/engine/ops/dot_product_naive.h>
+#include <firestorm/engine/vector_ops/dot_product_naive.h>
 #if USE_AVX
 #include <firestorm/engine/dot_product_avx256.h>
 #endif
-#include <firestorm/engine/ops/dot_product_openmp.h>
-#include <firestorm/engine/ops/dot_product_sse42.h>
+#include <firestorm/engine/vector_ops/dot_product_openmp.h>
+#include <firestorm/engine/vector_ops/dot_product_sse42.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/benchmark/benchmark.h>
 #include "query_vector.h"
