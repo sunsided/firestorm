@@ -11,7 +11,7 @@
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
-#include <firestorm/engine/Worker.h>
+#include <firestorm/engine/worker_t.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/index_t.h>
 
@@ -38,13 +38,13 @@ namespace firestorm {
     }
 
     void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
-                               size_t repetitions, const Worker &worker,
+                               size_t repetitions, const worker_t &worker,
                                const vector_t &query,
                                score_t expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const Worker &worker,
+    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const worker_t &worker,
                                const vector_t &query,
                                const score_t expected_best_score,
                                const size_t num_vectors) {
@@ -56,13 +56,13 @@ namespace firestorm {
 
     void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                size_t repetitions,
-                               const std::vector<std::unique_ptr<Worker>> &workers, const vector_t &query,
+                               const std::vector<std::unique_ptr<worker_t>> &workers, const vector_t &query,
                                score_t expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
     void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions,
-                               const std::vector<std::unique_ptr<Worker>> &workers, const vector_t &query,
+                               const std::vector<std::unique_ptr<worker_t>> &workers, const vector_t &query,
                                const score_t expected_best_score,
                                const size_t num_vectors) {
 

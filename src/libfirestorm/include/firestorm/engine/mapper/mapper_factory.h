@@ -7,7 +7,7 @@
 
 #include <memory>
 #include "mapper_t.h"
-#include "firestorm/engine/combiner/combiner_t.h"
+#include "firestorm/engine/reducer/reducer_t.h"
 
 namespace firestorm {
 
@@ -18,6 +18,9 @@ namespace firestorm {
         /// \return The mapper.
         virtual std::shared_ptr<mapper_t> create() const = 0;
     };
+
+    /// \brief Pointer to a mapper factory.
+    using mapper_factory_ptr = std::shared_ptr<mapper_factory>;
 
 }
 

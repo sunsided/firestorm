@@ -10,7 +10,7 @@
 
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/memory/ChunkManager.h>
-#include <firestorm/engine/Worker.h>
+#include <firestorm/engine/worker_t.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #if USE_AVX
 #include <firestorm/engine/dot_product_avx256.h>
@@ -43,15 +43,15 @@ namespace firestorm {
 
         // A worker is a visitor that is performs a calculation on the chunks of a
         // registered manager.
-        unique_ptr<Worker> worker_st = make_unique<Worker>();
+        unique_ptr<worker_t> worker_st = make_unique<worker_t>();
 
         // Add multiple workers for multi-threaded testing
         size_t concurrency = num_workers ? num_workers.get() : thread::hardware_concurrency();
         if (concurrency == 0) concurrency = 8;
         log->info("Use concurrency of {} threads.", concurrency);
-        vector<unique_ptr<Worker>> workers_mt;
+        vector<unique_ptr<worker_t>> workers_mt;
         for (size_t t = 0; t < concurrency; ++t) {
-            workers_mt.push_back(make_unique<Worker>());
+            workers_mt.push_back(make_unique<worker_t>());
         }
 
         // To simplify experiments, we require the block to exactly match our expectations
@@ -156,7 +156,7 @@ namespace firestorm {
         run_test_round<dot_product_openmp_t>(log, repetitions, result, *chunkManager, query,
                                              expected_best_match, num_vectors);
 
-        log->info("dot_product_openmp (Worker)");
+        log->info("dot_product_openmp (worker_t)");
         run_test_round_worker<dot_product_openmp_t>(log, repetitions, *worker_st, query,
                                                     expected_best_match, num_vectors);
 
@@ -172,7 +172,7 @@ namespace firestorm {
         run_test_round<dot_product_sse42_t>(log, repetitions, result, *chunkManager, query,
                                             expected_best_match, num_vectors);
 
-        log->info("dot_product_sse42 (Worker)");
+        log->info("dot_product_sse42 (worker_t)");
         run_test_round_worker<dot_product_sse42_t>(log, repetitions, *worker_st, query,
                                                    expected_best_match, num_vectors);
 
@@ -186,7 +186,7 @@ namespace firestorm {
         run_test_round<dot_product_unrolled_8_t>(log, repetitions, result, *chunkManager, query,
                                                  expected_best_match, num_vectors);
 
-        log->info("dot_product_unrolled_8 (Worker)");
+        log->info("dot_product_unrolled_8 (worker_t)");
         run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, *worker_st, query,
                                                         expected_best_match, num_vectors);
 
@@ -198,7 +198,7 @@ namespace firestorm {
         run_test_round<dot_product_naive_t>(log, repetitions, result, *chunkManager, query,
                                             expected_best_match, num_vectors);
 
-        log->info("dot_product_naive (Worker)");
+        log->info("dot_product_naive (worker_t)");
         run_test_round_worker<dot_product_naive_t>(log, repetitions, *worker_st, query,
                                                    expected_best_match, num_vectors);
 

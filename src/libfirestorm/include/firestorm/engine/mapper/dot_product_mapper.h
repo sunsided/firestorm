@@ -19,7 +19,7 @@ namespace firestorm {
         dot_product_mapper() = default;
         ~dot_product_mapper() final = default;
 
-        std::any map(const mem_chunk_t &chunk, const vector_t &query) final {
+        map_result_t map(const mem_chunk_t &chunk, const vector_t &query) const final {
             assert(chunk.dimensions == query.dimensions);
 
             std::vector<score_t> out_scores {chunk.vectors};
@@ -32,9 +32,10 @@ namespace firestorm {
 
             for (size_t start_idx = 0, vector_idx = 0; start_idx < element_count; start_idx += N, ++vector_idx) {
                 const auto ref_vector = &ref_data[start_idx];
-                const auto score = static_cast<score_value_t >(calculate(ref_vector, query_vector, N));
+                const auto dot_product = calculate(ref_vector, query_vector, N);
 
-                index_t index {chunk_idx, static_cast<vector_idx_t>(vector_idx)};
+                const index_t index {chunk_idx, static_cast<vector_idx_t>(vector_idx)};
+                const auto score = static_cast<score_value_t>(dot_product);
                 out_scores[vector_idx] = score_t(index, score);
             }
 

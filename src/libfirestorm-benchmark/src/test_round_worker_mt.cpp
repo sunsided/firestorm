@@ -4,7 +4,7 @@
 
 #include <atomic>
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/combiner/keep_all_combiner_factory.h>
+#include <firestorm/engine/reducer/keep_all_reducer_factory.h>
 #include "test_round.h"
 
 using namespace std;
@@ -13,7 +13,7 @@ namespace firestorm {
 
     void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
                                const size_t repetitions,
-                               const vector<unique_ptr<Worker>> &workers, const vector_t &query,
+                               const vector<unique_ptr<worker_t>> &workers, const vector_t &query,
                                const score_t expected_best_score,
                                [[maybe_unused]] const size_t num_vectors) {
         atomic<long> total_duration_ms{0L};
@@ -23,10 +23,10 @@ namespace firestorm {
         // TODO: Use promises to return results from queue.
 
         vector<thread> threads;
-        vector<shared_ptr<combiner_t>> result_buffers;
+        vector<shared_ptr<reducer_t>> result_buffers;
         auto actual_worker_count = 0;
 
-        keep_all_combiner_factory combiner_factory{};
+        keep_all_reducer_factory reducer_factory{};
 
         // Start all threads
         for (const auto &t : workers) {
@@ -36,12 +36,12 @@ namespace firestorm {
 
             // NOTE: Will be destroyed upon leaving the loop
             auto visitor = factory.create();
-            auto combiner = combiner_factory.create();
+            auto reducer = reducer_factory.create();
 
             auto fun = thread(
-                    [&query, &total_duration_ms, &total_num_vectors, repetitions, &log](const Worker *const worker,
+                    [&query, &total_duration_ms, &total_num_vectors, repetitions, &log](const worker_t *const worker,
                                                                                         std::shared_ptr<mapper_t> visitor,
-                                                                                        std::shared_ptr<combiner_t> combiner) {
+                                                                                        std::shared_ptr<reducer_t> combiner) {
                         const auto &w = *worker;
                         auto &v = *visitor;
                         auto &c = *combiner;
@@ -66,7 +66,7 @@ namespace firestorm {
                                        repetition + 1, repetitions, local_duration_ms, processed,
                                        local_vectors_per_second);
                         }
-                    }, worker, std::move(visitor), combiner);
+                    }, worker, std::move(visitor), reducer);
 
             // Set CPU affinity
             // TODO: Explicitly setting CPU affinity might actually hurt performance if the core is loaded otherwise
@@ -74,7 +74,7 @@ namespace firestorm {
             // set_thread_affinity(log, t, fun);
 
             threads.push_back(move(fun));
-            result_buffers.push_back(move(combiner));
+            result_buffers.push_back(move(reducer));
         }
 
         // Wait for all threads to join.
@@ -83,7 +83,7 @@ namespace firestorm {
         });
 
         // Aggregate the results
-        auto results = any_cast<vector<score_t>>(combiner_factory.combine_all(result_buffers));
+        auto results = any_cast<vector<score_t>>(reducer_factory.reduce(result_buffers));
 
         // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
         score_t best_match{};

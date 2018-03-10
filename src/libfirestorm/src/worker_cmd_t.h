@@ -2,72 +2,47 @@
 // Created by sunside on 04.03.18.
 //
 
-#ifndef PROJECT_WORKER_CMD_ENUM_H
-#define PROJECT_WORKER_CMD_ENUM_H
+#ifndef PROJECT_WORKER_CMD_T_H
+#define PROJECT_WORKER_CMD_T_H
 
 #include <memory>
 #include <firestorm/engine/types/vector_t.h>
 
 namespace firestorm {
 
-/// Describes a command to be executed by a threaded worker.
-    enum worker_cmd_enum_t {
-        IDLE = 0,       ///< A no-op command.
-        STOP,           ///< Indicates that processing should stop.
-        QUERY,          ///< Indicates that a query vector should be processed.
-    };
-
-/// A structure containing commands and their parameters.
-    struct worker_cmd_t final {
-        explicit worker_cmd_t(worker_cmd_enum_t command) noexcept
-                : type{command}, vector{nullptr}, visitor{nullptr}, reducer{nullptr}
+    /// A structure describing a query command and its parameters.
+    struct worker_query_cmd_t final {
+        worker_query_cmd_t(job_info_ptr info, vector_ptr vector, mapper_ptr visitor, reducer_ptr reducer) noexcept
+                : _info{std::move(info)}, _vector{std::move(vector)}, _mapper{visitor}, _reducer{reducer}
         {}
 
-        explicit worker_cmd_t(std::shared_ptr<vector_t> vector,
-                              std::shared_ptr<mapper_t> visitor,
-                              std::shared_ptr<combiner_t> reducer) noexcept
-                : type{worker_cmd_enum_t::QUERY}, vector{std::move(vector)}, visitor{visitor}, reducer{reducer}
-        {}
+        ~worker_query_cmd_t() = default;
+        worker_query_cmd_t(const worker_query_cmd_t&) = delete;
+        worker_query_cmd_t(worker_query_cmd_t&&) = delete;
 
-        worker_cmd_t(const worker_cmd_t &other) noexcept
-                : type{other.type}, vector{other.vector}, visitor{other.visitor}, reducer{other.reducer}
-        {}
+        inline job_info_ptr info() const { return _info; }
+        inline vector_ptr vector() const { return _vector; }
+        inline mapper_ptr mapper() const { return _mapper; }
+        inline reducer_ptr reducer() const { return _reducer; }
 
-        worker_cmd_t(worker_cmd_t &&other) noexcept
-                : type{other.type}, vector{other.vector}, visitor{other.visitor}, reducer{other.reducer}
-        {}
-
-        ~worker_cmd_t() = default;
-
-        worker_cmd_t &operator=(const worker_cmd_t &other) noexcept {
-            type = other.type;
-            vector = other.vector;
-            visitor = other.visitor;
-            reducer = other.reducer;
-            return *this;
-        }
-
-        worker_cmd_t &operator=(worker_cmd_t&& other) noexcept {
-            type = other.type;
-            vector = std::move(other.vector);
-            visitor = std::move(other.visitor);
-            reducer = std::move(other.reducer);
-            return *this;
-        }
+    private:
 
         /// The type of the command to execute.
-        worker_cmd_enum_t type;
+        const job_info_ptr _info{};
 
-        /// A vector to execute commands on, if it exists.
-        std::shared_ptr<vector_t> vector;
+        /// \brief A vector to execute commands on, if it exists.
+        const vector_ptr _vector;
 
-        /// The visitor to process the chunks with.
-        std::shared_ptr<mapper_t> visitor;
+        /// \brief The visitor to process the chunks with.
+        const mapper_ptr _mapper{};
 
-        /// The visitor to reduce the results with.
-        std::shared_ptr<combiner_t> reducer;
+        /// \brief The visitor to reduce the results with.
+        const reducer_ptr _reducer{};
     };
+
+    /// \brief Pointer to a worker command.
+    using worker_query_cmd_ptr = std::shared_ptr<worker_query_cmd_t>;
 
 }
 
-#endif //PROJECT_WORKER_CMD_ENUM_H
+#endif //PROJECT_WORKER_CMD_T_H

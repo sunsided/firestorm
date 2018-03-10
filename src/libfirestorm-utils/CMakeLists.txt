@@ -6,10 +6,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/exception.cpp)
+        src/exception.cpp
+        src/reader_writer_lock.cpp)
 
 set(HEADER_FILES
-        include/firestorm/utils/exception.h include/firestorm/utils/time_conversion.h)
+        include/firestorm/utils/exception.h
+        include/firestorm/utils/time_conversion.h
+        include/firestorm/utils/reader_writer_lock.h)
 
 # Define an executable
 add_library(libfirestorm-utils

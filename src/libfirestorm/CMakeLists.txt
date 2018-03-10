@@ -7,8 +7,8 @@ set(SOURCE_FILES
         src/vector_ops/dot_product_naive.cpp
         src/vector_ops/dot_product_openmp.cpp
         src/vector_ops/dot_product_sse42.cpp
-        src/WorkerCoordinator.cpp
-        src/thread_support.cpp src/combiner/combiner_factory.cpp)
+        src/worker_thread_coordinator.cpp
+        src/thread_support.cpp src/combiner/reducer_factory.cpp)
 
 set(HEADER_FILES
         include/firestorm/engine/types/bytes_t.h
@@ -30,19 +30,19 @@ set(HEADER_FILES
         include/firestorm/engine/types/vector_idx_t.h
         include/firestorm/engine/types/vector_insert_t.h
         include/firestorm/engine/types/vector_t.h
-        include/firestorm/engine/Worker.h
-        include/firestorm/engine/WorkerCoordinator.h
+        include/firestorm/engine/worker_t.h
+        include/firestorm/engine/worker_thread_coordinator.h
         include/firestorm/engine/mapper/mapper_t.h
         include/firestorm/engine/mapper/mapper_factory.h
         include/firestorm/engine/mapper/dot_product_mapper.h
         include/firestorm/engine/mapper/dot_product_mapper_factory.h
-        include/firestorm/engine/combiner/combiner_t.h
-        include/firestorm/engine/combiner/combiner_factory.h
-        include/firestorm/engine/combiner/keep_all_combiner.h
-        include/firestorm/engine/combiner/keep_all_combiner_factory.h
+        include/firestorm/engine/reducer/reducer_t.h
+        include/firestorm/engine/reducer/reducer_factory.h
+        include/firestorm/engine/reducer/keep_all_reducer.h
+        include/firestorm/engine/reducer/keep_all_reducer_factory.h
         include/firestorm/engine/thread_support.h
         src/worker_cmd_t.h
-        src/ThreadedWorker.h include/firestorm/engine/types/score_value_t.h)
+        src/worker_thread.h include/firestorm/engine/types/score_value_t.h include/firestorm/engine/job_t.h include/firestorm/engine/mapper/map_result_t.h include/firestorm/engine/reducer/reduce_result_t.h ../libfirestorm-utils/include/firestorm/utils/reader_writer_lock.h ../libfirestorm-utils/src/reader_writer_lock.cpp)
 
 # Define an executable
 add_library(libfirestorm
@@ -63,6 +63,7 @@ target_link_libraries(libfirestorm
         gperftools
         concurrentqueue
         libfirestorm-logging
+        libfirestorm-utils
         ${CMAKE_THREAD_LIBS_INIT})
 
 # Required compiler features

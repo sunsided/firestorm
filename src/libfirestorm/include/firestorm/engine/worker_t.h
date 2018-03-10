@@ -9,30 +9,23 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <shared_mutex>
 #include <boost/optional.hpp>
 #include "firestorm/engine/types/mem_chunk_t.h"
 #include "firestorm/engine/mapper/mapper_t.h"
-#include "firestorm/engine/combiner/combiner_t.h"
+#include "firestorm/engine/reducer/reducer_t.h"
 #include "firestorm/engine/memory/ChunkAccessor.h"
 #include "firestorm/engine/types/result_t.h"
 
 namespace firestorm {
 
     /// Worker that processes vectors in the registered chunks.
-    class Worker {
-    private:
-        /// Ideally, subsequently allocated chunks appear sequentially in memory.
-        /// To aid in processing, balancing between workers should be from "right to left",
-        /// such that adding an item from a worker to the "right" at the back
-        /// moves the first item (on the front) to a worker on the "left". This way,
-        /// memory is quasi-sequential for each worker.
-        std::deque<std::weak_ptr<const mem_chunk_t>> assigned_chunks;
-
+    class worker_t {
     public:
         /// Initializes an instance of the Worker class.
         /// \param accessor An accessor to a chunk manager.
-        explicit Worker()
-                : assigned_chunks{} {}
+        explicit worker_t()
+                : _assigned_chunks{} {}
 
         /// Determines whether this worker has chunks assigned.
         /// \return true if there are chunks registered for processing.
@@ -40,23 +33,23 @@ namespace firestorm {
 
         /// Determines the number of assigned chunks.
         /// \return The number of assigned chunks.
-        inline size_t num_chunks() const { return assigned_chunks.size(); }
+        inline size_t num_chunks() const { return _assigned_chunks.size(); }
 
         /// Assigns a chunk of the manager to this worker.
         /// \param chunk_idx The index of the chunk to process.
-        void assign_chunk(std::weak_ptr<const mem_chunk_t> chunk) {
-            assigned_chunks.push_back(chunk);
+        void assign_chunk(const std::weak_ptr<const mem_chunk_t> &chunk) {
+            _assigned_chunks.push_back(chunk);
         }
 
         /// Unassigns a chunk of the manager from this worker.
         /// \return The index of the chunk that was unassigned.
         boost::optional<std::weak_ptr<const mem_chunk_t>> unassign_chunk() {
-            if (assigned_chunks.empty()) {
+            if (_assigned_chunks.empty()) {
                 return boost::none;
             }
 
-            auto chunk = assigned_chunks.front();
-            assigned_chunks.pop_front();
+            auto chunk = _assigned_chunks.front();
+            _assigned_chunks.pop_front();
             return chunk;
         }
 
@@ -66,11 +59,10 @@ namespace firestorm {
         /// \param query The query vector to operate on.
         /// \param results The result buffer.
         /// \return The number of vectors that were processed.
-        size_t accept(mapper_t &visitor, combiner_t &reducer, const vector_t &query) const {
-
+        size_t accept(const mapper_t &visitor, reduce_t &reducer, const vector_t &query) const {
             size_t vectors_processed = 0;
 
-            for (const auto &chunk : assigned_chunks) {
+            for (const auto &chunk : _assigned_chunks) {
                 const auto shared_chunk = chunk.lock();
                 if (shared_chunk == nullptr) continue;
 
@@ -78,7 +70,7 @@ namespace firestorm {
                 assert(chunk_ref.dimensions == query.dimensions);
 
                 auto result = visitor.map(chunk_ref, query);
-                reducer.combine(std::move(result));
+                reducer.reduce(std::move(result));
 
                 // TODO: We can send the number of processed vectors along with the mapper results
                 vectors_processed += chunk_ref.vectors;
@@ -86,6 +78,14 @@ namespace firestorm {
 
             return vectors_processed;
         }
+
+    private:
+        /// Ideally, subsequently allocated chunks appear sequentially in memory.
+        /// To aid in processing, balancing between workers should be from "right to left",
+        /// such that adding an item from a worker to the "right" at the back
+        /// moves the first item (on the front) to a worker on the "left". This way,
+        /// memory is quasi-sequential for each worker.
+        std::deque<std::weak_ptr<const mem_chunk_t>> _assigned_chunks;
     };
 
 }

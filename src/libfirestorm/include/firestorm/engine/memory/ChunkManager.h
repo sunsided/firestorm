@@ -14,15 +14,10 @@ namespace firestorm {
 /// This class implements memory chunk handling for vectors
 /// stored in consecutive memory.
     class ChunkManager : public ChunkAccessor {
-    private:
-        std::vector<std::shared_ptr<mem_chunk_t>> chunks;
-        chunk_idx_t next_index = 0;
     public:
         ChunkManager() = default;
 
-        virtual ~ChunkManager() {
-            chunks.clear();
-        }
+        virtual ~ChunkManager() = default;
 
         /// Allocates a new memory chunk for the specified amount of vectors of the given dimensionality.
         /// \param vectors The number of vectors to store in this chunk.
@@ -55,6 +50,10 @@ namespace firestorm {
         /// Gets the number of chunks registered in this manager.
         /// \return The number of chunks.
         inline size_t size() const { return chunks.size(); }
+
+    private:
+        std::vector<std::shared_ptr<mem_chunk_t>> chunks;
+        chunk_idx_t next_index = 0;
     };
 
 }

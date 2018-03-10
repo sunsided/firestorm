@@ -4,14 +4,14 @@
 
 #include "test_round.h"
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/combiner/keep_all_combiner.h>
+#include <firestorm/engine/reducer/keep_all_reducer.h>
 
 using namespace std;
 
 namespace firestorm {
 
     void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
-                               const size_t repetitions, const Worker &worker,
+                               const size_t repetitions, const worker_t &worker,
                                const vector_t &query,
                                const score_t expected_best_score,
                                const size_t num_vectors) {
@@ -19,14 +19,14 @@ namespace firestorm {
         auto total_num_vectors = static_cast<size_t>(0);
 
         auto visitor = factory.create();
-        keep_all_combiner combiner {};
+        keep_all_reducer reducer {};
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
 
-            combiner.begin();
-            const auto processed = worker.accept(*visitor, combiner, query);
-            auto results = any_cast<vector<score_t>>(combiner.finish());
+            reducer.begin();
+            const auto processed = worker.accept(*visitor, reducer, query);
+            auto results = any_cast<vector<score_t>>(reducer.finish());
 
             auto end_time = chrono::_V2::system_clock::now();
             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();

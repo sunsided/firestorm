@@ -51,6 +51,9 @@ namespace firestorm {
         float *data;
     };
 
+    /// \brief Pointer to a vector.
+    using vector_ptr = std::shared_ptr<vector_t>;
+
 }
 
 #endif //FIRESTORM_VECTORT_H
