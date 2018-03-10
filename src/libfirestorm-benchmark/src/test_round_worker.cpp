@@ -10,22 +10,22 @@ using namespace std;
 
 namespace firestorm {
 
-    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
+    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const shared_ptr<mapper_factory> &factory,
                                const size_t repetitions, const worker_t &worker,
-                               const vector_t &query,
-                               const score_t expected_best_score,
+                               const vector_ptr query,
+                               const score_t &expected_best_score,
                                const size_t num_vectors) {
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
 
-        auto visitor = factory.create();
+        auto visitor = factory->create();
         keep_all_reducer reducer {};
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
 
             reducer.begin();
-            const auto processed = worker.accept(*visitor, reducer, query);
+            const auto processed = worker.accept(*visitor, reducer, *query);
             auto results = any_cast<vector<score_t>>(reducer.finish());
 
             auto end_time = chrono::_V2::system_clock::now();

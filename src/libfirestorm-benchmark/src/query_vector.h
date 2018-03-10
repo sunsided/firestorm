@@ -9,7 +9,7 @@
 
 namespace firestorm {
 
-    vector_t create_query_vector(size_t num_dimensions);
+    vector_ptr create_query_vector(size_t num_dimensions);
 
 }
 

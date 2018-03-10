@@ -49,10 +49,7 @@ namespace firestorm {
         size_t concurrency = num_workers ? num_workers.get() : thread::hardware_concurrency();
         if (concurrency == 0) concurrency = 8;
         log->info("Use concurrency of {} threads.", concurrency);
-        vector<unique_ptr<worker_t>> workers_mt;
-        for (size_t t = 0; t < concurrency; ++t) {
-            workers_mt.push_back(make_unique<worker_t>());
-        }
+        worker_thread_coordinator coordinator {concurrency};
 
         // To simplify experiments, we require the block to exactly match our expectations
         // about vector lengths. Put differently, all bytes in the buffer can be used.
@@ -72,7 +69,7 @@ namespace firestorm {
         score_t expected_best_match {};
 
         // Create a random query vector.
-        vector_t query = create_query_vector(BENCHMARK_NUM_DIMENSIONS);
+        auto query = create_query_vector(BENCHMARK_NUM_DIMENSIONS);
 
         // Create M vectors (1000, 10000, whatever).
         for (size_t j = 0; j < num_vectors; ++j) {
@@ -88,13 +85,9 @@ namespace firestorm {
                 remaining_chunk_size = target_chunk_size;
                 float_offset = 0;
 
+                // Assign the chunk
                 worker_st->assign_chunk(chunk);
-
-                // Round-robin assign the chunks.
-                // TODO: Note that chunks should be shifted "from the right" to maximize likelihood of consecutive memory locations.
-                auto chunk_to_add = chunk->index;
-                auto worker_idx = chunk_to_add % workers_mt.size();
-                workers_mt.at(worker_idx)->assign_chunk(chunk);
+                coordinator.assign_chunk(chunk);
             }
 
             // Some progress printing.
@@ -103,7 +96,7 @@ namespace firestorm {
             }
 
             auto a = &chunk->data[float_offset];
-            const auto *const b = &query.data[0];
+            const auto *const b = &query->data[0];
 
             assert(a != nullptr);
             assert(b != nullptr);
@@ -145,7 +138,7 @@ namespace firestorm {
                                                     expected_best_match, num_vectors);
 
         log->info("dot_product_avx256 (MT workers)");
-        run_test_round_worker<dot_product_avx256_t>(log, repetitions, workers_mt, query,
+        run_test_round_worker<dot_product_avx256_t>(log, repetitions, coordinator, query,
                                                     expected_best_match, num_vectors);
 
 #endif
@@ -161,7 +154,7 @@ namespace firestorm {
                                                     expected_best_match, num_vectors);
 
         log->info("dot_product_openmp (MT workers)");
-        run_test_round_worker<dot_product_openmp_t>(log, repetitions, workers_mt, query,
+        run_test_round_worker<dot_product_openmp_t>(log, repetitions, coordinator, query,
                                                     expected_best_match, num_vectors);
 
 #endif
@@ -177,7 +170,7 @@ namespace firestorm {
                                                    expected_best_match, num_vectors);
 
         log->info("dot_product_sse42 (MT workers)");
-        run_test_round_worker<dot_product_sse42_t>(log, repetitions, workers_mt, query,
+        run_test_round_worker<dot_product_sse42_t>(log, repetitions, coordinator, query,
                                                    expected_best_match, num_vectors);
 
 #endif
@@ -191,7 +184,7 @@ namespace firestorm {
                                                         expected_best_match, num_vectors);
 
         log->info("dot_product_unrolled_8 (MT workers)");
-        run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, workers_mt, query,
+        run_test_round_worker<dot_product_unrolled_8_t>(log, repetitions, coordinator, query,
                                                         expected_best_match, num_vectors);
 
         log->info("dot_product_naive");
@@ -203,7 +196,7 @@ namespace firestorm {
                                                    expected_best_match, num_vectors);
 
         log->info("dot_product_naive (MT workers)");
-        run_test_round_worker<dot_product_naive_t>(log, repetitions, workers_mt, query,
+        run_test_round_worker<dot_product_naive_t>(log, repetitions, coordinator, query,
                                                    expected_best_match, num_vectors);
 
         log->info("Cleaning up ...");

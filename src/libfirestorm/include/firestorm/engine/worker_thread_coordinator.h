@@ -25,6 +25,10 @@ namespace firestorm {
         /// \param chunk The chunk to register.
         void assign_chunk(std::weak_ptr<const mem_chunk_t> chunk) const;
 
+        /// \brief Gets the number of effective workers.
+        /// \return The number of workers with actual chunks assigned.
+        size_t effective_worker_count() const;
+
         /// \brief Processes the specified job.
         /// \param job The job to run.
         /// \return The outcome of the job.

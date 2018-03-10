@@ -37,8 +37,13 @@ namespace firestorm {
 
         /// Assigns a chunk of the manager to this worker.
         /// \param chunk_idx The index of the chunk to process.
-        void assign_chunk(const std::weak_ptr<const mem_chunk_t> &chunk) {
+        inline void assign_chunk(const std::weak_ptr<const mem_chunk_t> &chunk) {
             _assigned_chunks.push_back(chunk);
+        }
+
+        /// \brief Unassigns all chunks from this worker.
+        inline void unassign_all_chunks() {
+            _assigned_chunks.clear();
         }
 
         /// Unassigns a chunk of the manager from this worker.

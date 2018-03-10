@@ -18,33 +18,71 @@ namespace firestorm {
             : _outbox{make_shared<worker_outbox_t>()}
         { }
 
-        void add_worker() {
+        void add_worker(bool redistribute = true) {
             const auto lock = _management_lock.write_lock();
+
+            // Set CPU affinity
+            // TODO: Explicitly setting CPU affinity might actually hurt performance if the core is loaded otherwise
+            // TODO: L2 cache is shared between cores .. chunk sizes might affect performance of other cores?
+            // set_thread_affinity(log, t, fun);
 
             // "emplace_back might leak if vector cannot be extended" ... unlikely but not worth the hassle
             // https://stackoverflow.com/a/15784982/195651
             _workers.push_back(make_unique<worker_thread>(make_unique<worker_t>(), _outbox, _management_lock.reader_view()));
-            redistribute_chunks();
+            if (redistribute){
+                internal_redistribute_chunks();
+            }
         }
 
-        void assign_chunk(const weak_ptr<const mem_chunk_t> &chunk) {
+        void assign_chunk(const weak_ptr<const mem_chunk_t> &chunk, bool redistribute = true) {
             const auto lock = _management_lock.write_lock();
 
             _chunks.push_back(chunk);
-            redistribute_chunks();
+            if (redistribute){
+                internal_redistribute_chunks();
+            }
+        }
+
+        void redistribute_chunks() {
+            const auto lock = _management_lock.write_lock();
+            internal_redistribute_chunks();
+        }
+
+        size_t effective_worker_count() const {
+            size_t count = 0;
+            for (auto& worker : _workers) {
+                if (worker->num_chunks() == 0) continue;
+                ++count;
+            }
+            return count;
         }
 
         std::future<std::any> process([[maybe_unused]] const job_t& job) const {
-            const auto mapper = job.get_mapper_factory()->create();
-            // TODO: Create N "combiners"
+            const auto mapper = job.mapper_factory()->create();
+
+            // TODO: Register request in a dictionary (on job ID)
+
+            for (auto& worker : _workers) {
+                if (worker->num_chunks() == 0) continue;
+                auto reducer = job.reducer_factory()->create();
+                auto cmd = make_shared<worker_query_cmd_t>(job.info(), job.query(), mapper, reducer);
+                worker->enqueue_command(cmd);
+            }
+
+            // TODO: Tap the outbox of each worker for results on the job ID
+
             // TODO: Reduce result (do that multithreaded?)
-            return future<any>();
+
+
+            promise<any> lol {};
+            lol.set_value(vector<score_t>{});
+            return lol.get_future();
         }
 
     private:
         /// \brief Redistributes the chunks across workers.
         /// \warning The caller needs to take a write lock.
-        void redistribute_chunks() {
+        void internal_redistribute_chunks() {
             // Drop all chunks that are deleted.
             // There could be a race condition where chunks expire after this call.
             // however, in that case this method would be called again soon until this
@@ -59,6 +97,16 @@ namespace firestorm {
             const auto num_workers = _workers.size();
             if (num_workers == 0) return;
 
+            // Unassign all chunks from all workers.
+            for (size_t w = 0; w < num_workers; ++w) {
+                auto& worker = _workers[w];
+                worker->unassign_all_chunks();
+            }
+
+            // Early exit v2.
+            const auto num_chunks = _chunks.size();
+            if (num_chunks == 0) return;
+
             // Sort chunks according to memory address.
             sort(_chunks.begin(), _chunks.end(),
                  [](const weak_ptr<const mem_chunk_t>& a, const weak_ptr<const mem_chunk_t>& b) {
@@ -69,7 +117,6 @@ namespace firestorm {
             );
 
             // Distribute the chunks across the workers.
-            const auto num_chunks = _chunks.size();
             const auto chunks_per_worker = num_chunks / num_workers;
             size_t assigned_chunks = 0;
             for (size_t w = 0; w < num_workers; ++w) {
@@ -90,7 +137,7 @@ namespace firestorm {
 
     private:
         reader_writer_lock _management_lock {};
-        worker_outbox_ptr _outbox {};
+        worker_outbox_ptr _outbox;
         vector<unique_ptr<worker_thread>> _workers;
         vector<weak_ptr<const mem_chunk_t>> _chunks {};
     };
@@ -100,8 +147,9 @@ namespace firestorm {
         // TODO: Throw if stupid
         worker_count = worker_count > 0 ? worker_count : 1;
         for (size_t i = 0; i < worker_count; ++i) {
-            impl->add_worker();
+            impl->add_worker(false);
         }
+        impl->redistribute_chunks();
     }
 
     worker_thread_coordinator::~worker_thread_coordinator() = default;
@@ -116,6 +164,10 @@ namespace firestorm {
 
     std::future<std::any> worker_thread_coordinator::process(const job_t& job) const {
         return impl->process(job);
+    }
+
+    size_t worker_thread_coordinator::effective_worker_count() const {
+        return impl->effective_worker_count();
     }
 
 }

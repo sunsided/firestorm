@@ -19,7 +19,7 @@ namespace firestorm {
     using writer_lock_view_ptr = std::shared_ptr<writer_lock_view_t>;
 
     /// \brief A reader-writer lock.
-    struct reader_writer_lock : private std::enable_shared_from_this<reader_writer_lock> {
+    struct reader_writer_lock {
     public:
         reader_writer_lock() = default;
 
@@ -50,33 +50,33 @@ namespace firestorm {
     /// \brief The reader view of a reader-writer lock.
     struct reader_lock_view_t final {
     public:
-        explicit reader_lock_view_t(std::shared_ptr<const reader_writer_lock> lock)
-            : _lock{std::move(lock)} {}
+        explicit reader_lock_view_t(const reader_writer_lock& lock)
+            : _lock{lock} {}
 
         /// \brief Takes a read lock. Multiple threads can have this lock at the same time.
         /// \return The read lock.
         inline std::shared_lock<std::shared_mutex> lock() const {
-            return _lock->read_lock();
+            return _lock.read_lock();
         }
 
     private:
-        const std::shared_ptr<const reader_writer_lock> _lock;
+        const reader_writer_lock& _lock;
     };
 
     /// \brief The writer view of a reader-writer lock.
     struct writer_lock_view_t final {
     public:
-        explicit writer_lock_view_t(std::shared_ptr<const reader_writer_lock> lock)
-            : _lock{std::move(lock)} {}
+        explicit writer_lock_view_t(const reader_writer_lock& lock)
+            : _lock{lock} {}
 
         /// \brief Takes a write lock. Only a single thread can have this lock.
         /// \return The write lock.
         inline std::unique_lock<std::shared_mutex> lock() const {
-            return _lock->write_lock();
+            return _lock.write_lock();
         }
 
     private:
-        const std::shared_ptr<const reader_writer_lock> _lock;
+        const reader_writer_lock& _lock;
     };
 
 }

@@ -14,6 +14,7 @@
 #include <firestorm/engine/worker_t.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/index_t.h>
+#include <firestorm/engine/worker_thread_coordinator.h>
 
 namespace firestorm {
 
@@ -21,13 +22,13 @@ namespace firestorm {
 
     void run_test_round(const std::shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, size_t repetitions,
                         float* result, const ChunkManager &chunkManager,
-                        const vector_t &query,
+                        vector_ptr query,
                         score_t expected_best_score, size_t num_vectors);
 
     template<typename T>
     void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result,
                         const ChunkManager &chunkManager,
-                        const vector_t &query,
+                        const vector_ptr query,
                         const score_t expected_best_score, size_t num_vectors) {
 
         static_assert(std::is_convertible<T *, dot_product_t *>::value, "Derived type must inherit dot_product_t as public");
@@ -37,37 +38,37 @@ namespace firestorm {
                        num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
+    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const std::shared_ptr<mapper_factory>& factory,
                                size_t repetitions, const worker_t &worker,
-                               const vector_t &query,
-                               score_t expected_best_score,
+                               vector_ptr query,
+                               const score_t& expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
     void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const worker_t &worker,
-                               const vector_t &query,
-                               const score_t expected_best_score,
+                               const vector_ptr query,
+                               const score_t& expected_best_score,
                                const size_t num_vectors) {
 
-        const dot_product_mapper_factory<T> factory{};
+        const auto factory = std::make_shared<dot_product_mapper_factory<T>>();
         run_test_round_worker(log, factory, repetitions, worker, query, expected_best_score,
                               num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const mapper_factory &factory,
+    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const std::shared_ptr<mapper_factory>& factory,
                                size_t repetitions,
-                               const std::vector<std::unique_ptr<worker_t>> &workers, const vector_t &query,
-                               score_t expected_best_score,
+                               const worker_thread_coordinator& coordinator, const vector_ptr& query,
+                               const score_t& expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
     void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions,
-                               const std::vector<std::unique_ptr<worker_t>> &workers, const vector_t &query,
-                               const score_t expected_best_score,
+                               const worker_thread_coordinator& coordinator, const vector_ptr query,
+                               const score_t& expected_best_score,
                                const size_t num_vectors) {
 
-        const dot_product_mapper_factory<T> factory{};
-        run_test_round_worker(log, factory, repetitions, workers, query, expected_best_score,
+        const auto factory = std::make_shared<dot_product_mapper_factory<T>>();
+        run_test_round_worker(log, factory, repetitions, coordinator, query, expected_best_score,
                               num_vectors);
     }
 

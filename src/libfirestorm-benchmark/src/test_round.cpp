@@ -13,7 +13,7 @@ namespace firestorm {
 
     void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, const size_t repetitions,
                         float *const result, const ChunkManager &chunkManager,
-                        const vector_t &query,
+                        const vector_ptr query,
                         const score_t expected_best_score, size_t num_vectors) {
 
         auto total_duration_ms = static_cast<size_t>(0);
@@ -31,7 +31,7 @@ namespace firestorm {
             auto remaining_vectors_per_chunk = chunk->vectors;
             total_num_vectors += remaining_vectors_per_chunk;
 
-            auto query_vector = query.data;
+            auto query_vector = query->data;
             auto float_offset = 0;
 
 

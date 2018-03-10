@@ -30,7 +30,7 @@ namespace firestorm {
     /// \brief Mailboxed thread around a worker.
     class worker_thread final {
     public:
-        explicit worker_thread(std::unique_ptr<worker_t> worker, worker_outbox_ptr& outbox, reader_lock_view_ptr lock) noexcept
+        explicit worker_thread(std::unique_ptr<worker_t> worker, worker_outbox_ptr outbox, reader_lock_view_ptr lock) noexcept
             : _lock{std::move(lock)},
               _inbox{}, _outbox{std::move(outbox)},
               _worker{std::move(worker)}, _thread{[this] { process_loop(); }} {
@@ -60,6 +60,13 @@ namespace firestorm {
         /// \param chunk The chunk to assign.
         inline void assign_chunk(const std::weak_ptr<const mem_chunk_t> &chunk) {
             _worker->assign_chunk(chunk);
+        }
+
+        /// \brief Unassigns all chunks from the worker.
+        ///
+        /// \warning The caller is required to take the management writer lock before calling this.
+        inline void unassign_all_chunks() {
+            _worker->unassign_all_chunks();
         }
 
         /// Unassigns a chunk of the manager from this worker.
@@ -95,8 +102,8 @@ namespace firestorm {
             auto reduce_result = reducer->finish();
 
             const auto job_info = command.info();
-            const auto worker_result = std::make_shared<worker_result_t>(job_info, reduce_result);
-            _outbox->enqueue(std::move(worker_result));
+            auto worker_result = std::make_shared<worker_result_t>(job_info, reduce_result);
+            _outbox->enqueue(worker_result);
         }
 
     private:

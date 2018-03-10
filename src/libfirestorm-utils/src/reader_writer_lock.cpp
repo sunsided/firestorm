@@ -9,11 +9,11 @@ using namespace std;
 namespace firestorm {
 
     reader_lock_view_ptr reader_writer_lock::reader_view() const {
-        return make_shared<reader_lock_view_t>(shared_from_this());
+        return make_shared<reader_lock_view_t>(*this);
     }
 
     writer_lock_view_ptr reader_writer_lock::writer_view() const {
-        return make_shared<writer_lock_view_t>(shared_from_this());
+        return make_shared<writer_lock_view_t>(*this);
     }
 
 }

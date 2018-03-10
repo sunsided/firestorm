@@ -12,8 +12,8 @@ namespace firestorm {
 
     /// A structure describing a query command and its parameters.
     struct worker_query_cmd_t final {
-        worker_query_cmd_t(job_info_ptr info, vector_ptr vector, mapper_ptr visitor, reducer_ptr reducer) noexcept
-                : _info{std::move(info)}, _vector{std::move(vector)}, _mapper{visitor}, _reducer{reducer}
+        worker_query_cmd_t(job_info_ptr info, vector_ptr vector, mapper_ptr mapper, reducer_ptr reducer) noexcept
+                : _info{std::move(info)}, _vector{std::move(vector)}, _mapper{mapper}, _reducer{reducer}
         {}
 
         ~worker_query_cmd_t() = default;
