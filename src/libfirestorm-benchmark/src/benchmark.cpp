@@ -13,7 +13,7 @@
 #include <firestorm/engine/worker_t.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #if USE_AVX
-#include <firestorm/engine/dot_product_avx256.h>
+#include <firestorm/engine/vector_ops/dot_product_avx256.h>
 #endif
 #include <firestorm/engine/vector_ops/dot_product_openmp.h>
 #include <firestorm/engine/vector_ops/dot_product_sse42.h>

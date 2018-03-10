@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <firestorm/engine/simd.h>
-#include <firestorm/engine/dot_product_avx256.h>
+#include <firestorm/engine/vector_ops/dot_product_avx256.h>
 
 namespace firestorm {
 
