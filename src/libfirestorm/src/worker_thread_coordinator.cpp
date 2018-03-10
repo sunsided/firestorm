@@ -60,23 +60,36 @@ namespace firestorm {
         std::future<std::any> process([[maybe_unused]] const job_t& job) const {
             const auto mapper = job.mapper_factory()->create();
 
-            // TODO: Register request in a dictionary (on job ID)
+            vector<future<reduce_result_t>> results;
 
             for (auto& worker : _workers) {
                 if (worker->num_chunks() == 0) continue;
                 auto reducer = job.reducer_factory()->create();
                 auto cmd = make_shared<worker_query_cmd_t>(job.info(), job.query(), mapper, reducer);
+
+                results.push_back(cmd->promise().get_future());
+
                 worker->enqueue_command(cmd);
             }
 
-            // TODO: Tap the outbox of each worker for results on the job ID
-
             // TODO: Reduce result (do that multithreaded?)
+            auto final_reducer = job.reducer_factory()->create();
+            final_reducer->begin();
 
+            for (auto& future : results) {
+                auto result = static_cast<reduce_result_t>(future.get());
 
-            promise<any> lol {};
-            lol.set_value(vector<score_t>{});
-            return lol.get_future();
+                // TODO: Here an "invalid" cast is going on, as the method takes map_result_t, not reduce_result_t.
+                final_reducer->reduce(result);
+            }
+
+            auto result = final_reducer->finish();
+
+            // TODO: We need to trigger this promise once all partial promises are fulfilled, failed or timed out (deadline!).
+            // TODO: Have a reducer thread that gets woken up whenever an individual promise was touched?
+            promise<any> p {};
+            p.set_value(result);
+            return p.get_future();
         }
 
     private:

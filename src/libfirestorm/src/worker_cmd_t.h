@@ -25,19 +25,23 @@ namespace firestorm {
         inline mapper_ptr mapper() const { return _mapper; }
         inline reducer_ptr reducer() const { return _reducer; }
 
+        inline std::promise<reduce_result_t>& promise() const { return _promise; }
+
     private:
 
         /// The type of the command to execute.
-        const job_info_ptr _info{};
+        const job_info_ptr _info;
 
         /// \brief A vector to execute commands on, if it exists.
         const vector_ptr _vector;
 
         /// \brief The visitor to process the chunks with.
-        const mapper_ptr _mapper{};
+        const mapper_ptr _mapper;
 
         /// \brief The visitor to reduce the results with.
-        const reducer_ptr _reducer{};
+        const reducer_ptr _reducer;
+
+        mutable std::promise<reduce_result_t> _promise {};
     };
 
     /// \brief Pointer to a worker command.

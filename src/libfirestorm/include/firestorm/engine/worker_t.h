@@ -75,7 +75,7 @@ namespace firestorm {
                 assert(chunk_ref.dimensions == query.dimensions);
 
                 auto result = visitor.map(chunk_ref, query);
-                reducer.reduce(std::move(result));
+                reducer.reduce(result);
 
                 // TODO: We can send the number of processed vectors along with the mapper results
                 vectors_processed += chunk_ref.vectors;

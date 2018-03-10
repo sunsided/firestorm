@@ -13,7 +13,8 @@ namespace firestorm {
 
         aggregator->begin();
         for (auto& it : items) {
-            aggregator->reduce(it->finish());
+            auto result = it->finish();
+            aggregator->reduce(result);
         }
         return aggregator->finish();
     }

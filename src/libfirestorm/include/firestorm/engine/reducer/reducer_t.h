@@ -24,7 +24,7 @@ namespace firestorm {
         /// \brief Reduces the results of two mappers.
         /// \param other The other visitor to merge into the local results.
         /// \return The reduced result.
-        virtual void reduce(map_result_t &&other) = 0;
+        virtual void reduce(const map_result_t& other) = 0;
     };
 
     /// \brief A stateful class that performs mapping result reduction.

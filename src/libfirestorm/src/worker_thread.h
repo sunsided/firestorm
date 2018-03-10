@@ -101,9 +101,7 @@ namespace firestorm {
             _worker->accept(*mapper, *reducer, *query);
             auto reduce_result = reducer->finish();
 
-            const auto job_info = command.info();
-            auto worker_result = std::make_shared<worker_result_t>(job_info, reduce_result);
-            _outbox->enqueue(worker_result);
+            command.promise().set_value(reduce_result);
         }
 
     private:

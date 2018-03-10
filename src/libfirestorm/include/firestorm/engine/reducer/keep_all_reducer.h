@@ -19,7 +19,7 @@ namespace firestorm {
             scores.clear();
         }
 
-        void reduce(map_result_t &&other) final {
+        void reduce(const map_result_t& other) final {
             auto other_scores = std::any_cast<std::vector<score_t>>(other);
 
             for (const auto &result : other_scores) {
