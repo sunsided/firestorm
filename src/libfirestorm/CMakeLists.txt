@@ -7,10 +7,13 @@ set(SOURCE_FILES
         src/vector_ops/dot_product_naive.cpp
         src/vector_ops/dot_product_openmp.cpp
         src/vector_ops/dot_product_sse42.cpp
-        src/worker_thread_coordinator.cpp
-        src/thread_support.cpp src/combiner/reducer_factory.cpp)
+        src/worker/worker_thread_coordinator.cpp
+        src/thread_support.cpp
+        src/combiner/reducer_factory.cpp)
 
 set(HEADER_FILES
+        src/worker/worker_cmd_t.h
+        src/worker/worker_thread.h
         include/firestorm/engine/types/bytes_t.h
         include/firestorm/engine/types/chunk_idx_t.h
         include/firestorm/engine/memory/ChunkAccessor.h
@@ -30,8 +33,8 @@ set(HEADER_FILES
         include/firestorm/engine/types/vector_idx_t.h
         include/firestorm/engine/types/vector_insert_t.h
         include/firestorm/engine/types/vector_t.h
-        include/firestorm/engine/worker_t.h
-        include/firestorm/engine/worker_thread_coordinator.h
+        include/firestorm/engine/worker/worker_t.h
+        include/firestorm/engine/worker/worker_thread_coordinator.h
         include/firestorm/engine/mapper/mapper_t.h
         include/firestorm/engine/mapper/mapper_factory.h
         include/firestorm/engine/mapper/dot_product_mapper.h
@@ -41,8 +44,10 @@ set(HEADER_FILES
         include/firestorm/engine/reducer/keep_all_reducer.h
         include/firestorm/engine/reducer/keep_all_reducer_factory.h
         include/firestorm/engine/thread_support.h
-        src/worker_cmd_t.h
-        src/worker_thread.h include/firestorm/engine/types/score_value_t.h include/firestorm/engine/job_t.h include/firestorm/engine/mapper/map_result_t.h include/firestorm/engine/reducer/reduce_result_t.h ../libfirestorm-utils/include/firestorm/utils/reader_writer_lock.h ../libfirestorm-utils/src/reader_writer_lock.cpp)
+        include/firestorm/engine/types/score_value_t.h
+        include/firestorm/engine/job_t.h
+        include/firestorm/engine/mapper/map_result_t.h
+        include/firestorm/engine/reducer/reduce_result_t.h)
 
 # Define an executable
 add_library(libfirestorm

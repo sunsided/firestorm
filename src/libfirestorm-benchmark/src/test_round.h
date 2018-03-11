@@ -11,10 +11,10 @@
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
-#include <firestorm/engine/worker_t.h>
+#include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/index_t.h>
-#include <firestorm/engine/worker_thread_coordinator.h>
+#include <firestorm/engine/worker/worker_thread_coordinator.h>
 
 namespace firestorm {
 

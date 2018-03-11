@@ -10,7 +10,7 @@
 
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/memory/ChunkManager.h>
-#include <firestorm/engine/worker_t.h>
+#include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #if USE_AVX
 #include <firestorm/engine/vector_ops/dot_product_avx256.h>

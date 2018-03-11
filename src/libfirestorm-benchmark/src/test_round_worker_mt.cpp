@@ -5,7 +5,7 @@
 #include <atomic>
 #include <firestorm/utils/time_conversion.h>
 #include <firestorm/engine/reducer/keep_all_reducer_factory.h>
-#include <firestorm/engine/worker_thread_coordinator.h>
+#include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include "test_round.h"
 
 using namespace std;
