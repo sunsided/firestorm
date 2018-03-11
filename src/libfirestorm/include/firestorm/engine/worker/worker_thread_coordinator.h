@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <future>
-#include <firestorm/engine/job_t.h>
+#include <firestorm/engine/job/job_t.h>
 
 namespace firestorm {
 

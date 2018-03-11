@@ -45,7 +45,8 @@ set(HEADER_FILES
         include/firestorm/engine/reducer/keep_all_reducer_factory.h
         include/firestorm/engine/thread_support.h
         include/firestorm/engine/types/score_value_t.h
-        include/firestorm/engine/job_t.h
+        include/firestorm/engine/job/job_t.h
+        include/firestorm/engine/job/job_info_t.h
         include/firestorm/engine/mapper/map_result_t.h
         include/firestorm/engine/reducer/reduce_result_t.h)
 
