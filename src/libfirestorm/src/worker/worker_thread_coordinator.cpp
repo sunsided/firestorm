@@ -4,8 +4,8 @@
 
 #include <thread>
 #include <vector>
-#include <firestorm/engine/worker_t.h>
-#include <firestorm/engine/worker_thread_coordinator.h>
+#include <firestorm/engine/worker/worker_t.h>
+#include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include "worker_thread.h"
 
 using namespace std;

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <firestorm/engine/types/vector_t.h>
+#include <firestorm/engine/job/job_info_t.h>
 
 namespace firestorm {
 
