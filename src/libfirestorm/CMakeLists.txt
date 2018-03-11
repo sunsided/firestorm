@@ -3,32 +3,46 @@ project(libfirestorm VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/dot_product_avx256.cpp
-        src/dot_product_naive.cpp
-        src/dot_product_openmp.cpp
-        src/dot_product_sse42.cpp)
+        src/vector_ops/dot_product_avx256.cpp
+        src/vector_ops/dot_product_naive.cpp
+        src/vector_ops/dot_product_openmp.cpp
+        src/vector_ops/dot_product_sse42.cpp
+        src/worker_thread_coordinator.cpp
+        src/thread_support.cpp src/combiner/reducer_factory.cpp)
 
 set(HEADER_FILES
-        include/firestorm/bytes_t.h
-        include/firestorm/chunk_idx_t.h
-        include/firestorm/ChunkAccessor.h
-        include/firestorm/ChunkManager.h
-        include/firestorm/ChunkVisitor.h
-        include/firestorm/context_t.h
-        include/firestorm/dot_product_openmp.h
-        include/firestorm/dot_product_avx256.h
-        include/firestorm/dot_product_naive.h
-        include/firestorm/dot_product_functor.h
-        include/firestorm/dot_product_sse42.h
-        include/firestorm/DotProductVisitor.h
-        include/firestorm/index_t.h
-        include/firestorm/mem_chunk_t.h
-        include/firestorm/result_t.h
-        include/firestorm/Simd.h
-        include/firestorm/vector_idx_t.h
-        include/firestorm/vector_insert_t.h
-        include/firestorm/vector_t.h
-        include/firestorm/Worker.h)
+        include/firestorm/engine/types/bytes_t.h
+        include/firestorm/engine/types/chunk_idx_t.h
+        include/firestorm/engine/memory/ChunkAccessor.h
+        include/firestorm/engine/memory/ChunkManager.h
+        include/firestorm/engine/types/context_t.h
+        include/firestorm/engine/vector_ops/dot_product_openmp.h
+        include/firestorm/engine/vector_ops/dot_product_avx256.h
+        include/firestorm/engine/vector_ops/dot_product_naive.h
+        include/firestorm/engine/vector_ops/dot_product_functor.h
+        include/firestorm/engine/vector_ops/dot_product_sse42.h
+        include/firestorm/engine/mapper/dot_product_mapper.h
+        include/firestorm/engine/types/index_t.h
+        include/firestorm/engine/types/mem_chunk_t.h
+        include/firestorm/engine/types/result_t.h
+        include/firestorm/engine/types/score_t.h
+        include/firestorm/engine/simd.h
+        include/firestorm/engine/types/vector_idx_t.h
+        include/firestorm/engine/types/vector_insert_t.h
+        include/firestorm/engine/types/vector_t.h
+        include/firestorm/engine/worker_t.h
+        include/firestorm/engine/worker_thread_coordinator.h
+        include/firestorm/engine/mapper/mapper_t.h
+        include/firestorm/engine/mapper/mapper_factory.h
+        include/firestorm/engine/mapper/dot_product_mapper.h
+        include/firestorm/engine/mapper/dot_product_mapper_factory.h
+        include/firestorm/engine/reducer/reducer_t.h
+        include/firestorm/engine/reducer/reducer_factory.h
+        include/firestorm/engine/reducer/keep_all_reducer.h
+        include/firestorm/engine/reducer/keep_all_reducer_factory.h
+        include/firestorm/engine/thread_support.h
+        src/worker_cmd_t.h
+        src/worker_thread.h include/firestorm/engine/types/score_value_t.h include/firestorm/engine/job_t.h include/firestorm/engine/mapper/map_result_t.h include/firestorm/engine/reducer/reduce_result_t.h ../libfirestorm-utils/include/firestorm/utils/reader_writer_lock.h ../libfirestorm-utils/src/reader_writer_lock.cpp)
 
 # Define an executable
 add_library(libfirestorm
@@ -46,7 +60,11 @@ target_include_directories(libfirestorm PUBLIC
 # Define the libraries this project depends upon
 target_link_libraries(libfirestorm
         boost
-        gperftools)
+        gperftools
+        concurrentqueue
+        libfirestorm-logging
+        libfirestorm-utils
+        ${CMAKE_THREAD_LIBS_INIT})
 
 # Required compiler features
 # see https://cmake.org/cmake/help/v3.1/manual/cmake-compile-features.7.html

@@ -6,13 +6,13 @@
 #define PROJECT_DOTPRODUCT_H
 
 #include <gtest/gtest.h>
-#include <firestorm/vector_t.h>
+#include <firestorm/engine/types/vector_t.h>
 
 class DotProduct : public ::testing::Test
 {
 public:
-    vector_t vector_a;
-    vector_t vector_b;
+    firestorm::vector_t vector_a;
+    firestorm::vector_t vector_b;
     float result;
 
     DotProduct();

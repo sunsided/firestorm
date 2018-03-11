@@ -5,12 +5,13 @@
 #ifdef USE_AVX
 
 #include <gtest/gtest.h>
-#include <firestorm/vector_t.h>
-#include <firestorm/dot_product_avx256.h>
+#include <firestorm/engine/types/vector_t.h>
+#include <firestorm/engine/vector_ops/dot_product_avx256.h>
 #include <VectorNorm.h>
 #include <DotProduct.h>
 
 using namespace std;
+using namespace firestorm;
 
 namespace {
 

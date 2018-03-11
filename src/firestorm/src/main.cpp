@@ -7,29 +7,23 @@
 #endif
 
 #include <CLI/CLI.hpp>
+#include <boost/optional.hpp>
 
-#include <logging/LoggerFactory.h>
-#include <firestorm/Simd.h>
-#include <firestorm/OpenMP.h>
+#include <firestorm/utils/exception.h>
+#include <firestorm/logging/LoggerFactory.h>
+#include <firestorm/engine/simd.h>
+#include <firestorm/engine/openmp.h>
+#include <firestorm/benchmark/benchmark.h>
 
 #include "options/options.h"
-#include "benchmark.h"
 
 using namespace std;
+using namespace firestorm;
 namespace spd = spdlog;
 
 // TODO: Boost
 // TODO: Boost.SIMD
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
-
-void print_exception(const std::exception& e, int level = 0) {
-    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
-    try {
-        std::rethrow_if_nested(e);
-    } catch(const std::exception& e) {
-        print_exception(e, level+1);
-    } catch(...) {}
-}
 
 unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verbosity) {
     // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
@@ -98,8 +92,10 @@ int main(int argc, char **argv) {
 #if USE_AVX
     size_t num_vectors = 100000;
 #else
-    size_t num_vectors = 5000;
+    size_t num_vectors = 8192;
 #endif
+    size_t num_workers = 0;
+    size_t chunk_size_mb = 32;
 
     // Main options
     add_option(app, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
@@ -110,6 +106,12 @@ int main(int argc, char **argv) {
     benchmark->add_option("-n,--vectors", num_vectors, "Sets the number of vectors to test with.", true)
             ->group("Benchmark")
             ->envname("FSTM_NUM_VECTORS");
+    benchmark->add_option("-c,--chunk-size", chunk_size_mb, "Sets the vector chunk size in megabytes.", true)
+            ->group("Benchmark")
+            ->envname("FSTM_CHUNK_SIZE");
+    benchmark->add_option("-w,--workers", num_workers, "Sets the number of workers.", false)
+            ->group("Benchmark")
+            ->envname("FSTM_NUM_WORKERS");
     add_option(*benchmark, "-V,--verbosity", verbosity, "Sets the output verbosity. One of: trace, debug, info, warn, error.", true)
             ->group("Logging")
             ->envname("FSTM_VERBOSITY");
@@ -127,9 +129,15 @@ int main(int argc, char **argv) {
     report_profiler(logger);
     report_optimizations(logger);
 
+    // TODO: Print "unknown" hardware concurrency if zero
+    logger->info("Hardware concurrency: {} threads.", thread::hardware_concurrency());
+
     if(benchmark->parsed()) {
         auto benchmarkLogger = loggerFactory->createLogger("benchmark", verbosity);
-        run_benchmark(benchmarkLogger, num_vectors);
+        run_benchmark(benchmarkLogger,
+                      num_vectors,
+                      chunk_size_mb * 1024UL * 1024UL,
+                      num_workers > 0 ? num_workers : boost::optional<size_t>());
     }
 
     return 0;

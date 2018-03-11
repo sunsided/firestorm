@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Set default compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3 -g")
@@ -21,6 +21,8 @@ include(LibraryGperftools)
 include(LibraryGTest)
 include(LibrarySpdlog)
 include(LibraryCLI11)
+include(LibraryThreads)
+include(LibraryConcurrentqueue)
 
 # Options
 include(OptionLto)
