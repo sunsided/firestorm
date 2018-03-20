@@ -1,7 +1,7 @@
 include(ExternalProject)
 ExternalProject_Add(cli11_git
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11
-        # GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/cli11"
+        GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/cli11"
         GIT_REMOTE_NAME origin
         GIT_TAG v1.3.0
         GIT_SHALLOW On
