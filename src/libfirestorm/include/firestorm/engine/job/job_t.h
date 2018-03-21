@@ -24,10 +24,10 @@ namespace firestorm {
             : _info{std::move(other._info)}, _mf{std::move(other._mf)}, _rf{std::move(other._rf)}, _query{std::move(other._query)}
         {}
 
-        const inline job_info_ptr info() const { return _info; }
-        const inline mapper_factory_ptr mapper_factory() const { return _mf; }
-        const inline reducer_factory_ptr reducer_factory() const { return _rf; }
-        const inline vector_ptr query() const { return _query; }
+        const inline job_info_ptr info() const noexcept { return _info; }
+        const inline mapper_factory_ptr mapper_factory() const noexcept { return _mf; }
+        const inline reducer_factory_ptr reducer_factory() const noexcept { return _rf; }
+        const inline vector_ptr query() const noexcept { return _query; }
 
         bool operator==(const job_t& rhs) const noexcept {
             return *_info == *rhs._info;
