@@ -40,6 +40,8 @@ namespace firestorm {
         std::unique_ptr<Impl> impl;
     };
 
+    using worker_thread_coordinator_ptr = std::shared_ptr<worker_thread_coordinator>;
+
 }
 
 #endif //PROJECT_WORKERCOORDINATOR_H

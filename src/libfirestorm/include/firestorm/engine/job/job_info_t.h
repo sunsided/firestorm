@@ -5,6 +5,7 @@
 #ifndef PROJECT_JOB_INFO_T_H
 #define PROJECT_JOB_INFO_T_H
 
+#include <functional>
 #include <chrono>
 #include <memory>
 
@@ -22,7 +23,12 @@ namespace firestorm {
             return _created;
         }
 
+        bool operator==(const job_info_t& rhs) {
+            return _created == rhs._created;
+        }
+
         // TODO: Add Job ID (GUID or cluster-wide unique ID?)
+        // TODO: Adjust hash<job_info_t> for correct unique ID.
         // TODO: Add deadline (as relative time so different machine clocks work!)
 
     private:
@@ -31,6 +37,27 @@ namespace firestorm {
 
     /// \brief Pointer to job information.
     using job_info_ptr = std::shared_ptr<job_info_t>;
+}
+
+namespace std {
+
+    template<>
+    struct hash<firestorm::job_info_t> {
+        typedef firestorm::job_info_t argument_type;
+        typedef size_t result_type;
+
+        result_type operator()(const argument_type& k) const
+        {
+            using namespace std::chrono;
+
+            const auto created = k.created();
+            const auto created_ms = time_point_cast<milliseconds>(created);
+            const auto created_ms_since_epoch = created_ms.time_since_epoch().count();
+
+            // TODO: Adjust hash<job_info_t> for correct unique ID.
+            return hash<long>()(created_ms_since_epoch);
+        }
+    };
 
 }
 

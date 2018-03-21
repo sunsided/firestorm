@@ -10,15 +10,18 @@
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/reducer/reducer_factory.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
+#include <firestorm/engine/worker/worker_thread_coordinator.h>
 
 namespace firestorm {
 
     /// \brief A job coordinator takes care of creating jobs,
     ///        scheduling work and collecting worker results.
-    class job_coordinator {
+    class job_coordinator final {
     public:
-        job_coordinator() noexcept = default;
+        explicit job_coordinator(worker_thread_coordinator_ptr wtc) noexcept;
         ~job_coordinator() noexcept = default;
+        job_coordinator(const job_coordinator&) noexcept = delete;
+        job_coordinator(job_coordinator&&) noexcept = default;
 
         std::future<std::any> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept;
 
