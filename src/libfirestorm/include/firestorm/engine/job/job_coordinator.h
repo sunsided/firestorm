@@ -7,10 +7,12 @@
 
 #include <memory>
 #include <future>
+#include <vector>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/reducer/reducer_factory.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
+#include <firestorm/engine/executor/executor_t.h>
 #include "job_status_t.h"
 
 namespace firestorm {
@@ -19,7 +21,7 @@ namespace firestorm {
     ///        scheduling work and collecting worker results.
     class job_coordinator final {
     public:
-        explicit job_coordinator(worker_thread_coordinator_ptr wtc) noexcept;
+        explicit job_coordinator(std::vector<executor_ptr> executors) noexcept;
         ~job_coordinator() noexcept = default;
         job_coordinator(const job_coordinator&) noexcept = delete;
         job_coordinator(job_coordinator&&) noexcept = default;

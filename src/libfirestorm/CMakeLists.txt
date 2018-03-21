@@ -48,7 +48,7 @@ set(HEADER_FILES
         include/firestorm/engine/job/job_t.h
         include/firestorm/engine/job/job_info_t.h
         include/firestorm/engine/mapper/map_result_t.h
-        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h include/firestorm/engine/job/job_status_t.h)
+        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h include/firestorm/engine/job/job_status_t.h include/firestorm/engine/executor/local_executor_t.h include/firestorm/engine/executor/remote_executor_t.h include/firestorm/engine/instance_identifier_t.h include/firestorm/engine/executor/executor_t.h)
 
 # Define an executable
 add_library(libfirestorm

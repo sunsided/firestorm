@@ -8,6 +8,7 @@
 #include <firestorm/engine/job/job_coordinator.h>
 #include <firestorm/engine/job/job_info_t.h>
 #include <firestorm/engine/job/job_t.h>
+#include <firestorm/engine/executor/executor_t.h>
 #include "job_tracker.h"
 
 using namespace std;
@@ -16,8 +17,8 @@ namespace firestorm {
 
     class job_coordinator::Impl {
     public:
-        explicit Impl(worker_thread_coordinator_ptr wtc) noexcept
-            :_wtc{std::move(wtc)}, _jobs{}
+        explicit Impl(vector<executor_ptr> executors) noexcept
+            :_executors{move(executors)}, _jobs{}
         {}
 
         ~Impl() noexcept = default;
@@ -31,12 +32,12 @@ namespace firestorm {
         job_info_ptr create_job_info() const;
 
     private:
-        worker_thread_coordinator_ptr _wtc;
+        vector<executor_ptr> _executors;
         unordered_map<job_info_ptr, job_tracker_ptr> _jobs;
     };
 
-    job_coordinator::job_coordinator(worker_thread_coordinator_ptr wtc) noexcept
-        : _impl{make_unique<job_coordinator::Impl>(wtc)}
+    job_coordinator::job_coordinator(vector<executor_ptr> executors) noexcept
+        : _impl{make_unique<job_coordinator::Impl>(move(executors))}
     {}
 
     job_info_ptr job_coordinator::Impl::create_job_info() const {
@@ -74,9 +75,13 @@ namespace firestorm {
         // TODO: Register what a job progress _expects_, so that it can fire a result when all expectations are met.
 
         // Schedule onto local executors
-        // TODO: Rename worker_thread_coordinator to local_executor
+        // TODO: Rename worker_thread_coordinator to local_executor_t
         // TODO: Schedule onto remote_executors
-        auto result = _wtc->process(job);
+        // auto result = _wtc->process(job);
+        for (const auto& executor : _executors) {
+            // TODO: dispatch job to executor
+            executor->local();
+        }
 
         // TODO: Currently, worker_thread_coordinator itself contains aggregation logic for a final promise.
         //       However, multiple _machines_ could return these results, so the actual instance concerned
