@@ -9,7 +9,7 @@ set(SOURCE_FILES
         src/vector_ops/dot_product_sse42.cpp
         src/worker/worker_thread_coordinator.cpp
         src/thread_support.cpp
-        src/combiner/reducer_factory.cpp src/job/job_coordinator.cpp src/job/job_info_t.cpp src/job/job_tracker.h src/executor/local_executor_t.cpp src/instance_identifier.cpp)
+        src/combiner/reducer_factory.cpp src/job/job_coordinator.cpp src/job/job_info_t.cpp src/job/job_tracker.h src/executor/local_executor_t.cpp src/instance_identifier.cpp src/job/job_tracker.cpp)
 
 set(HEADER_FILES
         src/worker/worker_cmd_t.h
@@ -48,7 +48,7 @@ set(HEADER_FILES
         include/firestorm/engine/job/job_t.h
         include/firestorm/engine/job/job_info_t.h
         include/firestorm/engine/mapper/map_result_t.h
-        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h include/firestorm/engine/job/job_status_t.h include/firestorm/engine/executor/local_executor_t.h include/firestorm/engine/executor/remote_executor_t.h include/firestorm/engine/instance_identifier_t.h include/firestorm/engine/executor/executor_t.h include/firestorm/engine/job/job_completion_callback_t.h include/firestorm/engine/completion_signal_t.h include/firestorm/engine/job/job_completion_promise.h include/firestorm/engine/executor/execution_result_t.h include/firestorm/engine/executor/execution_completion_promise.h include/firestorm/engine/job/job_result_t.h)
+        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h include/firestorm/engine/job/job_status_t.h include/firestorm/engine/executor/local_executor_t.h include/firestorm/engine/executor/remote_executor_t.h include/firestorm/engine/instance_identifier_t.h include/firestorm/engine/executor/executor_t.h include/firestorm/engine/job/job_completion_callback_t.h include/firestorm/engine/completion_signal_t.h include/firestorm/engine/job/job_completion_promise.h include/firestorm/engine/executor/execution_result_t.h include/firestorm/engine/executor/execution_completion_promise.h include/firestorm/engine/job/job_result_t.h include/firestorm/engine/auto_reset_event.h src/auto_reset_event.cpp)
 
 # Define an executable
 add_library(libfirestorm

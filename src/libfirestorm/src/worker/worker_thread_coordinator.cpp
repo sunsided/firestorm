@@ -93,7 +93,7 @@ namespace firestorm {
 
             // TODO: Take job deadlines into account.
 
-            job_status_t js {STATUS_COMPLETED, COMPLETION_SUCCEEDED, FAILURE_NONE};
+            job_status_t js {job_status::completed, job_completion::succeeded, job_failure::none};
             job_result_t jr {js, std::move(result)};
             callback(std::move(jr));
         }

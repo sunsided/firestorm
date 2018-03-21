@@ -6,6 +6,7 @@
 #define PROJECT_REMOTE_EXECUTOR_H
 
 #include <cassert>
+#include <firestorm/engine/job/job_t.h>
 #include "executor_t.h"
 
 namespace firestorm {
@@ -19,6 +20,13 @@ namespace firestorm {
             assert(!instance->local());
         }
         ~remote_executor_t() final = default;
+
+        /// \brief Processes a job on this executor.
+        /// \param job The job to process.
+        /// \param promise The promise to set the result for.
+        void process(const job_t& job, execution_completion_promise promise) noexcept final {
+            // TODO: Not implemented
+        }
     };
 
 }

@@ -8,11 +8,11 @@
 #include <utility>
 
 #include <firestorm/engine/instance_identifier_t.h>
-#include <firestorm/engine/job/job_status_t.h>
+#include <firestorm/engine/job/job_result_t.h>
 
 namespace firestorm {
 
-    /// \brief The result of a job execution on a specific instance.
+    /// \brief The status of a job execution on a specific instance.
     struct execution_result_t {
     public:
         execution_result_t(instance_identifier_ptr instance, job_result_t result) noexcept

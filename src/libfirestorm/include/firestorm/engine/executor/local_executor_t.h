@@ -12,6 +12,7 @@
 #include <firestorm/engine/job/job_status_t.h>
 #include <firestorm/engine/job/job_completion_callback_t.h>
 #include "executor_t.h"
+#include "execution_completion_promise.h"
 
 namespace firestorm {
 
@@ -23,8 +24,8 @@ namespace firestorm {
 
         /// \brief Processes a job on this executor.
         /// \param job The job to process.
-        /// \return The future containing the processing result.
-        std::future<execution_result_t> process(const job_t& job) noexcept final;
+        /// \param promise The promise to set the result for.
+        void process(const job_t& job, execution_completion_promise promise) noexcept final;
 
     private:
         class Impl;

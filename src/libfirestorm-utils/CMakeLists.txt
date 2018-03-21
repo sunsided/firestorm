@@ -12,7 +12,7 @@ set(SOURCE_FILES
 set(HEADER_FILES
         include/firestorm/utils/exception.h
         include/firestorm/utils/time_conversion.h
-        include/firestorm/utils/reader_writer_lock.h)
+        include/firestorm/utils/reader_writer_lock.h include/firestorm/utils/future_support.h)
 
 # Define an executable
 add_library(libfirestorm-utils
