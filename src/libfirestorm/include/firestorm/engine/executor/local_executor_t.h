@@ -6,8 +6,11 @@
 #define PROJECT_LOCAL_EXECUTOR_H
 
 #include <cassert>
+#include <future>
 #include <utility>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
+#include <firestorm/engine/job/job_status_t.h>
+#include <firestorm/engine/job/job_completion_callback_t.h>
 #include "executor_t.h"
 
 namespace firestorm {
@@ -15,15 +18,17 @@ namespace firestorm {
     /// \brief An executor that processes jobs locally.
     class local_executor_t final : public executor_t {
     public:
-        explicit local_executor_t(instance_identifier_ptr instance, worker_thread_coordinator_ptr wtc) noexcept
-            : _wtc{std::move(wtc)}, executor_t(std::move(instance))
-        {
-            assert(instance->local());
-        }
-        ~local_executor_t() final = default;
+        explicit local_executor_t(instance_identifier_ptr instance, worker_thread_coordinator_ptr wtc) noexcept;
+        ~local_executor_t() final;
+
+        /// \brief Processes a job on this executor.
+        /// \param job The job to process.
+        /// \return The future containing the processing result.
+        std::future<execution_result_t> process(const job_t& job) noexcept final;
 
     private:
-        worker_thread_coordinator_ptr _wtc;
+        class Impl;
+        std::unique_ptr<Impl> _impl;
     };
 
 }

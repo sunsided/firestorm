@@ -4,11 +4,11 @@ project(firestorm VERSION 0.1 LANGUAGES C CXX)
 # Define library. Only source files here!
 set(SOURCE_FILES
         src/main.cpp
-        src/options/option_verbosity.cpp)
+        src/options/option_verbosity.cpp src/server.cpp)
 
 set(HEADER_FILES
         src/options/options.h
-        src/options/options_verbosity.h)
+        src/options/options_verbosity.h src/server.h)
 
 # Define an executable
 add_executable(firestorm

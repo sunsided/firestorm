@@ -5,9 +5,9 @@
 #ifndef PROJECT_EXECUTOR_T_H
 #define PROJECT_EXECUTOR_T_H
 
-#include <firestorm/engine/instance_identifier_t.h>
-
 #include <utility>
+#include <firestorm/engine/instance_identifier_t.h>
+#include <firestorm/engine/executor/execution_result_t.h>
 
 namespace firestorm {
 
@@ -28,8 +28,10 @@ namespace firestorm {
             return _instance->local();
         };
 
-        // TODO: Add useful processing signature
-        virtual void process() = 0;
+        /// \brief Processes a job on this executor.
+        /// \param job The job to process.
+        /// \return The future containing the processing result.
+        virtual std::future<execution_result_t> process(const job_t& job) noexcept = 0;
 
     private:
         instance_identifier_ptr _instance;

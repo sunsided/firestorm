@@ -16,6 +16,7 @@
 #include <firestorm/benchmark/benchmark.h>
 
 #include "options/options.h"
+#include "server.h"
 
 using namespace std;
 using namespace firestorm;
@@ -140,5 +141,5 @@ int main(int argc, char **argv) {
                       num_workers > 0 ? num_workers : boost::optional<size_t>());
     }
 
-    return 0;
+    return run_server();
 }

@@ -41,6 +41,9 @@ namespace firestorm {
                 : _status{status}, _completion{completion}, _failure{failure}
         {}
 
+        job_status_t(const job_status_t&) noexcept = default;
+        job_status_t(job_status_t&&) noexcept = default;
+
         inline job_status_enum status() const noexcept { return _status; }
         inline job_completion_enum completion_type() const noexcept { return _completion; }
         inline job_failure_enum failure_type() const noexcept { return _failure; }
