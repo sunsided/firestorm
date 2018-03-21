@@ -12,7 +12,7 @@
 
 namespace firestorm {
 
-    /// \brief Information about a job to be processed.
+    /// \brief The job information block is used to describe and identify a job.
     struct job_info_t : tao::operators::equality_comparable<job_info_t> {
         job_info_t() noexcept;
         job_info_t(const job_info_t& other) noexcept = default;
@@ -54,6 +54,14 @@ namespace std {
 
             // TODO: Adjust hash<job_info_t> for correct unique ID.
             return hash<long>()(created_ms_since_epoch);
+        }
+    };
+
+    template<>
+    struct hash<firestorm::job_info_ptr> {
+        size_t operator()(const firestorm::job_info_ptr& k) const
+        {
+            return hash<firestorm::job_info_t>()(*k);
         }
     };
 

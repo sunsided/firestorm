@@ -4,9 +4,11 @@
 
 #include <memory>
 #include <utility>
+#include <unordered_map>
 #include <firestorm/engine/job/job_coordinator.h>
 #include <firestorm/engine/job/job_info_t.h>
 #include <firestorm/engine/job/job_t.h>
+#include "job_tracker.h"
 
 using namespace std;
 
@@ -15,20 +17,22 @@ namespace firestorm {
     class job_coordinator::Impl {
     public:
         explicit Impl(worker_thread_coordinator_ptr wtc) noexcept
-            :_wtc{std::move(wtc)}
+            :_wtc{std::move(wtc)}, _jobs{}
         {}
 
         ~Impl() noexcept = default;
 
-        future<any> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
-                                           const vector_ptr &query) noexcept;
+        future<job_status_t> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+                          const vector_ptr &query) noexcept;
 
     private:
+        /// \brief Creates an information block for a job.
+        /// \return The job information.
         job_info_ptr create_job_info() const;
 
     private:
-        // TODO: Keep list of all jobs (remote ones, too)
         worker_thread_coordinator_ptr _wtc;
+        unordered_map<job_info_ptr, job_tracker_ptr> _jobs;
     };
 
     job_coordinator::job_coordinator(worker_thread_coordinator_ptr wtc) noexcept
@@ -39,18 +43,41 @@ namespace firestorm {
         return make_shared<job_info_t>();
     }
 
-    future<any> job_coordinator::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+    future<job_status_t> job_coordinator::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
                                 const vector_ptr &query) noexcept {
         return _impl->query(mf, rf, query);
     }
 
-    future<any> job_coordinator::Impl::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+    future<job_status_t> job_coordinator::Impl::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
                                        const vector_ptr &query) noexcept {
 
         auto info = create_job_info();
         job_t job { info, mf, rf, query };
 
-        // TODO: Schedule onto workers
+        // The tracker has all information required to watch progress and combine results.
+        auto tracker = make_shared<job_tracker>(job);
+        try {
+            const auto insert_result = _jobs.insert({info, tracker});
+            if (!insert_result.second) {
+                // TODO: The insert failed because of an ID collision. This is highly unlikely and we need to log it.
+                return tracker->fail_unstarted();
+            }
+        }
+        catch(...) {
+            // The insert failed, e.g. because of a memory error.
+            // TODO: Log the exception but return a _failed_ job status.
+            //       This would unify the results in that the future never throws because of _us_.
+            auto exception = std::current_exception();
+            return tracker->fail_with_exception(exception);
+        }
+
+        // TODO: Register what a job progress _expects_, so that it can fire a result when all expectations are met.
+
+        // Schedule onto local executors
+        // TODO: Rename worker_thread_coordinator to local_executor
+        // TODO: Schedule onto remote_executors
+        auto result = _wtc->process(job);
+
         // TODO: Currently, worker_thread_coordinator itself contains aggregation logic for a final promise.
         //       However, multiple _machines_ could return these results, so the actual instance concerned
         //       with aggregation should be this coordinator.
@@ -58,7 +85,7 @@ namespace firestorm {
         //       would expect from a remote machine. In this case, the job coordinator only handles
         //       global output.
         // TODO: Add deadline support.
-        return future<any>{};
+        return future<job_status_t>{};
     }
 
 }

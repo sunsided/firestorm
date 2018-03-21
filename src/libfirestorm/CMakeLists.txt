@@ -9,7 +9,7 @@ set(SOURCE_FILES
         src/vector_ops/dot_product_sse42.cpp
         src/worker/worker_thread_coordinator.cpp
         src/thread_support.cpp
-        src/combiner/reducer_factory.cpp src/job/job_coordinator.cpp src/job/job_info_t.cpp)
+        src/combiner/reducer_factory.cpp src/job/job_coordinator.cpp src/job/job_info_t.cpp src/job/job_tracker.h)
 
 set(HEADER_FILES
         src/worker/worker_cmd_t.h
@@ -48,7 +48,7 @@ set(HEADER_FILES
         include/firestorm/engine/job/job_t.h
         include/firestorm/engine/job/job_info_t.h
         include/firestorm/engine/mapper/map_result_t.h
-        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h)
+        include/firestorm/engine/reducer/reduce_result_t.h include/firestorm/engine/job/job_coordinator.h include/firestorm/engine/job/job_status_t.h)
 
 # Define an executable
 add_library(libfirestorm
