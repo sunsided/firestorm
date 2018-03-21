@@ -8,22 +8,23 @@
 #include <functional>
 #include <chrono>
 #include <memory>
+#include <tao/operators.hpp>
 
 namespace firestorm {
 
     /// \brief Information about a job to be processed.
-    struct job_info_t {
+    struct job_info_t : tao::operators::equality_comparable<job_info_t> {
         job_info_t() noexcept;
         job_info_t(const job_info_t& other) noexcept = default;
         job_info_t(job_info_t&& other) noexcept;
 
         job_info_t& operator=(const job_info_t& other) noexcept = default;
 
-        inline std::chrono::system_clock::time_point created() const {
+        inline std::chrono::system_clock::time_point created() const noexcept {
             return _created;
         }
 
-        bool operator==(const job_info_t& rhs) {
+        bool operator==(const job_info_t& rhs) const noexcept {
             return _created == rhs._created;
         }
 
@@ -43,10 +44,7 @@ namespace std {
 
     template<>
     struct hash<firestorm::job_info_t> {
-        typedef firestorm::job_info_t argument_type;
-        typedef size_t result_type;
-
-        result_type operator()(const argument_type& k) const
+        size_t operator()(const firestorm::job_info_t& k) const
         {
             using namespace std::chrono;
 

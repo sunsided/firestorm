@@ -12,7 +12,9 @@
 
 namespace firestorm {
 
-    struct job_t {
+    struct job_t : tao::operators::equality_comparable<job_t>,
+                   tao::operators::equality_comparable<job_t, job_info_t>,
+                   tao::operators::equality_comparable<job_t, job_info_ptr>{
     public:
         job_t(const job_info_ptr &info, const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept
             : _info{info}, _mf{mf}, _rf{rf}, _query{query}
@@ -27,11 +29,34 @@ namespace firestorm {
         const inline reducer_factory_ptr reducer_factory() const { return _rf; }
         const inline vector_ptr query() const { return _query; }
 
+        bool operator==(const job_t& rhs) const noexcept {
+            return *_info == *rhs._info;
+        }
+
+        bool operator==(const job_info_t& rhs) const noexcept {
+            return *_info == rhs;
+        }
+
+        bool operator==(const job_info_ptr& rhs) const noexcept {
+            return *_info == *rhs;
+        }
+
     private:
         mutable job_info_ptr _info;
         mutable mapper_factory_ptr _mf;
         mutable reducer_factory_ptr _rf;
         mutable vector_ptr _query;
+    };
+
+}
+
+namespace std {
+
+    template<>
+    struct hash<firestorm::job_t> {
+        size_t operator()(const firestorm::job_t& k) const {
+            return hash<firestorm::job_info_t>()(*k.info());
+        }
     };
 
 }
