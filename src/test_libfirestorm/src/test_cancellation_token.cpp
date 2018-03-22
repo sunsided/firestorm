@@ -3,6 +3,7 @@
 //
 
 #include <atomic>
+#include <chrono>
 #include <gtest/gtest.h>
 #include <firestorm/synchronization/cancellation_token_source.h>
 
@@ -16,7 +17,7 @@ namespace {
         auto ct = cts.create_token();
 
         // assert
-        ASSERT_EQ(ct->canceled(), false);
+        ASSERT_FALSE(ct->canceled());
     }
 
     TEST(CancellationToken, NewToken_WhenCanceled_IsCanceled) {
@@ -28,7 +29,7 @@ namespace {
         auto ct = cts.create_token();
 
         // assert
-        ASSERT_EQ(ct->canceled(), true);
+        ASSERT_TRUE(ct->canceled());
     }
 
     TEST(CancellationToken, ExistingToken_WhenCanceled_IsCanceled) {
@@ -40,7 +41,7 @@ namespace {
         cts.cancel();
 
         // assert
-        ASSERT_EQ(ct->canceled(), true);
+        ASSERT_TRUE(ct->canceled());
     }
 
     TEST(CancellationToken, MultipleTokens_WhenCanceled_AreCanceled) {
@@ -53,8 +54,8 @@ namespace {
         cts.cancel();
 
         // assert
-        ASSERT_EQ(a->canceled(), true);
-        ASSERT_EQ(b->canceled(), true);
+        ASSERT_TRUE(a->canceled());
+        ASSERT_TRUE(b->canceled());
     }
 
     TEST(CancellationToken, TokenCallback_WhenNotCanceled_IsNotCalled) {
@@ -117,4 +118,34 @@ namespace {
         ASSERT_EQ(count, 1);
     }
 
+    TEST(CancellationToken, CancelAfter_CancelsToken) {
+        // arrange
+        firestorm::cancellation_token_source cts{std::chrono::milliseconds(10)};
+
+        // act
+        auto ct = cts.create_token();
+        const auto immediate = ct->canceled();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        // assert
+        ASSERT_FALSE(immediate);
+        ASSERT_TRUE(ct->canceled());
+    }
+
+    TEST(CancellationToken, CancelAtTime_CancelsToken) {
+        // arrange
+        firestorm::cancellation_token_source cts{std::chrono::steady_clock::now() + std::chrono::milliseconds(10)};
+
+        // act
+        auto ct = cts.create_token();
+        const auto immediate = ct->canceled();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        // assert
+        ASSERT_FALSE(immediate);
+        ASSERT_TRUE(ct->canceled());
+    }
+
+
+    // TODO: Test chained token sources / chained cancellation.
 }

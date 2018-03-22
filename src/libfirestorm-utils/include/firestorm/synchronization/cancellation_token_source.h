@@ -22,6 +22,7 @@ namespace firestorm {
         explicit cancellation_token_source(const std::chrono::duration<_Rep, _Period>& rel_time) noexcept
             : cancellation_token_source()
         {
+            // TODO: If relative time is in the past, cancel immediately.
             std::thread([this, rel_time]() {
                 std::this_thread::sleep_for(rel_time);
                 cancel();
@@ -32,6 +33,7 @@ namespace firestorm {
         explicit cancellation_token_source(const std::chrono::time_point<_Clock, _Duration>& abs_time) noexcept
             : cancellation_token_source()
         {
+            // TODO: If absolute time is in the past, cancel immediately.
             std::thread([this, abs_time]() {
                 std::this_thread::sleep_until(abs_time);
                 cancel();
