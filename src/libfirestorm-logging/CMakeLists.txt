@@ -3,10 +3,10 @@ project(libfirestorm-logging VERSION 0.1 LANGUAGES C CXX)
 
 # Define library. Only source files here!
 set(SOURCE_FILES
-        src/LoggerFactory.cpp)
+        src/logger_factory.cpp)
 
 set(HEADER_FILES
-        include/firestorm/logging/LoggerFactory.h include/firestorm/logging/LoggingException.h include/firestorm/logging/logger_t.h)
+        include/firestorm/logging/logger_factory.h include/firestorm/logging/logging_exception.h include/firestorm/logging/logger_t.h)
 
 # Define an executable
 add_library(libfirestorm-logging

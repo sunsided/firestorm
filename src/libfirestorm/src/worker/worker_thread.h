@@ -12,7 +12,7 @@
 #include <blockingconcurrentqueue.h>
 #include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/types/mem_chunk_t.h>
-#include <firestorm/utils/reader_writer_lock.h>
+#include <firestorm/synchronization/reader_writer_lock.h>
 #include "worker_cmd_t.h"
 #include "worker_result_t.h"
 

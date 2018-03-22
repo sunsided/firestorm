@@ -12,34 +12,31 @@
 namespace firestorm {
 
     /// Factory for loggers.
-    class LoggerFactory {
+    class logger_factory {
     public:
-        LoggerFactory();
+        logger_factory();
+        logger_factory(const logger_factory &other) = delete;
+        logger_factory(logger_factory &&other) noexcept;
+        ~logger_factory();
 
-        LoggerFactory(const LoggerFactory &other) = delete;
-
-        LoggerFactory(LoggerFactory &&other) noexcept;
-
-        ~LoggerFactory();
-
-        LoggerFactory &operator=(LoggerFactory &&other) noexcept;
+        logger_factory &operator=(logger_factory &&other) noexcept;
 
         /// Sets the logging system to asynchronous mode.
         /// \return A reference to this instance.
-        LoggerFactory &setAsync();
+        logger_factory &set_async();
 
         /// Adds a console logger.
         /// \param color If true, enables ANSI color output.
-        /// \param logLevel The level at which to log.
+        /// \param log_level The level at which to log.
         /// \return A reference to this instance.
-        LoggerFactory &addConsole(spdlog::level::level_enum logLevel = spdlog::level::info, bool color = true);
+        logger_factory &add_console(spdlog::level::level_enum log_level = spdlog::level::info, bool color = true);
 
         /// Creates a new logger.
         /// \param logger_name The name of the logger.
-        /// \param logLevel The level at which to log.
+        /// \param log_level The level at which to log.
         /// \return The logger.
         logger_t
-        createLogger(const std::string &logger_name, spdlog::level::level_enum logLevel = spdlog::level::info);
+        create_logger(const std::string& logger_name, spdlog::level::level_enum log_level = spdlog::level::info);
 
     private:
         class Impl;

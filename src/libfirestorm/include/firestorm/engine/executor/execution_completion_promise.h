@@ -12,7 +12,7 @@
 #include <firestorm/engine/job/job_completion_callback_t.h>
 #include <firestorm/engine/instance_identifier_t.h>
 #include <firestorm/engine/job/job_status_t.h>
-#include <firestorm/engine/auto_reset_event.h>
+#include <firestorm/synchronization/auto_reset_event.h>
 #include "execution_result_t.h"
 
 namespace firestorm {

@@ -3,15 +3,15 @@
 //
 
 #include <vector>
-#include <firestorm/logging/LoggerFactory.h>
-#include <firestorm/logging/LoggingException.h>
+#include <firestorm/logging/logger_factory.h>
+#include <firestorm/logging/logging_exception.h>
 
 namespace spd = spdlog;
 using namespace std;
 
 namespace firestorm {
 
-    class LoggerFactory::Impl {
+    class logger_factory::Impl {
     public:
         Impl() = default;
 
@@ -27,49 +27,49 @@ namespace firestorm {
         vector<spd::sink_ptr> sinks;
     };
 
-    LoggerFactory::LoggerFactory()
-            : impl{make_unique<LoggerFactory::Impl>()} {
+    logger_factory::logger_factory()
+            : impl{make_unique<logger_factory::Impl>()} {
 
     }
 
-    LoggerFactory::LoggerFactory(LoggerFactory &&) noexcept = default;
+    logger_factory::logger_factory(logger_factory &&) noexcept = default;
 
-    LoggerFactory &LoggerFactory::operator=(LoggerFactory &&) noexcept = default;
+    logger_factory &logger_factory::operator=(logger_factory &&) noexcept = default;
 
-    LoggerFactory::~LoggerFactory() {
+    logger_factory::~logger_factory() {
         spd::drop_all();
     }
 
-    LoggerFactory &LoggerFactory::setAsync() {
+    logger_factory &logger_factory::set_async() {
         try {
             size_t logger_q_size = 8192;
             spd::set_async_mode(logger_q_size);
             return *this;
         }
         catch (...) {
-            std::throw_with_nested(LoggingException("Unable to configure asynchronous logging."));
+            std::throw_with_nested(logging_exception("Unable to configure asynchronous logging."));
         }
     }
 
-    LoggerFactory &LoggerFactory::addConsole(const spd::level::level_enum logLevel, const bool color) {
+    logger_factory &logger_factory::add_console(spdlog::level::level_enum log_level, bool color) {
         try {
             auto stdout_sink = color
                                ? static_cast<spd::sink_ptr>(make_shared<spd::sinks::ansicolor_stdout_sink_mt>())
                                : static_cast<spd::sink_ptr>(make_shared<spdlog::sinks::stdout_sink_mt>());
-            stdout_sink->set_level(logLevel);
+            stdout_sink->set_level(log_level);
             impl->add_sink(stdout_sink);
             return *this;
         }
         catch (...) {
-            std::throw_with_nested(LoggingException("Unable to register console logging sink."));
+            std::throw_with_nested(logging_exception("Unable to register console logging sink."));
         }
     }
 
-    logger_t LoggerFactory::createLogger(const std::string &logger_name, const spd::level::level_enum logLevel) {
+    logger_t logger_factory::create_logger(const std::string& logger_name, spdlog::level::level_enum log_level) {
         try {
             auto sinks = impl->getSinks();
             auto logger = make_shared<spd::logger>(logger_name, begin(sinks), end(sinks));
-            logger->set_level(logLevel);
+            logger->set_level(log_level);
             logger->set_pattern("[%Y-%m-%d %T.%e] [%t] [%n] [%l] %v");
 
             // register by name
@@ -78,7 +78,7 @@ namespace firestorm {
             return logger;
         }
         catch (...) {
-            std::throw_with_nested(LoggingException("Unable to create logger \"" + logger_name + "\"."));
+            std::throw_with_nested(logging_exception("Unable to create logger \"" + logger_name + "\"."));
         }
     }
 

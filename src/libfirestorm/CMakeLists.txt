@@ -17,7 +17,7 @@ set(SOURCE_FILES
         src/executor/local_executor_t.cpp
         src/instance_identifier.cpp
         src/job/job_tracker.cpp
-        src/auto_reset_event.cpp)
+        ../libfirestorm-utils/src/auto_reset_event.cpp)
 
 set(HEADER_FILES
         src/worker/worker_cmd_t.h
@@ -64,12 +64,12 @@ set(HEADER_FILES
         include/firestorm/engine/instance_identifier_t.h
         include/firestorm/engine/executor/executor_t.h
         include/firestorm/engine/job/job_completion_callback_t.h
-        include/firestorm/engine/completion_signal_t.h
+        ../libfirestorm-utils/include/firestorm/synchronization/completion_signal_t.h
         include/firestorm/engine/job/job_completion_promise.h
         include/firestorm/engine/executor/execution_result_t.h
         include/firestorm/engine/executor/execution_completion_promise.h
         include/firestorm/engine/job/job_result_t.h
-        include/firestorm/engine/auto_reset_event.h)
+        ../libfirestorm-utils/include/firestorm/synchronization/auto_reset_event.h)
 
 # Define an executable
 add_library(libfirestorm

@@ -5,7 +5,7 @@
 #ifndef PROJECT_JOB_STATUS_NOTIFICATION_H
 #define PROJECT_JOB_STATUS_NOTIFICATION_H
 
-#include <firestorm/engine/auto_reset_event.h>
+#include <firestorm/synchronization/auto_reset_event.h>
 #include <firestorm/engine/job/job_info_t.h>
 #include <blockingconcurrentqueue.h>
 

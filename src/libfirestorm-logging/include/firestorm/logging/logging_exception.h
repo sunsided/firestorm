@@ -10,12 +10,12 @@
 
 namespace firestorm {
 
-    class LoggingException final : public std::runtime_error {
+    class logging_exception final : public std::runtime_error {
     public:
-        explicit LoggingException(const std::string &what)
+        explicit logging_exception(const std::string &what)
                 : std::runtime_error(what) {}
 
-        ~LoggingException() final = default;
+        ~logging_exception() final = default;
     };
 
 }

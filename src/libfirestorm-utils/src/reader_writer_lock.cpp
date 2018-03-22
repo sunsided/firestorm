@@ -2,7 +2,7 @@
 // Created by sunside on 10.03.18.
 //
 
-#include "../include/firestorm/utils/reader_writer_lock.h"
+#include "firestorm/synchronization/reader_writer_lock.h"
 
 using namespace std;
 

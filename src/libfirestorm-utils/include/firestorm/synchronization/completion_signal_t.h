@@ -12,7 +12,7 @@
 
 namespace firestorm {
 
-    /// \brief Defines a signal that indicates job completion.
+    /// \brief Defines the base class for a signal that indicates completion of a task.
     ///
     /// Classes inheriting from this should implement operator().
     struct completion_signal_t {

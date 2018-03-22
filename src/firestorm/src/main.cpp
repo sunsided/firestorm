@@ -10,7 +10,7 @@
 #include <boost/optional.hpp>
 
 #include <firestorm/utils/exception.h>
-#include <firestorm/logging/LoggerFactory.h>
+#include <firestorm/logging/logger_factory.h>
 #include <firestorm/engine/simd.h>
 #include <firestorm/engine/openmp.h>
 #include <firestorm/benchmark/benchmark.h>
@@ -26,13 +26,13 @@ namespace spd = spdlog;
 // TODO: Boost.SIMD
 // TODO: determine __restrict__ keyword support from https://github.com/elemental/Elemental/blob/master/cmake/detect/CXX.cmake
 
-unique_ptr<LoggerFactory> configure_logging(const spdlog::level::level_enum verbosity) {
+unique_ptr<logger_factory> configure_logging(const spdlog::level::level_enum verbosity) {
     // TODO: https://github.com/gabime/spdlog/wiki/1.-QuickStart
     try
     {
-        auto factory = make_unique<LoggerFactory>();
-        factory->setAsync()
-                .addConsole(verbosity);
+        auto factory = make_unique<logger_factory>();
+        factory->set_async()
+                .add_console(verbosity);
 
         return factory;
     }
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    auto logger = loggerFactory->createLogger("firestorm");
+    auto logger = loggerFactory->create_logger("firestorm");
     logger->info("firestorm VSE starting.");
 
     report_profiler(logger);
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
     logger->info("Hardware concurrency: {} threads.", thread::hardware_concurrency());
 
     if(benchmark->parsed()) {
-        auto benchmarkLogger = loggerFactory->createLogger("benchmark", verbosity);
+        auto benchmarkLogger = loggerFactory->create_logger("benchmark", verbosity);
         run_benchmark(benchmarkLogger,
                       num_vectors,
                       chunk_size_mb * 1024UL * 1024UL,
@@ -142,6 +142,6 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    auto serverLogger = loggerFactory->createLogger("server", verbosity);
+    auto serverLogger = loggerFactory->create_logger("server", verbosity);
     return run_server(serverLogger);
 }

@@ -3,13 +3,14 @@
 //
 
 #include <memory>
+#include <set>
 #include <shared_mutex>
 #include <thread>
 #include <unordered_map>
-#include <firestorm/engine/job/job_coordinator.h>
-#include <blockingconcurrentqueue.h>
 #include <unordered_set>
-#include <set>
+#include <blockingconcurrentqueue.h>
+#include <firestorm/engine/job/job_coordinator.h>
+#include <firestorm/synchronization/reader_writer_lock.h>
 #include "job_tracker.h"
 
 namespace firestorm {
@@ -48,7 +49,7 @@ namespace firestorm {
         std::vector<executor_ptr> _executors;
         std::unordered_map<job_info_ptr, job_tracker_ptr> _jobs;
         mutable std::atomic<bool> _shutdown;
-        mutable std::shared_mutex _mutex;
+        mutable reader_writer_lock _mutex;
         mutable job_signal_queue_ptr _queue;
         mutable job_status_notification_ptr _signal;
         std::thread _update_thread;
@@ -85,7 +86,7 @@ namespace firestorm {
             // Update the job trackers where needed.
             // We lock the job list to avoid invalidation of our
             {
-                std::shared_lock<std::shared_mutex> lock(_mutex);
+                const auto lock = _mutex.read_lock();
                 for (auto i=0U; i<dequeue_count; ++i) {
                     const auto& id = infos[i];
                     try {
@@ -124,7 +125,7 @@ namespace firestorm {
         // The tracker has all information required to watch progress and combine results.
         auto tracker = std::make_shared<job_tracker>(job, _signal);
         try {
-            std::unique_lock<std::shared_mutex> lock(_mutex);
+            const auto lock = _mutex.write_lock();
             const auto insert_result = _jobs.insert(std::pair{info, tracker});
             if (!insert_result.second) {
                 // TODO: The insert failed because of an ID collision. This is highly unlikely and we need to log it.
