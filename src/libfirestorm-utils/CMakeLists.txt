@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 set(SOURCE_FILES
         src/exception.cpp
         src/reader_writer_lock.cpp
-        src/auto_reset_event.cpp src/cancellation_token_source.cpp src/cancellation_token.cpp)
+        src/auto_reset_event.cpp src/cancellation_token_source.cpp)
 
 set(HEADER_FILES
         include/firestorm/utils/exception.h

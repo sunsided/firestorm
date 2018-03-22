@@ -53,10 +53,6 @@ namespace firestorm {
         std::shared_ptr<cancellation_token> create_token();
 
     private:
-        /// \brief Cancels the specified token.
-        void cancel_token(const std::shared_ptr<cancellation_token>& token) const noexcept;
-
-    private:
         class Impl;
         std::unique_ptr<Impl> _impl;
     };
