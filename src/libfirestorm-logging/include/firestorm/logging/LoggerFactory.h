@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
+#include "logger_t.h"
 
 namespace firestorm {
 
@@ -37,7 +38,7 @@ namespace firestorm {
         /// \param logger_name The name of the logger.
         /// \param logLevel The level at which to log.
         /// \return The logger.
-        std::shared_ptr<spdlog::logger>
+        logger_t
         createLogger(const std::string &logger_name, spdlog::level::level_enum logLevel = spdlog::level::info);
 
     private:

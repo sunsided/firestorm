@@ -6,8 +6,6 @@
 #include <random>
 #include <algorithm>
 
-#include <spdlog/spdlog.h>
-
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/worker/worker_t.h>
@@ -19,6 +17,7 @@
 #include <firestorm/engine/vector_ops/dot_product_sse42.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/benchmark/benchmark.h>
+#include <firestorm/logging/logger_t.h>
 #include "query_vector.h"
 #include "test_round.h"
 
@@ -26,7 +25,7 @@ using namespace std;
 
 namespace firestorm {
 
-    void run_benchmark(const shared_ptr<spdlog::logger> &log, const size_t num_vectors, const size_t target_chunk_size,
+    void run_benchmark(const logger_t& log, const size_t num_vectors, const size_t target_chunk_size,
                        const boost::optional<size_t> num_workers) {
         const auto seed = 1337; // std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);

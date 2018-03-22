@@ -6,7 +6,6 @@
 #include <cassert>
 #include <thread>
 #include <vector>
-#include <spdlog/logger.h>
 #include <firestorm/engine/executor/local_executor_t.h>
 #include <firestorm/benchmark/vector_generator.h>
 #include <firestorm/engine/memory/ChunkManager.h>
@@ -14,8 +13,7 @@
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/engine/reducer/keep_all_reducer_factory.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
-#include <firestorm/engine/types/score_t.h>
-#include <firestorm/engine/types/result_t.h>
+#include <firestorm/logging/logger_t.h>
 #include "server.h"
 
 using namespace firestorm;
@@ -77,14 +75,14 @@ vector_ptr generate_vectors(const std::shared_ptr<spdlog::logger>& log,
     return vec_gen.create_vector(0L);
 }
 
-int run_server(std::shared_ptr<spdlog::logger> log) {
+int run_server(logger_t log) {
     // The instance identifier uniquely identifies this process.
     auto instance_identifier = std::make_shared<instance_identifier_t>();
 
     // The worker thread coordinator is used for local (in-process) work distribution.
     auto worker_count = std::thread::hardware_concurrency();
     if (worker_count == 0) worker_count = default_worker_count;
-    auto wtc = std::make_shared<worker_thread_coordinator>(worker_count);
+    auto wtc = std::make_shared<worker_thread_coordinator>(worker_count); // TODO: This one currently does synchronous operations.
 
     // The local executor handles the local work coordination.
     auto local_executor = std::make_shared<local_executor_t>(instance_identifier, wtc);
