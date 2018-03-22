@@ -139,7 +139,9 @@ int main(int argc, char **argv) {
                       num_vectors,
                       chunk_size_mb * 1024UL * 1024UL,
                       num_workers > 0 ? num_workers : boost::optional<size_t>());
+        return 0;
     }
 
-    return run_server();
+    auto serverLogger = loggerFactory->createLogger("server", verbosity);
+    return run_server(serverLogger);
 }

@@ -64,6 +64,8 @@ namespace firestorm {
         std::condition_variable _signal;
     };
 
+    using auto_reset_event_ptr = std::shared_ptr<auto_reset_event>;
+
 }
 
 #endif //PROJECT_AUTO_RESET_EVENT_H

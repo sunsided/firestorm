@@ -23,8 +23,8 @@ namespace firestorm {
 
         /// \brief Processes a job on this executor.
         /// \param job The job to process.
-        /// \param promise The promise to set the result for.
-        void process(const job_t& job, execution_completion_promise promise) noexcept final {
+        /// \param callback The function to call with the result.
+        void process(const job_t& job, job_completion_callback_t callback) noexcept final {
             // TODO: Not implemented
         }
     };

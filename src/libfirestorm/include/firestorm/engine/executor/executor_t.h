@@ -17,7 +17,9 @@ namespace firestorm {
     public:
         explicit executor_t(instance_identifier_ptr instance) noexcept
                 : _instance{std::move(instance)}
-        {}
+        {
+            assert(_instance != nullptr);
+        }
         virtual ~executor_t() noexcept = default;
 
         /// \brief Gets the instance this executor is running on.
@@ -49,14 +51,14 @@ namespace firestorm {
         inline std::future<execution_result_t> process(const job_t& job) noexcept {
             auto promise = create_promise();
             auto future = promise.get_future();
-            process(job, std::move(promise));
+            process(job, std::move(promise.callback()));
             return future;
         }
 
         /// \brief Processes a job on this executor.
         /// \param job The job to process.
-        /// \param promise The promise to set the result for.
-        virtual void process(const job_t& job, execution_completion_promise promise) noexcept = 0;
+        /// \param callback The function to call with the result.
+        virtual void process(const job_t& job, job_completion_callback_t callback) noexcept = 0;
 
     private:
         instance_identifier_ptr _instance;

@@ -14,6 +14,11 @@ namespace firestorm {
         return f.valid() && (f.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
     }
 
+    template<typename R>
+    inline bool is_ready(const std::shared_future<R>& f) {
+        return f.valid() && (f.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+    }
+
 }
 
 #endif //PROJECT_FUTURE_SUPPORT_H

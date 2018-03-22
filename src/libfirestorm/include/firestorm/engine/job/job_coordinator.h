@@ -22,11 +22,11 @@ namespace firestorm {
     class job_coordinator final {
     public:
         explicit job_coordinator(std::vector<executor_ptr> executors) noexcept;
-        ~job_coordinator() noexcept = default;
+        ~job_coordinator() noexcept;
         job_coordinator(const job_coordinator&) noexcept = delete;
         job_coordinator(job_coordinator&&) noexcept = default;
 
-        std::future<job_status_t> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept;
+        std::shared_future<job_result_t> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept;
 
     private:
         class Impl;
