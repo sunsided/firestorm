@@ -14,6 +14,9 @@ namespace firestorm {
 
     class keep_all_reducer_factory final : public reducer_factory {
     public:
+        keep_all_reducer_factory() noexcept = default;
+        virtual ~keep_all_reducer_factory() noexcept = default;
+
         reducer_ptr create() const final {
             return std::make_shared<keep_all_reducer>();
         }

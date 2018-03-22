@@ -1,7 +1,7 @@
 include(ExternalProject)
 ExternalProject_Add(gabime_spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        # GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/spdlog"
+        GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/spdlog"
         GIT_REMOTE_NAME origin
         GIT_TAG v0.16.3
         GIT_SHALLOW On

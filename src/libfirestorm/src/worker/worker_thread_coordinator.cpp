@@ -4,8 +4,9 @@
 
 #include <thread>
 #include <vector>
-#include <firestorm/engine/worker_t.h>
-#include <firestorm/engine/worker_thread_coordinator.h>
+#include <firestorm/engine/worker/worker_t.h>
+#include <firestorm/engine/worker/worker_thread_coordinator.h>
+#include <firestorm/engine/job/job_completion_promise.h>
 #include "worker_thread.h"
 
 using namespace std;
@@ -57,7 +58,7 @@ namespace firestorm {
             return count;
         }
 
-        std::future<std::any> process([[maybe_unused]] const job_t& job) const {
+        void process(const job_t& job, job_completion_callback_t&& callback) const {
             const auto mapper = job.mapper_factory()->create();
 
             vector<future<reduce_result_t>> results;
@@ -71,6 +72,8 @@ namespace firestorm {
 
                 worker->enqueue_command(cmd);
             }
+
+            // TODO: At this point, execution should return with a future.
 
             // TODO: Reduce result (do that multithreaded?)
             auto final_reducer = job.reducer_factory()->create();
@@ -87,9 +90,18 @@ namespace firestorm {
 
             // TODO: We need to trigger this promise once all partial promises are fulfilled, failed or timed out (deadline!).
             // TODO: Have a reducer thread that gets woken up whenever an individual promise was touched?
-            promise<any> p {};
-            p.set_value(result);
-            return p.get_future();
+
+            // TODO: Take job deadlines into account.
+
+            job_status_t js {job_status::completed, job_completion::succeeded, job_failure::none};
+            job_result_t jr {js, std::move(result)};
+            callback(std::move(jr));
+        }
+
+        std::future<job_result_t> process(const job_t& job) const {
+            job_completion_promise promise;
+            process(job, move(promise.callback()));
+            return promise.get_future();
         }
 
     private:
@@ -175,8 +187,12 @@ namespace firestorm {
         impl->assign_chunk(chunk);
     }
 
-    std::future<std::any> worker_thread_coordinator::process(const job_t& job) const {
+    std::future<job_result_t> worker_thread_coordinator::process(const job_t& job) const {
         return impl->process(job);
+    }
+
+    void worker_thread_coordinator::process(const job_t &job, job_completion_callback_t&& callback) const {
+        impl->process(job, move(callback));
     }
 
     size_t worker_thread_coordinator::effective_worker_count() const {

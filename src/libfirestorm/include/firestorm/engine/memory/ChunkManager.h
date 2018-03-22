@@ -47,7 +47,7 @@ namespace firestorm {
             return chunks.at(n);
         }
 
-        /// Gets the number of chunks registered in this manager.
+        /// \brief Gets the number of chunks registered in this manager.
         /// \return The number of chunks.
         inline size_t size() const { return chunks.size(); }
 

@@ -23,6 +23,7 @@ include(LibrarySpdlog)
 include(LibraryCLI11)
 include(LibraryThreads)
 include(LibraryConcurrentqueue)
+include(LibraryTaoCppOperators)
 
 # Options
 include(OptionLto)

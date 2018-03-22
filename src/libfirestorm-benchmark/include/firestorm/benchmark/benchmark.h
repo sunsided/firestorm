@@ -8,12 +8,12 @@
 #include <random>
 #include <chrono>
 #include <memory>
-#include <spdlog/spdlog.h>
 #include <firestorm/engine/memory/ChunkManager.h>
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/mapper/dot_product_mapper.h>
+#include <firestorm/logging/logger_t.h>
 
 namespace firestorm {
 
@@ -22,7 +22,7 @@ namespace firestorm {
     /// \param num_vectors The number of vectors to test.
     /// \param target_chunk_size The chunk size to work with.
     /// \param num_workers The number of concurrent workers to use. If unset, use native system concurrency.
-    void run_benchmark(const std::shared_ptr<spdlog::logger> &log, size_t num_vectors, size_t target_chunk_size = 32_MB,
+    void run_benchmark(const logger_t &log, size_t num_vectors, size_t target_chunk_size = 32_MB,
                        boost::optional<size_t> num_workers = boost::none);
 
 }

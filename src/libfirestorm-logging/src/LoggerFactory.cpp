@@ -65,8 +65,7 @@ namespace firestorm {
         }
     }
 
-    shared_ptr<spd::logger>
-    LoggerFactory::createLogger(const std::string &logger_name, const spd::level::level_enum logLevel) {
+    logger_t LoggerFactory::createLogger(const std::string &logger_name, const spd::level::level_enum logLevel) {
         try {
             auto sinks = impl->getSinks();
             auto logger = make_shared<spd::logger>(logger_name, begin(sinks), end(sinks));

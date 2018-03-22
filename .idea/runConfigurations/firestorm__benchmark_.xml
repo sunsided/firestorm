@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="firestorm (benchmark)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="benchmark --verbosity debug -c 8" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="firestorm" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="firestorm">
+    <envs />
+    <method />
+  </configuration>
+</component>

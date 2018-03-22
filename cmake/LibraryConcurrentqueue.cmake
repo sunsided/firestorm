@@ -1,7 +1,7 @@
 include(ExternalProject)
 ExternalProject_Add(concurrentqueue_git
         GIT_REPOSITORY https://github.com/cameron314/concurrentqueue.git
-        # GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/concurrentqueue"
+        GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/concurrentqueue"
         GIT_REMOTE_NAME origin
         GIT_TAG v1.0.0-beta
         GIT_SHALLOW On

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <firestorm/engine/reducer/reduce_result_t.h>
+#include <firestorm/engine/job/job_info_t.h>
 
 namespace firestorm {
 

@@ -6,7 +6,7 @@ set(SOURCE_FILES
         src/LoggerFactory.cpp)
 
 set(HEADER_FILES
-        include/firestorm/logging/LoggerFactory.h include/firestorm/logging/LoggingException.h)
+        include/firestorm/logging/LoggerFactory.h include/firestorm/logging/LoggingException.h include/firestorm/logging/logger_t.h)
 
 # Define an executable
 add_library(libfirestorm-logging

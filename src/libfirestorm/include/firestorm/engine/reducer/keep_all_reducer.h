@@ -5,6 +5,7 @@
 #ifndef FIRESTORM_KEEP_ALL_REDUCER_H
 #define FIRESTORM_KEEP_ALL_REDUCER_H
 
+#include <any>
 #include <vector>
 #include "reducer_t.h"
 
