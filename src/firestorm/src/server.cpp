@@ -8,7 +8,7 @@
 #include <vector>
 #include <firestorm/engine/executor/local_executor_t.h>
 #include <firestorm/benchmark/vector_generator.h>
-#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/job/job_coordinator.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/engine/reducer/keep_all_reducer_factory.h>
@@ -25,7 +25,7 @@ const size_t BENCHMARK_NUM_VECTORS = 10000;
 const size_t BENCHMARK_VECTOR_SEED = 1337;
 
 vector_ptr generate_vectors(const std::shared_ptr<spdlog::logger>& log,
-                      const std::shared_ptr<ChunkManager>& chunkManager, size_t target_chunk_size,
+                      const std::shared_ptr<chunk_manager>& chunkManager, size_t target_chunk_size,
                       const std::shared_ptr<worker_thread_coordinator>& wtc) {
     vector_generator vec_gen{BENCHMARK_NUM_DIMENSIONS, BENCHMARK_VECTOR_SEED};
 
@@ -93,11 +93,11 @@ int run_server(logger_t log) {
     job_coordinator coordinator{executors};
 
     // The chunk manager manages the memory locations for our vectors.
-    auto chunk_manager = std::make_shared<ChunkManager>(); // TODO: Actually it should be singleton and passed by-ref
+    auto cm = std::make_shared<chunk_manager>(); // TODO: Actually it should be singleton and passed by-ref
     const size_t target_chunk_size = 32_MB; // TODO: This should be a property of the manager itself
 
     // Let's generate some vectors.
-    const auto query_vector = generate_vectors(log, chunk_manager, target_chunk_size, wtc);
+    const auto query_vector = generate_vectors(log, cm, target_chunk_size, wtc);
 
     // We need a mapper and reducer.
     auto mapper_factory = std::make_shared<dot_product_mapper_factory<dot_product_unrolled_8_t>>();
@@ -116,7 +116,7 @@ int run_server(logger_t log) {
 
     // With keep_all, we will see more results than we have actual vectors (depending on the number of
     // vectors), since this also keeps all unassigned slots in a chunk.
-    const auto expected_num_vectors = (chunk_manager->size() * target_chunk_size) / (sizeof(float) * BENCHMARK_NUM_DIMENSIONS);
+    const auto expected_num_vectors = (cm->size() * target_chunk_size) / (sizeof(float) * BENCHMARK_NUM_DIMENSIONS);
     log->info("Vector results: {}. Expected results: {}", results.size(), expected_num_vectors);
     assert(results.size() == expected_num_vectors);
 

@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include <firestorm/engine/types/vector_t.h>
-#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #if USE_AVX
@@ -37,7 +37,7 @@ namespace firestorm {
         auto result = new float[num_vectors];
 
         // We first create a chunk manager that will hold the vectors.
-        shared_ptr<ChunkManager> chunkManager = make_shared<ChunkManager>();
+        shared_ptr<chunk_manager> chunkManager = make_shared<chunk_manager>();
         const size_t num_vectors_per_chunk = target_chunk_size / (BENCHMARK_NUM_DIMENSIONS * sizeof(float));
 
         // A worker is a visitor that is performs a calculation on the chunks of a

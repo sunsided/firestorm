@@ -24,8 +24,8 @@ set(HEADER_FILES
         src/worker/worker_thread.h
         include/firestorm/engine/types/bytes_t.h
         include/firestorm/engine/types/chunk_idx_t.h
-        include/firestorm/engine/memory/ChunkAccessor.h
-        include/firestorm/engine/memory/ChunkManager.h
+        include/firestorm/engine/memory/chunk_accessor.h
+        include/firestorm/engine/memory/chunk_manager.h
         include/firestorm/engine/types/context_t.h
         include/firestorm/engine/vector_ops/dot_product_openmp.h
         include/firestorm/engine/vector_ops/dot_product_avx256.h

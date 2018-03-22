@@ -12,7 +12,7 @@
 namespace firestorm {
 
     /// This class implements a read-only accessor to memory chunks.
-    class ChunkAccessor {
+    class chunk_accessor {
     public:
         /// Obtains a memory chunk for read-only access.
         /// \param n The index of the chunk to obtain.

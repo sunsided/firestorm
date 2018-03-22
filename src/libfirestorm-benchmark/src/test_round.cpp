@@ -12,7 +12,7 @@ using namespace std;
 namespace firestorm {
 
     void run_test_round(const shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, const size_t repetitions,
-                        float *const result, const ChunkManager &chunkManager,
+                        float *const result, const chunk_manager &chunkManager,
                         const vector_ptr query,
                         const score_t expected_best_score, size_t num_vectors) {
 

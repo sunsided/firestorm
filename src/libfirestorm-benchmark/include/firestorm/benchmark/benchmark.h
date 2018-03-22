@@ -8,7 +8,7 @@
 #include <random>
 #include <chrono>
 #include <memory>
-#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/worker/worker_t.h>

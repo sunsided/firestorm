@@ -7,17 +7,16 @@
 
 #include <vector>
 #include <memory>
-#include "ChunkAccessor.h"
+#include "chunk_accessor.h"
 
 namespace firestorm {
 
-/// This class implements memory chunk handling for vectors
-/// stored in consecutive memory.
-    class ChunkManager : public ChunkAccessor {
+    /// \brief This class implements memory chunk handling for vectors stored in continuous memory.
+    class chunk_manager : public chunk_accessor {
     public:
-        ChunkManager() = default;
+        chunk_manager() = default;
 
-        virtual ~ChunkManager() = default;
+        virtual ~chunk_manager() = default;
 
         /// Allocates a new memory chunk for the specified amount of vectors of the given dimensionality.
         /// \param vectors The number of vectors to store in this chunk.

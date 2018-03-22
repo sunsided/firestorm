@@ -8,7 +8,7 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
-#include <firestorm/engine/memory/ChunkManager.h>
+#include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
 #include <firestorm/engine/worker/worker_t.h>
@@ -21,13 +21,13 @@ namespace firestorm {
     const size_t BENCHMARK_NUM_DIMENSIONS = 2048;
 
     void run_test_round(const std::shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, size_t repetitions,
-                        float* result, const ChunkManager &chunkManager,
+                        float* result, const chunk_manager &chunkManager,
                         vector_ptr query,
                         score_t expected_best_score, size_t num_vectors);
 
     template<typename T>
     void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result,
-                        const ChunkManager &chunkManager,
+                        const chunk_manager &chunkManager,
                         const vector_ptr query,
                         const score_t expected_best_score, size_t num_vectors) {
 

@@ -14,7 +14,7 @@
 #include "firestorm/engine/types/mem_chunk_t.h"
 #include "firestorm/engine/mapper/mapper_t.h"
 #include "firestorm/engine/reducer/reducer_t.h"
-#include "firestorm/engine/memory/ChunkAccessor.h"
+#include "firestorm/engine/memory/chunk_accessor.h"
 #include "firestorm/engine/types/result_t.h"
 
 namespace firestorm {
