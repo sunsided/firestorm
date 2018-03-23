@@ -1,27 +1,27 @@
 //
-// Created by Markus on 11.02.2018.
+// Created by sunside on 23.03.18.
 //
 
-#ifndef FIRESTORM_KEEP_ALL_REDUCER_H
-#define FIRESTORM_KEEP_ALL_REDUCER_H
+#ifndef PROJECT_KEEP_ALL_COMBINER_H
+#define PROJECT_KEEP_ALL_COMBINER_H
 
 #include <any>
 #include <vector>
 #include <firestorm/engine/types/score_t.h>
-#include "reducer_t.h"
+#include "combiner_t.h"
 
 namespace firestorm {
 
-    class keep_all_reducer final : public reducer_t {
+    class keep_all_combiner final : public combiner_t {
     public:
-        keep_all_reducer() = default;
-        ~keep_all_reducer() final = default;
+        keep_all_combiner() = default;
+        ~keep_all_combiner() final = default;
 
         void begin() final {
             scores.clear();
         }
 
-        void reduce(const combine_result_t& other) final {
+        void combine(const map_result_t& other) final {
             auto other_scores = std::any_cast<std::vector<score_t>>(other);
 
             for (const auto &result : other_scores) {
@@ -31,7 +31,7 @@ namespace firestorm {
             other_scores.clear();
         }
 
-        reduce_result_t finish() final {
+        combine_result_t finish() final {
             return scores;
         }
 
@@ -41,4 +41,4 @@ namespace firestorm {
 
 }
 
-#endif //FIRESTORM_KEEP_ALL_REDUCER_H
+#endif //PROJECT_KEEP_ALL_COMBINER_H

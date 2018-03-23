@@ -5,6 +5,8 @@
 #ifndef PROJECT_TIME_CONVERSION_H
 #define PROJECT_TIME_CONVERSION_H
 
+#include <type_traits>
+
 namespace firestorm {
 
     /// \brief Converts milliseconds to seconds.

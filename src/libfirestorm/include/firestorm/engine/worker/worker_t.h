@@ -13,7 +13,7 @@
 #include <boost/optional.hpp>
 #include "firestorm/engine/types/mem_chunk_t.h"
 #include "firestorm/engine/mapper/mapper_t.h"
-#include "firestorm/engine/reducer/reducer_t.h"
+#include "firestorm/engine/combiner/combiner_t.h"
 #include "firestorm/engine/memory/chunk_accessor.h"
 #include "firestorm/engine/types/result_t.h"
 
@@ -48,15 +48,7 @@ namespace firestorm {
 
         /// Unassigns a chunk of the manager from this worker.
         /// \return The index of the chunk that was unassigned.
-        boost::optional<std::weak_ptr<const mem_chunk_t>> unassign_chunk() {
-            if (_assigned_chunks.empty()) {
-                return boost::none;
-            }
-
-            auto chunk = _assigned_chunks.front();
-            _assigned_chunks.pop_front();
-            return chunk;
-        }
+        boost::optional<std::weak_ptr<const mem_chunk_t>> unassign_chunk();
 
         /// Applies the specified visitor with the given query vector to the registered chunks.
         /// \param visitor The visitor to use.
@@ -64,25 +56,7 @@ namespace firestorm {
         /// \param query The query vector to operate on.
         /// \param results The result buffer.
         /// \return The number of vectors that were processed.
-        size_t accept(const mapper_t &visitor, reduce_t &reducer, const vector_t &query) const {
-            size_t vectors_processed = 0;
-
-            for (const auto &chunk : _assigned_chunks) {
-                const auto shared_chunk = chunk.lock();
-                if (shared_chunk == nullptr) continue;
-
-                const auto &chunk_ref = *shared_chunk;
-                assert(chunk_ref.dimensions == query.dimensions);
-
-                auto result = visitor.map(chunk_ref, query);
-                reducer.reduce(result);
-
-                // TODO: We can send the number of processed vectors along with the mapper results
-                vectors_processed += chunk_ref.vectors;
-            }
-
-            return vectors_processed;
-        }
+        size_t accept(const mapper_t& visitor, combine_t& combiner, const vector_t &query) const;
 
     private:
         /// Ideally, subsequently allocated chunks appear sequentially in memory.

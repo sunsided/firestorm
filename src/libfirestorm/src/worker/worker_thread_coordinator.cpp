@@ -65,8 +65,8 @@ namespace firestorm {
 
             for (auto& worker : _workers) {
                 if (worker->num_chunks() == 0) continue;
-                auto reducer = job.reducer_factory()->create();
-                auto cmd = make_shared<worker_query_cmd_t>(job.info(), job.query(), mapper, reducer);
+                auto combiner = job.combiner_factory()->create();
+                auto cmd = make_shared<worker_query_cmd_t>(job.info(), job.query(), mapper, combiner);
 
                 results.push_back(cmd->promise().get_future());
 
@@ -76,17 +76,15 @@ namespace firestorm {
             // TODO: At this point, execution should return with a future.
 
             // TODO: Reduce result (do that multithreaded?)
-            auto final_reducer = job.reducer_factory()->create();
-            final_reducer->begin();
+            auto local_reducer = job.reducer_factory()->create();
+            local_reducer->begin();
 
             for (auto& future : results) {
-                auto result = static_cast<reduce_result_t>(future.get());
-
-                // TODO: Here an "invalid" cast is going on, as the method takes map_result_t, not reduce_result_t.
-                final_reducer->reduce(result);
+                auto result = static_cast<combine_result_t>(future.get());
+                local_reducer->reduce(result);
             }
 
-            auto result = final_reducer->finish();
+            auto result = local_reducer->finish();
 
             // TODO: We need to trigger this promise once all partial promises are fulfilled, failed or timed out (deadline!).
             // TODO: Have a reducer thread that gets woken up whenever an individual promise was touched?

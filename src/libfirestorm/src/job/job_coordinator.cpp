@@ -34,7 +34,9 @@ namespace firestorm {
             _update_thread.join();
         }
 
-        std::shared_future<job_result_t> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+        std::shared_future<job_result_t> query(const mapper_factory_ptr &mf,
+                                               const combiner_factory_ptr &cf,
+                                               const reducer_factory_ptr &rf,
                                                const vector_ptr &query) noexcept;
 
     private:
@@ -111,16 +113,20 @@ namespace firestorm {
         while(!_shutdown.load());
     }
 
-    std::shared_future<job_result_t> job_coordinator::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+    std::shared_future<job_result_t> job_coordinator::query(const mapper_factory_ptr &mf,
+                                                            const combiner_factory_ptr &cf,
+                                                            const reducer_factory_ptr &rf,
                                 const vector_ptr &query) noexcept {
-        return _impl->query(mf, rf, query);
+        return _impl->query(mf, cf, rf, query);
     }
 
-    std::shared_future<job_result_t> job_coordinator::Impl::query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf,
+    std::shared_future<job_result_t> job_coordinator::Impl::query(const mapper_factory_ptr &mf,
+                                                                  const combiner_factory_ptr &cf,
+                                                                  const reducer_factory_ptr &rf,
                                        const vector_ptr &query) noexcept {
 
         auto info = create_job_info();
-        job_t job { info, mf, rf, query };
+        job_t job { info, mf, cf, rf, query };
 
         // The tracker has all information required to watch progress and combine results.
         auto tracker = std::make_shared<job_tracker>(job, _signal);

@@ -11,6 +11,7 @@
 #include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/job/job_coordinator.h>
 #include <firestorm/engine/mapper/dot_product_mapper_factory.h>
+#include <firestorm/engine/combiner/keep_all_combiner_factory.h>
 #include <firestorm/engine/reducer/keep_all_reducer_factory.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #include <firestorm/logging/logger_t.h>
@@ -101,10 +102,11 @@ int run_server(logger_t log) {
 
     // We need a mapper and reducer.
     auto mapper_factory = std::make_shared<dot_product_mapper_factory<dot_product_unrolled_8_t>>();
+    auto combiner_factory = std::make_shared<keep_all_combiner_factory>();
     auto reducer_factory = std::make_shared<keep_all_reducer_factory>();
 
     // We can now perform a query.
-    auto future = coordinator.query(mapper_factory, reducer_factory, query_vector);
+    auto future = coordinator.query(mapper_factory, combiner_factory, reducer_factory, query_vector);
 
     const auto& job_result = future.get();
     assert(job_result.status().completion_type() == job_completion::succeeded);

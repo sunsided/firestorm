@@ -97,6 +97,9 @@ namespace firestorm {
             }
 
             if (!maybe_result) continue;
+
+            // TODO: An invalid cast is going on here. reduce() expects a combine_result_t, but we have a reduce_result_t.
+            // TODO: We need a reducer_reducer here.
             reducer->reduce(*maybe_result);
         }
 

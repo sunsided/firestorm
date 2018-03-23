@@ -6,6 +6,7 @@
 #define PROJECT_JOB_T_H
 
 #include <utility>
+#include <firestorm/engine/combiner/combiner_factory.h>
 #include "firestorm/engine/mapper/mapper_factory.h"
 #include "firestorm/engine/reducer/reducer_factory.h"
 #include "job_info_t.h"
@@ -16,16 +17,25 @@ namespace firestorm {
                    tao::operators::equality_comparable<job_t, job_info_t>,
                    tao::operators::equality_comparable<job_t, job_info_ptr>{
     public:
-        job_t(const job_info_ptr &info, const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept
-            : _info{info}, _mf{mf}, _rf{rf}, _query{query}
+        job_t(const job_info_ptr &info,
+              const mapper_factory_ptr &mf,
+              const combiner_factory_ptr &cf,
+              const reducer_factory_ptr &rf,
+              const vector_ptr &query) noexcept
+            : _info{info}, _mf{mf}, _cf{cf}, _rf{rf}, _query{query}
         {}
 
         job_t(job_t&& other) noexcept
-            : _info{std::move(other._info)}, _mf{std::move(other._mf)}, _rf{std::move(other._rf)}, _query{std::move(other._query)}
+            : _info{std::move(other._info)},
+              _mf{std::move(other._mf)},
+              _cf{std::move(other._cf)},
+              _rf{std::move(other._rf)},
+              _query{std::move(other._query)}
         {}
 
         const inline job_info_ptr info() const noexcept { return _info; }
         const inline mapper_factory_ptr mapper_factory() const noexcept { return _mf; }
+        const inline combiner_factory_ptr combiner_factory() const noexcept { return _cf; }
         const inline reducer_factory_ptr reducer_factory() const noexcept { return _rf; }
         const inline vector_ptr query() const noexcept { return _query; }
 
@@ -44,6 +54,7 @@ namespace firestorm {
     private:
         mutable job_info_ptr _info;
         mutable mapper_factory_ptr _mf;
+        mutable combiner_factory_ptr _cf;
         mutable reducer_factory_ptr _rf;
         mutable vector_ptr _query;
     };
