@@ -6,6 +6,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 #include <firestorm/synchronization/cancellation_token_source.h>
+#include <firestorm/synchronization/cancellation_exception.h>
 
 namespace {
 
@@ -18,6 +19,7 @@ namespace {
 
         // assert
         ASSERT_FALSE(ct->canceled());
+        ASSERT_NO_THROW({ ct->throw_if_cancellation_requested(); });
     }
 
     TEST(CancellationToken, NewToken_WhenCanceled_IsCanceled) { // NOLINT
@@ -30,6 +32,7 @@ namespace {
 
         // assert
         ASSERT_TRUE(ct->canceled());
+        ASSERT_THROW({ ct->throw_if_cancellation_requested(); }, firestorm::cancellation_exception);
     }
 
     TEST(CancellationToken, ExistingToken_WhenCanceled_IsCanceled) { // NOLINT
@@ -42,6 +45,7 @@ namespace {
 
         // assert
         ASSERT_TRUE(ct->canceled());
+        ASSERT_THROW({ ct->throw_if_cancellation_requested(); }, firestorm::cancellation_exception);
     }
 
     TEST(CancellationToken, MultipleTokens_WhenCanceled_AreCanceled) { // NOLINT
@@ -244,5 +248,18 @@ namespace {
         ASSERT_FALSE(canceled_before);
         ASSERT_FALSE(canceled_after);
         ASSERT_TRUE(ct->canceled());
+    }
+
+    TEST(CancellationToken, CancellationTokenSource_WhenChained_AndDeleted_DoesNotFailInParent) { // NOLINT
+        // arrange
+        firestorm::cancellation_token_source a;
+
+        // act
+        {
+            firestorm::cancellation_token_source cts(a.create_token());
+        }
+
+        // assert
+        ASSERT_NO_THROW({ a.cancel(); });
     }
 }

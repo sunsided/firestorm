@@ -18,7 +18,7 @@ namespace firestorm {
             : _cleanup(std::move(cleanup))
         {}
 
-        ~cancellation_callback_token_impl() noexcept {
+        ~cancellation_callback_token_impl() noexcept final {
             _cleanup(this);
         }
 
@@ -131,13 +131,13 @@ namespace firestorm {
     public:
         explicit Impl(bool canceled) noexcept
             : _tokens{}, _signal{canceled}, _lock{}, _parent{nullptr},
-              _cancel_this{nullptr}
+              _callback_token{nullptr}
         {}
 
         explicit Impl(const std::shared_ptr<cancellation_token>& ct) noexcept
                 : _tokens{}, _signal{ct->canceled()}, _lock{}, _parent{ct}
         {
-            _cancel_this = ct->register_callback([this]() { this->cancel(); });
+            _callback_token = ct->register_callback([this]() { this->cancel(); });
         }
 
         /// \brief Cancels all attached tokens.
@@ -181,7 +181,7 @@ namespace firestorm {
         std::atomic_bool _signal;
         reader_writer_lock _lock;
         std::shared_ptr<cancellation_token> _parent;
-        cancellation_token::callback_token _cancel_this;
+        cancellation_token::callback_token _callback_token;
     };
 
     cancellation_token_source::cancellation_token_source() noexcept
