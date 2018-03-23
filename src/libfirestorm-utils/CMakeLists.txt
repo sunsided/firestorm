@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 set(SOURCE_FILES
         src/exception.cpp
         src/reader_writer_lock.cpp
-        src/auto_reset_event.cpp)
+        src/auto_reset_event.cpp src/cancellation_token_source.cpp)
 
 set(HEADER_FILES
         include/firestorm/utils/exception.h
@@ -16,7 +16,7 @@ set(HEADER_FILES
         include/firestorm/synchronization/reader_writer_lock.h
         include/firestorm/utils/future_support.h
         include/firestorm/synchronization/auto_reset_event.h
-        include/firestorm/synchronization/completion_signal_t.h)
+        include/firestorm/synchronization/completion_signal_t.h include/firestorm/synchronization/cancellation_token_source.h include/firestorm/synchronization/cancellation_exception.h include/firestorm/synchronization/cancellation_token.h)
 
 # Define an executable
 add_library(libfirestorm-utils

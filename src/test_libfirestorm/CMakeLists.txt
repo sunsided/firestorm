@@ -5,7 +5,7 @@ set(SOURCE_FILES
         src/test_dot_product_naive.cpp
         src/test_dot_product_openmp.cpp
         src/test_dot_product_avx256.cpp
-        src/VectorNorm.cpp src/DotProduct.cpp src/test_dot_product_sse42.cpp)
+        src/VectorNorm.cpp src/DotProduct.cpp src/test_dot_product_sse42.cpp src/test_cancellation_token.cpp)
 
 set(HEADER_FILES
         include/VectorNorm.h
@@ -28,6 +28,7 @@ gtest_add_tests(test_libfirestorm "" AUTO)
 # Define the libraries this project depends upon
 target_link_libraries(test_libfirestorm
         libfirestorm
+        libfirestorm-utils
         gtest
         gmock)
 
