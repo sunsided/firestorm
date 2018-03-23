@@ -3,8 +3,8 @@
 //
 
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/reducer/keep_all_reducer.h>
 #include <firestorm/logging/logger_t.h>
+#include <firestorm/engine/mapreduce/combiner/keep_all_combiner.h>
 #include "test_round.h"
 
 using namespace std;
@@ -20,14 +20,14 @@ namespace firestorm {
         auto total_num_vectors = static_cast<size_t>(0);
 
         auto visitor = factory->create();
-        keep_all_reducer reducer {};
+        keep_all_combiner combiner {};
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
 
-            reducer.begin();
-            const auto processed = worker.accept(*visitor, reducer, *query);
-            auto results = any_cast<vector<score_t>>(reducer.finish());
+            combiner.begin();
+            const auto processed = worker.accept(*visitor, combiner, *query);
+            auto results = any_cast<vector<score_t>>(combiner.finish());
 
             auto end_time = chrono::_V2::system_clock::now();
             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();

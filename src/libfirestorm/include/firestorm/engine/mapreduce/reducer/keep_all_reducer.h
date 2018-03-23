@@ -7,7 +7,8 @@
 
 #include <any>
 #include <vector>
-#include "reducer_t.h"
+#include <firestorm/engine/types/score_t.h>
+#include "firestorm/engine/mapreduce/reducer_t.h"
 
 namespace firestorm {
 
@@ -20,7 +21,7 @@ namespace firestorm {
             scores.clear();
         }
 
-        void reduce(const map_result_t& other) final {
+        void reduce(const combine_result_t& other) final {
             auto other_scores = std::any_cast<std::vector<score_t>>(other);
 
             for (const auto &result : other_scores) {

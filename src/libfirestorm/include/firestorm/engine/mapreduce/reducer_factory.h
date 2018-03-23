@@ -7,8 +7,7 @@
 
 #include <memory>
 #include <vector>
-#include "firestorm/engine/mapper/mapper_t.h"
-#include "reducer_ptr.h"
+#include "reducer_t.h"
 #include "reduce_result_t.h"
 
 namespace firestorm {

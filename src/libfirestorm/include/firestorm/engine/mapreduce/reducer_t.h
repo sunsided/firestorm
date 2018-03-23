@@ -11,7 +11,7 @@
 #include <firestorm/engine/types/mem_chunk_t.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/score_t.h>
-#include <firestorm/engine/mapper/map_result_t.h>
+#include <firestorm/engine/mapreduce/combine_result_t.h>
 #include "reduce_result_t.h"
 
 namespace firestorm {
@@ -24,7 +24,7 @@ namespace firestorm {
         /// \brief Reduces the results of two mappers.
         /// \param other The other visitor to merge into the local results.
         /// \return The reduced result.
-        virtual void reduce(const map_result_t& other) = 0;
+        virtual void reduce(const combine_result_t& other) = 0;
     };
 
     /// \brief A stateful class that performs mapping result reduction.

@@ -5,7 +5,7 @@
 #ifndef FIRESTORM_DOTPRODUCTMAPPER_H
 #define FIRESTORM_DOTPRODUCTMAPPER_H
 
-#include "mapper_t.h"
+#include "firestorm/engine/mapreduce/mapper_t.h"
 #include "firestorm/engine/vector_ops/dot_product_functor.h"
 
 namespace firestorm {

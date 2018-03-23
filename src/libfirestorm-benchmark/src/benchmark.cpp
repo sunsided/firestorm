@@ -15,7 +15,8 @@
 #endif
 #include <firestorm/engine/vector_ops/dot_product_openmp.h>
 #include <firestorm/engine/vector_ops/dot_product_sse42.h>
-#include <firestorm/engine/mapper/mapper_factory.h>
+#include <firestorm/engine/mapreduce/mapper_factory.h>
+#include <firestorm/engine/mapreduce/mapper/dot_product_mapper.h>
 #include <firestorm/benchmark/benchmark.h>
 #include <firestorm/logging/logger_t.h>
 #include "query_vector.h"

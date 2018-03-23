@@ -5,7 +5,7 @@
 #ifndef PROJECT_DOTPRODUCTMAPPERFACTORY_H
 #define PROJECT_DOTPRODUCTMAPPERFACTORY_H
 
-#include "mapper_factory.h"
+#include "firestorm/engine/mapreduce/mapper_factory.h"
 #include "dot_product_mapper.h"
 
 namespace firestorm {

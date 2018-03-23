@@ -94,14 +94,14 @@ namespace firestorm {
             const auto lock = _lock->lock();
 
             const auto mapper = command.mapper();
-            const auto reducer = command.reducer();
+            const auto combiner = command.combiner();
             const auto query = command.vector();
 
-            reducer->begin();
-            _worker->accept(*mapper, *reducer, *query);
-            auto reduce_result = reducer->finish();
+            combiner->begin();
+            _worker->accept(*mapper, *combiner, *query);
+            auto combine_result = combiner->finish();
 
-            command.promise().set_value(reduce_result);
+            command.promise().set_value(combine_result);
         }
 
     private:

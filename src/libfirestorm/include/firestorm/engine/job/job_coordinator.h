@@ -9,8 +9,8 @@
 #include <future>
 #include <vector>
 #include <firestorm/engine/types/vector_t.h>
-#include <firestorm/engine/reducer/reducer_factory.h>
-#include <firestorm/engine/mapper/mapper_factory.h>
+#include <firestorm/engine/mapreduce/reducer_factory.h>
+#include <firestorm/engine/mapreduce/mapper_factory.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include <firestorm/engine/executor/executor_t.h>
 #include "job_status_t.h"
@@ -26,7 +26,10 @@ namespace firestorm {
         job_coordinator(const job_coordinator&) noexcept = delete;
         job_coordinator(job_coordinator&&) noexcept = default;
 
-        std::shared_future<job_result_t> query(const mapper_factory_ptr &mf, const reducer_factory_ptr &rf, const vector_ptr &query) noexcept;
+        std::shared_future<job_result_t> query(const mapper_factory_ptr &mf,
+                                               const combiner_factory_ptr &cf,
+                                               const reducer_factory_ptr &rf,
+                                               const vector_ptr &query) noexcept;
 
     private:
         class Impl;

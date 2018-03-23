@@ -4,7 +4,8 @@
 
 #include <atomic>
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/reducer/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include "test_round.h"
 
@@ -21,6 +22,7 @@ namespace firestorm {
         auto total_duration_ms = static_cast<size_t>(0);
         auto total_num_vectors = static_cast<size_t>(0);
 
+        const auto combiner_factory = make_shared<keep_all_combiner_factory>();
         const auto reducer_factory = make_shared<keep_all_reducer_factory>();
         const auto actual_worker_count = coordinator.effective_worker_count();
 
@@ -28,7 +30,7 @@ namespace firestorm {
             auto start_time = chrono::_V2::system_clock::now();
 
             const auto info = make_shared<job_info_t>();
-            job_t job{info, factory, reducer_factory, query};
+            job_t job{info, factory, combiner_factory, reducer_factory, query};
             const auto processing_result = coordinator.process(job).get();
 
             auto end_time = chrono::_V2::system_clock::now();
