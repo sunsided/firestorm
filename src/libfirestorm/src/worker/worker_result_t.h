@@ -6,7 +6,7 @@
 #define PROJECT_WORKER_RESULT_T_H
 
 #include <memory>
-#include <firestorm/engine/reducer/reduce_result_t.h>
+#include <firestorm/engine/mapreduce/reduce_result_t.h>
 #include <firestorm/engine/job/job_info_t.h>
 
 namespace firestorm {

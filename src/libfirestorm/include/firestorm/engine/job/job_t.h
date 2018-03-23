@@ -6,9 +6,9 @@
 #define PROJECT_JOB_T_H
 
 #include <utility>
-#include <firestorm/engine/combiner/combiner_factory.h>
-#include "firestorm/engine/mapper/mapper_factory.h"
-#include "firestorm/engine/reducer/reducer_factory.h"
+#include <firestorm/engine/mapreduce/combiner_factory.h>
+#include "firestorm/engine/mapreduce/mapper_factory.h"
+#include "firestorm/engine/mapreduce/reducer_factory.h"
 #include "job_info_t.h"
 
 namespace firestorm {

@@ -8,7 +8,7 @@
 #include <any>
 #include <vector>
 #include <firestorm/engine/types/score_t.h>
-#include "combiner_t.h"
+#include "firestorm/engine/mapreduce/combiner_t.h"
 
 namespace firestorm {
 

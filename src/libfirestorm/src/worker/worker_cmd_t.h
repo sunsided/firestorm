@@ -8,8 +8,8 @@
 #include <memory>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/job/job_info_t.h>
-#include <firestorm/engine/mapper/mapper_t.h>
-#include <firestorm/engine/combiner/combiner_t.h>
+#include <firestorm/engine/mapreduce/mapper_t.h>
+#include <firestorm/engine/mapreduce/combiner_t.h>
 
 namespace firestorm {
 

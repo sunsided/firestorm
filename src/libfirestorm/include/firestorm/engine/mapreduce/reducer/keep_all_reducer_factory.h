@@ -5,9 +5,9 @@
 #ifndef PROJECT_KEEP_ALL_REDUCER_FACTORY_H
 #define PROJECT_KEEP_ALL_REDUCER_FACTORY_H
 
-#include "firestorm/engine/mapper/mapper_factory.h"
-#include "reducer_factory.h"
-#include "firestorm/engine/mapper/dot_product_mapper.h"
+#include "firestorm/engine/mapreduce/mapper_factory.h"
+#include "firestorm/engine/mapreduce/reducer_factory.h"
+#include "firestorm/engine/mapreduce/mapper/dot_product_mapper.h"
 #include "keep_all_reducer.h"
 
 namespace firestorm {

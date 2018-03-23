@@ -6,7 +6,7 @@
 #define PROJECT_COMBINER_T_H
 
 #include <memory>
-#include <firestorm/engine/mapper/map_result_t.h>
+#include <firestorm/engine/mapreduce/map_result_t.h>
 #include "combine_result_t.h"
 
 namespace firestorm {

@@ -12,7 +12,6 @@
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/worker/worker_t.h>
-#include <firestorm/engine/mapper/dot_product_mapper.h>
 #include <firestorm/logging/logger_t.h>
 
 namespace firestorm {

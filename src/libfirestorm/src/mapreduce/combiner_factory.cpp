@@ -2,7 +2,7 @@
 // Created by sunside on 23.03.18.
 //
 
-#include <firestorm/engine/combiner/combiner_factory.h>
+#include <firestorm/engine/mapreduce/combiner_factory.h>
 
 using namespace std;
 

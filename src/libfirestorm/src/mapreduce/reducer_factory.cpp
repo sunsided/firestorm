@@ -2,7 +2,7 @@
 // Created by sunside on 06.03.18.
 //
 
-#include <firestorm/engine/reducer/reducer_factory.h>
+#include <firestorm/engine/mapreduce/reducer_factory.h>
 
 using namespace std;
 

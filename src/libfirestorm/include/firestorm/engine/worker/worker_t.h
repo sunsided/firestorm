@@ -12,8 +12,8 @@
 #include <shared_mutex>
 #include <boost/optional.hpp>
 #include "firestorm/engine/types/mem_chunk_t.h"
-#include "firestorm/engine/mapper/mapper_t.h"
-#include "firestorm/engine/combiner/combiner_t.h"
+#include "firestorm/engine/mapreduce/mapper_t.h"
+#include "firestorm/engine/mapreduce/combiner_t.h"
 #include "firestorm/engine/memory/chunk_accessor.h"
 #include "firestorm/engine/types/result_t.h"
 

@@ -10,9 +10,9 @@
 #include <firestorm/benchmark/vector_generator.h>
 #include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/job/job_coordinator.h>
-#include <firestorm/engine/mapper/dot_product_mapper_factory.h>
-#include <firestorm/engine/combiner/keep_all_combiner_factory.h>
-#include <firestorm/engine/reducer/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/mapper/dot_product_mapper_factory.h>
+#include <firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h>
+#include <firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #include <firestorm/logging/logger_t.h>
 #include "server.h"
