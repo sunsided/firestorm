@@ -6,7 +6,6 @@
 #define PROJECT_TEST_ROUND_H
 
 #include <memory>
-#include <spdlog/spdlog.h>
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/mapper/mapper_factory.h>
@@ -15,18 +14,19 @@
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/index_t.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
+#include <firestorm/logging/logger_t.h>
 
 namespace firestorm {
 
     const size_t BENCHMARK_NUM_DIMENSIONS = 2048;
 
-    void run_test_round(const std::shared_ptr<spdlog::logger> &log, const dot_product_t &calculate, size_t repetitions,
+    void run_test_round(const logger_t& log, const dot_product_t &calculate, size_t repetitions,
                         float* result, const chunk_manager &chunkManager,
                         vector_ptr query,
                         score_t expected_best_score, size_t num_vectors);
 
     template<typename T>
-    void run_test_round(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, float *const result,
+    void run_test_round(const logger_t& log, const size_t repetitions, float *const result,
                         const chunk_manager &chunkManager,
                         const vector_ptr query,
                         const score_t expected_best_score, size_t num_vectors) {
@@ -38,14 +38,14 @@ namespace firestorm {
                        num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const std::shared_ptr<mapper_factory>& factory,
+    void run_test_round_worker(const logger_t& log, const std::shared_ptr<mapper_factory>& factory,
                                size_t repetitions, const worker_t &worker,
                                vector_ptr query,
                                const score_t& expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions, const worker_t &worker,
+    void run_test_round_worker(const logger_t& log, const size_t repetitions, const worker_t &worker,
                                const vector_ptr query,
                                const score_t& expected_best_score,
                                const size_t num_vectors) {
@@ -55,14 +55,14 @@ namespace firestorm {
                               num_vectors);
     }
 
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const std::shared_ptr<mapper_factory>& factory,
+    void run_test_round_worker(const logger_t& log, const std::shared_ptr<mapper_factory>& factory,
                                size_t repetitions,
                                const worker_thread_coordinator& coordinator, const vector_ptr& query,
                                const score_t& expected_best_score,
                                size_t num_vectors);
 
     template<typename T>
-    void run_test_round_worker(const std::shared_ptr<spdlog::logger> &log, const size_t repetitions,
+    void run_test_round_worker(const logger_t& log, const size_t repetitions,
                                const worker_thread_coordinator& coordinator, const vector_ptr query,
                                const score_t& expected_best_score,
                                const size_t num_vectors) {

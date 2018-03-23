@@ -24,7 +24,7 @@ const size_t BENCHMARK_NUM_DIMENSIONS = 2048U;
 const size_t BENCHMARK_NUM_VECTORS = 10000;
 const size_t BENCHMARK_VECTOR_SEED = 1337;
 
-vector_ptr generate_vectors(const std::shared_ptr<spdlog::logger>& log,
+vector_ptr generate_vectors(const logger_t& log,
                       const std::shared_ptr<chunk_manager>& chunkManager, size_t target_chunk_size,
                       const std::shared_ptr<worker_thread_coordinator>& wtc) {
     vector_generator vec_gen{BENCHMARK_NUM_DIMENSIONS, BENCHMARK_VECTOR_SEED};

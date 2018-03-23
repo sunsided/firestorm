@@ -6,10 +6,10 @@
 #define PROJECT_THREAD_SUPPORT_H
 
 #include <thread>
-#include <spdlog/spdlog.h>
+#include <firestorm/logging/logger_t.h>
 
 namespace firestorm {
-    void set_thread_affinity(const std::shared_ptr<spdlog::logger> &log, size_t t, std::thread &thread);
+    void set_thread_affinity(const logger_t& log, size_t t, std::thread &thread);
 }
 
 #endif //PROJECT_THREAD_SUPPORT_H

@@ -12,7 +12,7 @@ using namespace std;
 
 namespace firestorm {
 
-    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const shared_ptr<mapper_factory> &factory,
+    void run_test_round_worker(const logger_t& log, const shared_ptr<mapper_factory> &factory,
                                [[ maybe_unused ]] const size_t repetitions,
                                const worker_thread_coordinator& coordinator, const vector_ptr &query,
                                const score_t &expected_best_score,

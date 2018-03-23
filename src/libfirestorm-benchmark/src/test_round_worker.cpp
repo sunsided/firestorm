@@ -2,15 +2,16 @@
 // Created by sunside on 06.03.18.
 //
 
-#include "test_round.h"
 #include <firestorm/utils/time_conversion.h>
 #include <firestorm/engine/reducer/keep_all_reducer.h>
+#include <firestorm/logging/logger_t.h>
+#include "test_round.h"
 
 using namespace std;
 
 namespace firestorm {
 
-    void run_test_round_worker(const shared_ptr<spdlog::logger> &log, const shared_ptr<mapper_factory> &factory,
+    void run_test_round_worker(const logger_t& log, const shared_ptr<mapper_factory> &factory,
                                const size_t repetitions, const worker_t &worker,
                                const vector_ptr query,
                                const score_t &expected_best_score,

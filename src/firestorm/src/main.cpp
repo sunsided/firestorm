@@ -44,7 +44,7 @@ unique_ptr<logger_factory> configure_logging(const spdlog::level::level_enum ver
     }
 }
 
-void report_profiler([[maybe_unused]] shared_ptr<spdlog::logger> &logger) {
+void report_profiler([[maybe_unused]] logger_t& logger) {
 #if USE_PROFILER
     ProfilerState state{};
     ProfilerGetCurrentState(&state);
@@ -52,7 +52,7 @@ void report_profiler([[maybe_unused]] shared_ptr<spdlog::logger> &logger) {
 #endif
 }
 
-void report_optimizations(shared_ptr<spdlog::logger> &logger) {
+void report_optimizations(logger_t& logger) {
     // TODO: Use cpu_features
 
     if (avx2_enabled()) {

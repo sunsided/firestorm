@@ -5,6 +5,8 @@
 #ifndef PROJECT_SERVER_H
 #define PROJECT_SERVER_H
 
-int run_server(std::shared_ptr<spdlog::logger> ptr);
+#include <firestorm/logging/logger_t.h>
+
+int run_server(firestorm::logger_t ptr);
 
 #endif //PROJECT_SERVER_H

@@ -12,7 +12,7 @@ using namespace std;
 
 namespace firestorm {
 
-    void set_thread_affinity(const shared_ptr<spdlog::logger> &log, size_t t, thread &thread) {
+    void set_thread_affinity(const logger_t& log, size_t t, thread &thread) {
 #if USE_PTHREADS
         cpu_set_t set {};
         CPU_ZERO(&set); // NOLINT
