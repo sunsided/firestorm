@@ -16,7 +16,13 @@ namespace firestorm {
     public:
         cancellation_token_source() noexcept;
         explicit cancellation_token_source(bool canceled) noexcept;
+        explicit cancellation_token_source(std::shared_ptr<cancellation_token> ct) noexcept;
+        cancellation_token_source(const cancellation_token_source&) noexcept = delete;
+        cancellation_token_source(cancellation_token_source&&) noexcept;
         ~cancellation_token_source() noexcept;
+
+        cancellation_token_source& operator=(const cancellation_token_source&) noexcept = delete;
+        cancellation_token_source& operator=(cancellation_token_source&&) noexcept;
 
         template<typename _Rep, typename _Period>
         explicit cancellation_token_source(const std::chrono::duration<_Rep, _Period>& rel_time) noexcept
@@ -39,9 +45,6 @@ namespace firestorm {
                 cancel();
             }).detach();
         }
-
-        cancellation_token_source(cancellation_token_source&&) = default;
-        cancellation_token_source& operator=(cancellation_token_source&&) = default;
 
         /// \brief Cancels all attached tokens.
         void cancel() noexcept;

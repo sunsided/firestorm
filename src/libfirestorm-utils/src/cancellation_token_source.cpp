@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <atomic>
-#include <vector>
+#include <functional>
 #include <firestorm/synchronization/reader_writer_lock.h>
 #include <firestorm/synchronization/cancellation_token.h>
 #include <firestorm/synchronization/cancellation_token_source.h>
@@ -12,10 +12,25 @@
 
 namespace firestorm {
 
+    class cancellation_callback_token_impl final : public cancellation_token::cancellation_callback_token_t {
+    public:
+        explicit cancellation_callback_token_impl(std::function<void(cancellation_callback_token_impl*)> cleanup) noexcept
+            : _cleanup(std::move(cleanup))
+        {}
+
+        ~cancellation_callback_token_impl() noexcept {
+            _cleanup(this);
+        }
+
+    private:
+        const std::function<void(cancellation_callback_token_impl*)> _cleanup;
+    };
+
     class cancellation_token_impl final: public cancellation_token {
     public:
         explicit cancellation_token_impl(bool canceled) noexcept
                 : _signal{canceled}, _callbacks{}, _lock{}
+
         {}
         ~cancellation_token_impl() noexcept = default;
 
@@ -37,17 +52,54 @@ namespace firestorm {
             throw cancellation_exception(what);
         }
 
+        /// \brief Unregisters a callback previously added via register_callback.
+        /// \param token The token that identifies the callback.
+        void unregister_callback(callback_token&& token) final {
+            // We just let the token die in order to trigger its destructor.
+            token.release();
+        }
+
+        /// \brief Unregisters a callback previously added via register_callback.
+        /// \param token The token that identifies the callback.
+        void unregister_callback(const callback_token& token) final {
+            unregister_callback(dynamic_cast<cancellation_callback_token_impl*>(token.get()));
+        }
+
+        /// \brief Unregisters a callback previously added via register_callback.
+        /// \param token The token that identifies the callback.
+        void unregister_callback(cancellation_callback_token_impl* key) {
+            if (key == nullptr) return;
+            const auto lock = _lock.write_lock();
+
+            // https://stackoverflow.com/a/16013546/195651
+            for(auto it = _callbacks.begin(); it != _callbacks.end();)
+            {
+                if (it->first == reinterpret_cast<std::uintptr_t>(key))
+                {
+                    _callbacks.erase(it);
+                    return;
+                }
+                ++it;
+            }
+        }
+
         /// \brief Registers a callback to invoke when the token is canceled.
         /// \param callback The callback function.
-        void register_callback(callback_t callback) final {
+        callback_token register_callback(callback_t callback) final {
             if (canceled()) {
                 callback();
-                return;
+                return nullptr;
             }
+
+            callback_token token = std::make_unique<cancellation_callback_token_impl>([this](cancellation_callback_token_impl* key){
+                this->unregister_callback(key);
+            });
 
             const auto lock = _lock.write_lock();
             // TODO: Prevent that the same callback is added twice.
-            _callbacks.push_back(callback);
+            _callbacks.insert(std::pair{reinterpret_cast<std::uintptr_t>(token.get()), callback});
+
+            return token;
         }
 
         /// \brief Cancels this token.
@@ -56,9 +108,9 @@ namespace firestorm {
             if (was_canceled) return;
 
             const auto lock = _lock.write_lock();
-            for (auto& callback : _callbacks) {
+            for (auto& pair : _callbacks) {
                 try {
-                    callback();
+                    pair.second();
                 }
                 catch(...) {
                     // TODO: We might want to log this. In any case, we don't care much.
@@ -71,15 +123,22 @@ namespace firestorm {
 
     private:
         std::atomic_bool _signal;
-        std::vector<callback_t> _callbacks;
+        std::unordered_map<std::uintptr_t, callback_t> _callbacks;
         reader_writer_lock _lock;
     };
 
     class cancellation_token_source::Impl {
     public:
         explicit Impl(bool canceled) noexcept
-            : _signal{canceled}, _lock{}
+            : _tokens{}, _signal{canceled}, _lock{}, _parent{nullptr},
+              _cancel_this{nullptr}
         {}
+
+        explicit Impl(const std::shared_ptr<cancellation_token>& ct) noexcept
+                : _tokens{}, _signal{ct->canceled()}, _lock{}, _parent{ct}
+        {
+            _cancel_this = ct->register_callback([this]() { this->cancel(); });
+        }
 
         /// \brief Cancels all attached tokens.
         inline void cancel() noexcept {
@@ -118,9 +177,11 @@ namespace firestorm {
         }
 
     private:
-        std::atomic_bool _signal;
         std::vector<std::weak_ptr<cancellation_token_impl>> _tokens;
+        std::atomic_bool _signal;
         reader_writer_lock _lock;
+        std::shared_ptr<cancellation_token> _parent;
+        cancellation_token::callback_token _cancel_this;
     };
 
     cancellation_token_source::cancellation_token_source() noexcept
@@ -132,6 +193,12 @@ namespace firestorm {
     {}
 
     cancellation_token_source::~cancellation_token_source() noexcept = default;
+    cancellation_token_source::cancellation_token_source(cancellation_token_source&& other) noexcept = default;
+    cancellation_token_source& cancellation_token_source::operator=(cancellation_token_source&& other) noexcept = default;
+
+    cancellation_token_source::cancellation_token_source(std::shared_ptr<cancellation_token> ct) noexcept
+            : _impl{std::make_unique<cancellation_token_source::Impl>(std::move(ct))}
+    {}
 
     void cancellation_token_source::cancel() noexcept {
         _impl->cancel();
