@@ -9,15 +9,14 @@ set(SOURCE_FILES
         src/vector_ops/dot_product_sse42.cpp
         src/worker/worker_thread_coordinator.cpp
         src/thread_support.cpp
-        src/combiner/reducer_factory.cpp
+        src/reducer/reducer_factory.cpp
         src/job/job_coordinator.cpp
         src/job/job_info_t.cpp
         src/job/job_status_notification.h
         src/job/job_tracker.h
         src/executor/local_executor_t.cpp
         src/instance_identifier.cpp
-        src/job/job_tracker.cpp
-        ../libfirestorm-utils/src/auto_reset_event.cpp)
+        src/job/job_tracker.cpp)
 
 set(HEADER_FILES
         src/worker/worker_cmd_t.h
@@ -64,12 +63,10 @@ set(HEADER_FILES
         include/firestorm/engine/instance_identifier_t.h
         include/firestorm/engine/executor/executor_t.h
         include/firestorm/engine/job/job_completion_callback_t.h
-        ../libfirestorm-utils/include/firestorm/synchronization/completion_signal_t.h
         include/firestorm/engine/job/job_completion_promise.h
         include/firestorm/engine/executor/execution_result_t.h
         include/firestorm/engine/executor/execution_completion_promise.h
-        include/firestorm/engine/job/job_result_t.h
-        ../libfirestorm-utils/include/firestorm/synchronization/auto_reset_event.h)
+        include/firestorm/engine/job/job_result_t.h)
 
 # Define an executable
 add_library(libfirestorm
