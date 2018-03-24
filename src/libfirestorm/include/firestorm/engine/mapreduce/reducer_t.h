@@ -21,10 +21,13 @@ namespace firestorm {
     public:
         virtual ~reduce_t() = default;
 
-        /// \brief Reduces the results of two mappers.
-        /// \param other The other visitor to merge into the local results.
-        /// \return The reduced result.
-        virtual void reduce(const combine_result_t& other) = 0;
+        /// \brief Reduces the results of two combiners.
+        /// \param other The result to merge into the local results.
+        virtual void reduce(const combine_result& other) = 0;
+
+        /// \brief Reduces the results of two reducers.
+        /// \param other The result to merge into the local results.
+        virtual void reduce(const reduce_result& other) = 0;
     };
 
     /// \brief A stateful class that performs mapping result reduction.
@@ -37,7 +40,7 @@ namespace firestorm {
 
         /// \brief Finalizes a reducing operation.
         /// \return The reducing result.
-        virtual reduce_result_t finish() = 0;
+        virtual reduce_result finish() = 0;
     };
 
     /// \brief Pointer to a reducer.

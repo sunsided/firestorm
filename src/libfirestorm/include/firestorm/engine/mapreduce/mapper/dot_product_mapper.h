@@ -7,6 +7,7 @@
 
 #include "firestorm/engine/mapreduce/mapper_t.h"
 #include "firestorm/engine/vector_ops/dot_product_functor.h"
+#include "score_map_result_t.h"
 
 namespace firestorm {
 
@@ -19,7 +20,7 @@ namespace firestorm {
         dot_product_mapper() = default;
         ~dot_product_mapper() final = default;
 
-        map_result_t map(const mem_chunk_t &chunk, const vector_t &query) const final {
+        map_result map(const mem_chunk_t &chunk, const vector_t &query) const final {
             assert(chunk.dimensions == query.dimensions);
 
             std::vector<score_t> out_scores {chunk.vectors};
@@ -39,7 +40,7 @@ namespace firestorm {
                 out_scores[vector_idx] = score_t(index, score);
             }
 
-            return out_scores;
+            return std::make_shared<score_map_result_t>(out_scores);
         };
 
     private:

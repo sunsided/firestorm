@@ -103,7 +103,7 @@ namespace firestorm {
             reducer->reduce(*maybe_result);
         }
 
-        reduce_result_t result = reducer->finish();
+        reduce_result result = reducer->finish();
 
         // TODO: Print report about outcome.
 

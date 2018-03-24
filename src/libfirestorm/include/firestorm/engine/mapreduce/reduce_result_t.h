@@ -10,7 +10,20 @@
 namespace firestorm {
 
     /// \brief The result of a reducing operation
-    using reduce_result_t = std::any;
+    class reduce_result_t {
+    public:
+        virtual ~reduce_result_t() noexcept = default;
+
+        virtual std::any as_any() const noexcept = 0;
+
+        template<class T>
+        inline T any_cast() const {
+            // TODO: Can we specialize this?
+            return std::any_cast<T>(as_any());
+        }
+    };
+
+    using reduce_result = std::shared_ptr<reduce_result_t>;
 
 }
 

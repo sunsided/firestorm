@@ -18,7 +18,7 @@ namespace firestorm {
 
         /// \brief Reduces the results of mappers.
         /// \param other The other visitor to merge into the local results.
-        virtual void combine(const map_result_t& other) = 0;
+        virtual void combine(const map_result& other) = 0;
     };
 
     /// \brief A stateful class that performs mapping result combination.
@@ -31,7 +31,7 @@ namespace firestorm {
 
         /// \brief Finalizes a combine operation.
         /// \return A combine result.
-        virtual combine_result_t finish() = 0;
+        virtual combine_result finish() = 0;
     };
 
     /// \brief Pointer to a combiner.

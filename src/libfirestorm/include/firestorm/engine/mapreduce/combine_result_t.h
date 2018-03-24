@@ -10,7 +10,20 @@
 namespace firestorm {
 
     /// \brief The result of a combining operation
-    using combine_result_t = std::any;
+    class combine_result_t {
+    public:
+        virtual ~combine_result_t() noexcept = default;
+
+        virtual std::any as_any() const noexcept = 0;
+
+        template<class T>
+        inline T any_cast() const {
+            // TODO: Can we specialize this?
+            return std::any_cast<T>(as_any());
+        }
+    };
+
+    using combine_result = std::shared_ptr<combine_result_t>;
 
 }
 

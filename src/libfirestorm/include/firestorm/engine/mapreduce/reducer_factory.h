@@ -22,7 +22,7 @@ namespace firestorm {
         /// \brief Reduces a list of items.
         /// \paragraph items The items to reduce.
         /// \return The result of the reduction.
-        reduce_result_t reduce(std::vector<reducer_ptr> items) const;
+        reduce_result reduce(std::vector<reducer_ptr> items) const;
     };
 
     /// \brief Pointer to a reducer factory.

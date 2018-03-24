@@ -13,16 +13,16 @@ namespace firestorm {
 
     struct worker_result_t final {
     public:
-        explicit worker_result_t(job_info_ptr info, reduce_result_t& result) noexcept
+        explicit worker_result_t(job_info_ptr info, reduce_result& result) noexcept
                 : _info{std::move(info)}, _result{std::move(result)}
         {}
 
         inline job_info_ptr get_info() const { return _info; }
-        inline const reduce_result_t& get_result() const { return _result; }
+        inline reduce_result get_result() const { return _result; }
 
     private:
         const job_info_ptr _info;
-        const reduce_result_t _result;
+        const reduce_result _result;
     };
 
     using worker_result_ptr = std::shared_ptr<worker_result_t>;

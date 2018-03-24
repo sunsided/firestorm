@@ -9,6 +9,7 @@
 #include <vector>
 #include <firestorm/engine/types/score_t.h>
 #include "firestorm/engine/mapreduce/reducer_t.h"
+#include "score_reduce_result_t.h"
 
 namespace firestorm {
 
@@ -18,25 +19,32 @@ namespace firestorm {
         ~keep_all_reducer() final = default;
 
         void begin() final {
-            scores.clear();
+            _scores.clear();
         }
 
-        void reduce(const combine_result_t& other) final {
-            auto other_scores = std::any_cast<std::vector<score_t>>(other);
-
-            for (const auto &result : other_scores) {
-                scores.push_back(result);
-            }
-
-            other_scores.clear();
+        void reduce(const combine_result& other) final {
+            auto other_scores = other->any_cast<std::vector<score_t>>();
+            reduce(other_scores);
         }
 
-        reduce_result_t finish() final {
-            return scores;
+        void reduce(const reduce_result& other) final {
+            auto other_scores = other->any_cast<std::vector<score_t>>();
+            reduce(other_scores);
+        }
+
+        reduce_result finish() final {
+            return std::make_shared<score_reduce_result_t>(_scores);
         }
 
     private:
-        std::vector<score_t> scores;
+        void reduce(const std::vector<score_t>& other_scores) {
+            for (const auto &result : other_scores) {
+                _scores.push_back(result);
+            }
+        }
+
+    private:
+        std::vector<score_t> _scores{};
     };
 
 }
