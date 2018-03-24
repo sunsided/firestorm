@@ -9,7 +9,7 @@
 #include <vector>
 #include <firestorm/engine/types/score_t.h>
 #include "firestorm/engine/mapreduce/reducer_t.h"
-#include "score_reduce_result_t.h"
+#include "score_result_t.h"
 
 namespace firestorm {
 
@@ -33,7 +33,7 @@ namespace firestorm {
         }
 
         reduce_result finish() final {
-            return std::make_shared<score_reduce_result_t>(_scores);
+            return std::make_shared<score_result_t>(_scores);
         }
 
     private:

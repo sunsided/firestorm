@@ -7,7 +7,7 @@
 
 #include "firestorm/engine/mapreduce/mapper_factory.h"
 #include "firestorm/engine/mapreduce/reducer_factory.h"
-#include "firestorm/engine/mapreduce/mapper/dot_product_mapper.h"
+#include "firestorm/engine/mapreduce/dot_product/dot_product_mapper.h"
 #include "keep_all_reducer.h"
 
 namespace firestorm {

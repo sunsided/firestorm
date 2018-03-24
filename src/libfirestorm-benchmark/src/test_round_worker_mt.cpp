@@ -4,8 +4,8 @@
 
 #include <atomic>
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h>
-#include <firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_combiner_factory.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include "test_round.h"
 

@@ -4,7 +4,7 @@
 
 #include <firestorm/utils/time_conversion.h>
 #include <firestorm/logging/logger_t.h>
-#include <firestorm/engine/mapreduce/combiner/keep_all_combiner.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_combiner.h>
 #include "test_round.h"
 
 using namespace std;

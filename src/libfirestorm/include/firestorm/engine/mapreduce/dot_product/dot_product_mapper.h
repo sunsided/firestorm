@@ -6,8 +6,8 @@
 #define FIRESTORM_DOTPRODUCTMAPPER_H
 
 #include "firestorm/engine/mapreduce/mapper_t.h"
+#include <firestorm/engine/mapreduce/dot_product/score_result_t.h>
 #include "firestorm/engine/vector_ops/dot_product_functor.h"
-#include "score_map_result_t.h"
 
 namespace firestorm {
 
@@ -40,7 +40,7 @@ namespace firestorm {
                 out_scores[vector_idx] = score_t(index, score);
             }
 
-            return std::make_shared<score_map_result_t>(out_scores);
+            return std::make_shared<score_result_t>(out_scores);
         };
 
     private:
