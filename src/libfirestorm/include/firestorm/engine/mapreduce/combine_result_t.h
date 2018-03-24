@@ -6,11 +6,17 @@
 #define PROJECT_COMBINE_RESULT_T_H
 
 #include <any>
+#include "any_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a combining operation
-    using combine_result_t = std::any;
+    class combine_result_t : public virtual any_result_t {
+    public:
+        virtual ~combine_result_t() noexcept = default;
+    };
+
+    using combine_result = std::shared_ptr<combine_result_t>;
 
 }
 

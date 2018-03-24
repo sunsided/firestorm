@@ -9,7 +9,7 @@
 #include <firestorm/engine/vector_ops/dot_product_functor.h>
 #include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/mapreduce/mapper_factory.h>
-#include <firestorm/engine/mapreduce/mapper/dot_product_mapper_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/dot_product_mapper_factory.h>
 #include <firestorm/engine/worker/worker_t.h>
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/types/index_t.h>

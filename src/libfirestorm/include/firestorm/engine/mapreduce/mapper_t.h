@@ -21,7 +21,7 @@ namespace firestorm {
         /// \brief Maps a chunk according to the logic of the visitor.
         /// \param chunk The chunk to map.
         /// \param query The query vector to use.
-        virtual map_result_t map(const mem_chunk_t &chunk, const vector_t &query) const = 0;
+        virtual map_result map(const mem_chunk_t &chunk, const vector_t &query) const = 0;
     };
 
     /// \brief Pointer to a mapper.

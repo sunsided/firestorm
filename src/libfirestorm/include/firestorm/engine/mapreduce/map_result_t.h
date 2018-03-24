@@ -6,11 +6,17 @@
 #define PROJECT_MAP_RESULT_T_H
 
 #include <any>
+#include "any_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a mapping operation.
-    using map_result_t = std::any;
+    class map_result_t : public virtual any_result_t {
+    public:
+        virtual ~map_result_t() noexcept = default;
+    };
+
+    using map_result = std::shared_ptr<map_result_t>;
 
 }
 

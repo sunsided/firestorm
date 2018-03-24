@@ -10,7 +10,6 @@ set(SOURCE_FILES
         src/worker/worker_thread_coordinator.cpp
         src/thread_support.cpp
         src/mapreduce/reducer_factory.cpp
-        src/mapreduce/combiner_factory.cpp
         src/job/job_coordinator.cpp
         src/job/job_info_t.cpp
         src/job/job_status_notification.h
@@ -32,7 +31,23 @@ set(HEADER_FILES
         include/firestorm/engine/vector_ops/dot_product_naive.h
         include/firestorm/engine/vector_ops/dot_product_functor.h
         include/firestorm/engine/vector_ops/dot_product_sse42.h
-        include/firestorm/engine/mapreduce/mapper/dot_product_mapper.h
+        include/firestorm/engine/mapreduce/map_result_t.h
+        include/firestorm/engine/mapreduce/mapper_t.h
+        include/firestorm/engine/mapreduce/mapper_factory.h
+        include/firestorm/engine/mapreduce/reduce_result_t.h
+        include/firestorm/engine/mapreduce/reducer_t.h
+        include/firestorm/engine/mapreduce/reducer_factory.h
+        include/firestorm/engine/mapreduce/combine_result_t.h
+        include/firestorm/engine/mapreduce/combiner_t.h
+        include/firestorm/engine/mapreduce/combiner_factory.h
+        include/firestorm/engine/mapreduce/any_result_t.h
+        include/firestorm/engine/mapreduce/dot_product/score_result_t.h
+        include/firestorm/engine/mapreduce/dot_product/dot_product_mapper.h
+        include/firestorm/engine/mapreduce/dot_product/dot_product_mapper_factory.h
+        include/firestorm/engine/mapreduce/dot_product/keep_all_combiner.h
+        include/firestorm/engine/mapreduce/dot_product/keep_all_combiner_factory.h
+        include/firestorm/engine/mapreduce/dot_product/keep_all_reducer.h
+        include/firestorm/engine/mapreduce/dot_product/keep_all_reducer_factory.h
         include/firestorm/engine/types/index_t.h
         include/firestorm/engine/types/mem_chunk_t.h
         include/firestorm/engine/types/result_t.h
@@ -43,20 +58,10 @@ set(HEADER_FILES
         include/firestorm/engine/types/vector_t.h
         include/firestorm/engine/worker/worker_t.h
         include/firestorm/engine/worker/worker_thread_coordinator.h
-        include/firestorm/engine/mapreduce/mapper_t.h
-        include/firestorm/engine/mapreduce/mapper_factory.h
-        include/firestorm/engine/mapreduce/mapper/dot_product_mapper.h
-        include/firestorm/engine/mapreduce/mapper/dot_product_mapper_factory.h
-        include/firestorm/engine/mapreduce/reducer_t.h
-        include/firestorm/engine/mapreduce/reducer_factory.h
-        include/firestorm/engine/mapreduce/reducer/keep_all_reducer.h
-        include/firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h
         include/firestorm/engine/thread_support.h
         include/firestorm/engine/types/score_value_t.h
         include/firestorm/engine/job/job_t.h
         include/firestorm/engine/job/job_info_t.h
-        include/firestorm/engine/mapreduce/map_result_t.h
-        include/firestorm/engine/mapreduce/reduce_result_t.h
         include/firestorm/engine/job/job_coordinator.h
         include/firestorm/engine/job/job_status_t.h
         include/firestorm/engine/executor/local_executor_t.h
@@ -67,12 +72,7 @@ set(HEADER_FILES
         include/firestorm/engine/job/job_completion_promise.h
         include/firestorm/engine/executor/execution_result_t.h
         include/firestorm/engine/executor/execution_completion_promise.h
-        include/firestorm/engine/job/job_result_t.h
-        include/firestorm/engine/mapreduce/combiner_t.h
-        include/firestorm/engine/mapreduce/combiner_factory.h
-        include/firestorm/engine/mapreduce/combine_result_t.h
-        include/firestorm/engine/mapreduce/combiner/keep_all_combiner.h
-        include/firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h)
+        include/firestorm/engine/job/job_result_t.h)
 
 # Define an executable
 add_library(libfirestorm

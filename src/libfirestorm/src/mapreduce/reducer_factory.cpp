@@ -8,7 +8,7 @@ using namespace std;
 
 namespace firestorm {
 
-    any reducer_factory::reduce(vector<shared_ptr<reducer_t>> items) const {
+    reduce_result reducer_factory::reduce(vector<shared_ptr<reducer_t>> items) const {
         auto aggregator = create();
 
         aggregator->begin();

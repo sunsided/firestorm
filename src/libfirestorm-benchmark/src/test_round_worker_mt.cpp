@@ -4,8 +4,8 @@
 
 #include <atomic>
 #include <firestorm/utils/time_conversion.h>
-#include <firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h>
-#include <firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_combiner_factory.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include "test_round.h"
 
@@ -39,7 +39,7 @@ namespace firestorm {
             assert(processing_result.result());
 
             // TODO: This should eventually be part of the worker, otherwise we're going through the lists twice.
-            auto results = any_cast<vector<score_t>>(*processing_result.result());
+            auto results = (*processing_result.result())->any_cast<vector<score_t>>();
             score_t best_match{};
             for (const auto &score : results) {
                 if (score > best_match || best_match.invalid()) {

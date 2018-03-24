@@ -10,9 +10,9 @@
 #include <firestorm/benchmark/vector_generator.h>
 #include <firestorm/engine/memory/chunk_manager.h>
 #include <firestorm/engine/job/job_coordinator.h>
-#include <firestorm/engine/mapreduce/mapper/dot_product_mapper_factory.h>
-#include <firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h>
-#include <firestorm/engine/mapreduce/reducer/keep_all_reducer_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/dot_product_mapper_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_combiner_factory.h>
+#include <firestorm/engine/mapreduce/dot_product/keep_all_reducer_factory.h>
 #include <firestorm/engine/vector_ops/dot_product_naive.h>
 #include <firestorm/logging/logger_t.h>
 #include "server.h"
@@ -114,7 +114,7 @@ int run_server(logger_t log) {
     auto maybe_result = job_result.result();
     assert(maybe_result);
 
-    auto results = std::any_cast<std::vector<score_t>>(*maybe_result);
+    auto results = (*maybe_result)->any_cast<std::vector<score_t>>();
 
     // With keep_all, we will see more results than we have actual vectors (depending on the number of
     // vectors), since this also keeps all unassigned slots in a chunk.

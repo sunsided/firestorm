@@ -9,6 +9,7 @@
 #include <vector>
 #include <firestorm/engine/types/score_t.h>
 #include "firestorm/engine/mapreduce/combiner_t.h"
+#include <firestorm/engine/mapreduce/dot_product/score_result_t.h>
 
 namespace firestorm {
 
@@ -18,25 +19,25 @@ namespace firestorm {
         ~keep_all_combiner() final = default;
 
         void begin() final {
-            scores.clear();
+            _scores.clear();
         }
 
-        void combine(const map_result_t& other) final {
-            auto other_scores = std::any_cast<std::vector<score_t>>(other);
+        void combine(const map_result& other) final {
+            auto other_scores = other->any_cast<std::vector<score_t>>();
 
             for (const auto &result : other_scores) {
-                scores.push_back(result);
+                _scores.push_back(result);
             }
 
             other_scores.clear();
         }
 
-        combine_result_t finish() final {
-            return scores;
+        combine_result finish() final {
+            return std::make_shared<score_result_t>(_scores);
         }
 
     private:
-        std::vector<score_t> scores;
+        std::vector<score_t> _scores;
     };
 
 }

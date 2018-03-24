@@ -16,7 +16,7 @@ namespace firestorm {
     /// A structure describing a query command and its parameters.
     struct worker_query_cmd_t final {
         worker_query_cmd_t(job_info_ptr info, vector_ptr vector, mapper_ptr mapper, combiner_ptr combiner) noexcept
-                : _info{std::move(info)}, _vector{std::move(vector)}, _mapper{mapper}, _combiner{combiner}
+                : _info{std::move(info)}, _vector{std::move(vector)}, _mapper{std::move(mapper)}, _combiner{std::move(combiner)}
         {}
 
         ~worker_query_cmd_t() = default;
@@ -28,7 +28,7 @@ namespace firestorm {
         inline mapper_ptr mapper() const { return _mapper; }
         inline combiner_ptr combiner() const { return _combiner; }
 
-        inline std::promise<combine_result_t>& promise() const { return _promise; }
+        inline std::promise<combine_result>& promise() const { return _promise; }
 
     private:
 
@@ -44,7 +44,7 @@ namespace firestorm {
         /// \brief The combiner to combine the results with.
         const combiner_ptr _combiner;
 
-        mutable std::promise<combine_result_t> _promise {};
+        mutable std::promise<combine_result> _promise {};
     };
 
     /// \brief Pointer to a worker command.

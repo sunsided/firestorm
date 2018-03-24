@@ -17,11 +17,6 @@ namespace firestorm {
         /// \brief Initializes a new instance of a combiner.
         /// \return The combiner.
         virtual combiner_ptr create() const = 0;
-
-        /// \brief Reduces a list of items.
-        /// \paragraph items The items to reduce.
-        /// \return The result of the combination.
-        combine_result_t combine(std::vector<combiner_ptr> items) const;
     };
 
     /// \brief Pointer to a combiner factory.

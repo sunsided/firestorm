@@ -61,7 +61,7 @@ namespace firestorm {
         void process(const job_t& job, job_completion_callback_t&& callback) const {
             const auto mapper = job.mapper_factory()->create();
 
-            vector<future<reduce_result_t>> results;
+            vector<future<combine_result>> results;
 
             for (auto& worker : _workers) {
                 if (worker->num_chunks() == 0) continue;
@@ -80,7 +80,7 @@ namespace firestorm {
             local_reducer->begin();
 
             for (auto& future : results) {
-                auto result = static_cast<combine_result_t>(future.get());
+                auto result = future.get();
                 local_reducer->reduce(result);
             }
 
