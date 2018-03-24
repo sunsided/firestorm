@@ -104,9 +104,10 @@ int run_server(logger_t log) {
     auto mapper_factory = std::make_shared<dot_product_mapper_factory<dot_product_unrolled_8_t>>();
     auto combiner_factory = std::make_shared<keep_all_combiner_factory>();
     auto reducer_factory = std::make_shared<keep_all_reducer_factory>();
+    const mapreduce_factories mf{mapper_factory, combiner_factory, reducer_factory}; // TODO: Create task-specific factory
 
     // We can now perform a query.
-    auto future = coordinator.query(mapper_factory, combiner_factory, reducer_factory, query_vector);
+    auto future = coordinator.query(mf, query_vector);
 
     const auto& job_result = future.get();
     assert(job_result.status().completion_type() == job_completion::succeeded);

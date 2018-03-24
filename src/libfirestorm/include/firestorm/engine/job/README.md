@@ -1,5 +1,7 @@
 # Job Management
 
+A job is a unit of work, e.g. a database query.
+
 This directory contains job management logic,
 including
 

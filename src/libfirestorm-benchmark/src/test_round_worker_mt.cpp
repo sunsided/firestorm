@@ -25,12 +25,13 @@ namespace firestorm {
         const auto combiner_factory = make_shared<keep_all_combiner_factory>();
         const auto reducer_factory = make_shared<keep_all_reducer_factory>();
         const auto actual_worker_count = coordinator.effective_worker_count();
+        const mapreduce_factories mf{factory, combiner_factory, reducer_factory}; // TODO: Create task-specific factory
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();
 
             const auto info = make_shared<job_info_t>();
-            job_t job{info, factory, combiner_factory, reducer_factory, query};
+            job_t job{info, mf, query};
             const auto processing_result = coordinator.process(job).get();
 
             auto end_time = chrono::_V2::system_clock::now();
