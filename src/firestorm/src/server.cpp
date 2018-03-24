@@ -114,7 +114,7 @@ int run_server(logger_t log) {
     auto maybe_result = job_result.result();
     assert(maybe_result);
 
-    auto results = std::any_cast<std::vector<score_t>>(*maybe_result);
+    auto results = (*maybe_result)->any_cast<std::vector<score_t>>();
 
     // With keep_all, we will see more results than we have actual vectors (depending on the number of
     // vectors), since this also keeps all unassigned slots in a chunk.

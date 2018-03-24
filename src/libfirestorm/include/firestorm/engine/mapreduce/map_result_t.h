@@ -6,21 +6,14 @@
 #define PROJECT_MAP_RESULT_T_H
 
 #include <any>
+#include "any_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a mapping operation.
-    class map_result_t {
+    class map_result_t : public virtual any_result_t {
     public:
         virtual ~map_result_t() noexcept = default;
-
-        virtual std::any as_any() const noexcept = 0;
-
-        template<class T>
-        inline T any_cast() const {
-            // TODO: Can we specialize this?
-            return std::any_cast<T>(as_any());
-        }
     };
 
     using map_result = std::shared_ptr<map_result_t>;

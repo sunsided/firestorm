@@ -71,7 +71,7 @@ set(HEADER_FILES
         include/firestorm/engine/mapreduce/combiner_factory.h
         include/firestorm/engine/mapreduce/combine_result_t.h
         include/firestorm/engine/mapreduce/combiner/keep_all_combiner.h
-        include/firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h include/firestorm/engine/mapreduce/mapper/score_map_result_t.h include/firestorm/engine/mapreduce/combiner/score_combine_result_t.h include/firestorm/engine/mapreduce/reducer/score_reduce_result_t.h)
+        include/firestorm/engine/mapreduce/combiner/keep_all_combiner_factory.h include/firestorm/engine/mapreduce/mapper/score_map_result_t.h include/firestorm/engine/mapreduce/combiner/score_combine_result_t.h include/firestorm/engine/mapreduce/reducer/score_reduce_result_t.h include/firestorm/engine/mapreduce/any_result_t.h)
 
 # Define an executable
 add_library(libfirestorm

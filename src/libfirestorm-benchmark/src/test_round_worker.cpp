@@ -27,7 +27,7 @@ namespace firestorm {
 
             combiner.begin();
             const auto processed = worker.accept(*visitor, combiner, *query);
-            auto results = any_cast<vector<score_t>>(combiner.finish());
+            auto results = combiner.finish()->any_cast<vector<score_t>>();
 
             auto end_time = chrono::_V2::system_clock::now();
             auto local_duration_ms = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
