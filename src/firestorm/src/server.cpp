@@ -110,10 +110,16 @@ int run_server(logger_t log) {
     auto future = coordinator.query(mf, query_vector);
 
     const auto& job_result = future.get();
-    assert(job_result.status().completion_type() == job_completion::succeeded);
+    if (job_result.status().completion_type() != job_completion::succeeded) {
+        log->error("Job did not succeed..");
+        return 1;
+    }
 
     auto maybe_result = job_result.result();
-    assert(maybe_result);
+    if (!maybe_result) {
+        log->error("Job returned no result.");
+        return 1;
+    }
 
     auto results = (*maybe_result)->any_cast<std::vector<score_t>>();
 
