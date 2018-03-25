@@ -6,12 +6,12 @@
 #define PROJECT_MAP_RESULT_T_H
 
 #include <any>
-#include "any_result_t.h"
+#include "mapreduce_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a mapping operation.
-    class map_result_t : public virtual any_result_t {
+    class map_result_t : public virtual mapreduce_result_t {
     public:
         virtual ~map_result_t() noexcept = default;
     };

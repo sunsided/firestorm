@@ -29,10 +29,12 @@ namespace firestorm {
         virtual bool canceled() const noexcept = 0;
 
         /// \brief Throws an cancellation_exception if this token has been cancelled.
+        /// \throws cancellation_exception Thrown when the token was cancelled.
         virtual void throw_if_cancellation_requested() const = 0;
 
         /// \brief Throws an cancellation_exception if this token has been cancelled.
         /// \param what The message to attach.
+        /// \throws cancellation_exception Thrown when the token was cancelled.
         virtual void throw_if_cancellation_requested(const std::string &what) const = 0;
 
         /// \brief Registers a callback to invoke when the token is canceled.

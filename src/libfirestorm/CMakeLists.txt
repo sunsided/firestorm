@@ -40,7 +40,7 @@ set(HEADER_FILES
         include/firestorm/engine/mapreduce/combine_result_t.h
         include/firestorm/engine/mapreduce/combiner_t.h
         include/firestorm/engine/mapreduce/combiner_factory.h
-        include/firestorm/engine/mapreduce/any_result_t.h
+        include/firestorm/engine/mapreduce/mapreduce_result_t.h
         include/firestorm/engine/mapreduce/dot_product/score_result_t.h
         include/firestorm/engine/mapreduce/dot_product/dot_product_mapper.h
         include/firestorm/engine/mapreduce/dot_product/dot_product_mapper_factory.h
