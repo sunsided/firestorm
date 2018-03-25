@@ -11,7 +11,7 @@
 #include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include <firestorm/engine/executor/executor_t.h>
-#include <firestorm/engine/mapreduce/mapreduce_factories.h>
+#include <firestorm/engine/mapreduce/mapreduce_factory.h>
 #include "job_status_t.h"
 
 namespace firestorm {
@@ -25,7 +25,7 @@ namespace firestorm {
         job_coordinator(const job_coordinator&) noexcept = delete;
         job_coordinator(job_coordinator&&) noexcept = default;
 
-        std::shared_future<job_result_t> query(const mapreduce_factories &factories,
+        std::shared_future<job_result_t> query(const mapreduce_factory &factories,
                                                const vector_ptr &query) noexcept;
 
     private:

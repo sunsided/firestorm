@@ -72,7 +72,7 @@ set(HEADER_FILES
         include/firestorm/engine/job/job_completion_promise.h
         include/firestorm/engine/executor/execution_result_t.h
         include/firestorm/engine/executor/execution_completion_promise.h
-        include/firestorm/engine/job/job_result_t.h include/firestorm/engine/mapreduce/mapreduce_factories.h)
+        include/firestorm/engine/job/job_result_t.h include/firestorm/engine/mapreduce/mapreduce_factory.h)
 
 # Define an executable
 add_library(libfirestorm

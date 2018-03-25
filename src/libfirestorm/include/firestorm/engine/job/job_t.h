@@ -6,7 +6,7 @@
 #define PROJECT_JOB_T_H
 
 #include <utility>
-#include <firestorm/engine/mapreduce/mapreduce_factories.h>
+#include <firestorm/engine/mapreduce/mapreduce_factory.h>
 #include "job_info_t.h"
 
 namespace firestorm {
@@ -16,7 +16,7 @@ namespace firestorm {
                    tao::operators::equality_comparable<job_t, job_info_ptr>{
     public:
         job_t(const job_info_ptr &info,
-              const mapreduce_factories &factories,
+              const mapreduce_factory &factories,
               const vector_ptr &query) noexcept
             : _info{info}, _f{factories}, _query{query}
         {}
@@ -47,7 +47,7 @@ namespace firestorm {
 
     private:
         mutable job_info_ptr _info;
-        mutable mapreduce_factories _f;
+        mutable mapreduce_factory _f;
         mutable vector_ptr _query;
     };
 

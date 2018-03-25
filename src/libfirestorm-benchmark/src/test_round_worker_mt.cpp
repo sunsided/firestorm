@@ -25,7 +25,7 @@ namespace firestorm {
         const auto combiner_factory = make_shared<keep_all_combiner_factory>();
         const auto reducer_factory = make_shared<keep_all_reducer_factory>();
         const auto actual_worker_count = coordinator.effective_worker_count();
-        const mapreduce_factories mf{factory, combiner_factory, reducer_factory}; // TODO: Create task-specific factory
+        const mapreduce_factory mf{factory, combiner_factory, reducer_factory}; // TODO: Create task-specific factory
 
         for (size_t repetition = 0; repetition < repetitions; ++repetition) {
             auto start_time = chrono::_V2::system_clock::now();

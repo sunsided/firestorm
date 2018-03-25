@@ -34,7 +34,7 @@ namespace firestorm {
             _update_thread.join();
         }
 
-        std::shared_future<job_result_t> query(const mapreduce_factories &factories,
+        std::shared_future<job_result_t> query(const mapreduce_factory &factories,
                                                const vector_ptr &query) noexcept;
 
     private:
@@ -111,12 +111,12 @@ namespace firestorm {
         while(!_shutdown.load());
     }
 
-    std::shared_future<job_result_t> job_coordinator::query(const mapreduce_factories &factories,
+    std::shared_future<job_result_t> job_coordinator::query(const mapreduce_factory &factories,
                                 const vector_ptr &query) noexcept {
         return _impl->query(factories, query);
     }
 
-    std::shared_future<job_result_t> job_coordinator::Impl::query(const mapreduce_factories &factories,
+    std::shared_future<job_result_t> job_coordinator::Impl::query(const mapreduce_factory &factories,
                                        const vector_ptr &query) noexcept {
 
         auto info = create_job_info();

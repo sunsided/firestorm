@@ -11,20 +11,20 @@
 
 namespace firestorm {
 
-    class mapreduce_factories final {
+    class mapreduce_factory final {
     public:
-        mapreduce_factories(const mapper_factory_ptr &mf,
+        mapreduce_factory(const mapper_factory_ptr &mf,
                             const combiner_factory_ptr &cf,
                             const reducer_factory_ptr &rf) noexcept
         : _mf{mf}, _cf{cf}, _rf{rf}
         {}
 
-        ~mapreduce_factories() noexcept = default;
-        mapreduce_factories(const mapreduce_factories& other) noexcept = default;
-        mapreduce_factories(mapreduce_factories&& other) noexcept = default;
+        ~mapreduce_factory() noexcept = default;
+        mapreduce_factory(const mapreduce_factory& other) noexcept = default;
+        mapreduce_factory(mapreduce_factory&& other) noexcept = default;
 
-        mapreduce_factories& operator=(const mapreduce_factories& other) noexcept = default;
-        mapreduce_factories& operator=(mapreduce_factories&& other) noexcept = default;
+        mapreduce_factory& operator=(const mapreduce_factory& other) noexcept = default;
+        mapreduce_factory& operator=(mapreduce_factory&& other) noexcept = default;
 
         inline mapper_factory_ptr mapper_factory() const noexcept {
             return _mf;
