@@ -5,14 +5,10 @@
 #ifndef FIRESTORM_REDUCER_T_H
 #define FIRESTORM_REDUCER_T_H
 
-#include <iterator>
 #include <any>
 #include <memory>
-#include <firestorm/engine/types/mem_chunk_t.h>
-#include <firestorm/engine/types/vector_t.h>
-#include <firestorm/engine/types/score_t.h>
-#include <firestorm/engine/mapreduce/combine_result_t.h>
 #include "reduce_result_t.h"
+#include "combine_result_t.h"
 
 namespace firestorm {
 
@@ -31,7 +27,7 @@ namespace firestorm {
     };
 
     /// \brief A stateful class that performs mapping result reduction.
-    class reducer_t : public reduce_t {
+    class reducer_t : public virtual reduce_t {
     public:
         ~reducer_t() override = default;
 

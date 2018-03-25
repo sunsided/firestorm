@@ -16,13 +16,13 @@ namespace firestorm {
     public:
         virtual ~combine_t() = default;
 
-        /// \brief Reduces the results of mappers.
+        /// \brief Combines the results of mappers.
         /// \param other The other visitor to merge into the local results.
         virtual void combine(const map_result& other) = 0;
     };
 
     /// \brief A stateful class that performs mapping result combination.
-    class combiner_t : public combine_t {
+    class combiner_t : public virtual combine_t {
     public:
         ~combiner_t() override = default;
 

@@ -6,12 +6,12 @@
 #define PROJECT_COMBINE_RESULT_T_H
 
 #include <any>
-#include "any_result_t.h"
+#include "mapreduce_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a combining operation
-    class combine_result_t : public virtual any_result_t {
+    class combine_result_t : public virtual mapreduce_result_t {
     public:
         virtual ~combine_result_t() noexcept = default;
     };

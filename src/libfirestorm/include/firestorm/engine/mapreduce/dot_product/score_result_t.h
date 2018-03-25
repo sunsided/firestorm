@@ -16,7 +16,7 @@ namespace firestorm {
     class score_result_t final : public map_result_t,
                                  public combine_result_t,
                                  public reduce_result_t,
-                                 public typed_result_t<std::vector<score_t>> {
+                                 public typed_mapreduce_result_t<std::vector<score_t>> {
     public:
         explicit score_result_t(std::vector<score_t> scores) noexcept
             : _scores{std::move(scores)}
