@@ -8,7 +8,6 @@
 #include <memory>
 #include <future>
 #include <vector>
-#include <firestorm/engine/types/vector_t.h>
 #include <firestorm/engine/worker/worker_thread_coordinator.h>
 #include <firestorm/engine/executor/executor_t.h>
 #include <firestorm/engine/mapreduce/mapreduce_factory.h>

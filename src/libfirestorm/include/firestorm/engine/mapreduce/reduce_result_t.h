@@ -6,12 +6,12 @@
 #define PROJECT_REDUCE_RESULT_T_H
 
 #include <any>
-#include "any_result_t.h"
+#include "mapreduce_result_t.h"
 
 namespace firestorm {
 
     /// \brief The result of a reducing operation
-    class reduce_result_t : public virtual any_result_t {
+    class reduce_result_t : public virtual mapreduce_result_t {
     public:
         virtual ~reduce_result_t() noexcept = default;
     };
