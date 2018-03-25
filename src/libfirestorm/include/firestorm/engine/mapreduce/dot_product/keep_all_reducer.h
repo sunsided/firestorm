@@ -18,39 +18,18 @@ namespace firestorm {
         keep_all_reducer() = default;
         ~keep_all_reducer() final = default;
 
-        void begin() final {
+        inline void begin() final {
             _scores.clear();
         }
 
-#if false
-        void reduce(const combine_result& other) final {
-            auto other_scores = other->any_cast<std::vector<score_t>>();
-            reduce(other_scores);
-        }
-
-        void reduce(const reduce_result& other) final {
-            auto other_scores = other->any_cast<std::vector<score_t>>();
-            reduce(other_scores);
-        }
-#endif
-
-        void reduce(const score_result_t& other) final {
-            auto other_scores = other.get();
-
-            for (const auto &result : other_scores) {
+        inline void reduce(const score_result_t& other) final {
+            for (const auto &result : other.get()) {
                 _scores.push_back(result);
             }
         }
 
-        reduce_result finish() final {
+        inline reduce_result finish() final {
             return std::make_shared<score_result_t>(_scores);
-        }
-
-    private:
-        void reduce(const std::vector<score_t>& other_scores) {
-            for (const auto &result : other_scores) {
-                _scores.push_back(result);
-            }
         }
 
     private:

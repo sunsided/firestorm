@@ -18,19 +18,17 @@ namespace firestorm {
         keep_all_combiner() = default;
         ~keep_all_combiner() final = default;
 
-        void begin() final {
+        inline void begin() final {
             _scores.clear();
         }
 
-        void combine(const score_result_t& other) final {
-            auto other_scores = other.get();
-
-            for (const auto &result : other_scores) {
+        inline void combine(const score_result_t& other) final {
+            for (const auto &result : other.get()) {
                 _scores.push_back(result);
             }
         }
 
-        combine_result finish() final {
+        inline combine_result finish() final {
             return std::make_shared<score_result_t>(_scores);
         }
 
