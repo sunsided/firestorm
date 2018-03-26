@@ -44,6 +44,7 @@ target_include_directories(libfirestorm-utils PUBLIC
 
 # Define the libraries this project depends upon
 target_link_libraries(libfirestorm-utils
+        boost
         spdlog)
 
 # Required compiler features
