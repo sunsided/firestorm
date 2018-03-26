@@ -79,6 +79,7 @@ vector_ptr generate_vectors(const logger_t& log,
 int run_server(logger_t log) {
     // The instance identifier uniquely identifies this process.
     auto instance_identifier = std::make_shared<instance_identifier_t>();
+    log->info("Created instance {}.", instance_identifier->id_str());
 
     // The worker thread coordinator is used for local (in-process) work distribution.
     auto worker_count = std::thread::hardware_concurrency();
