@@ -5,10 +5,13 @@
 #ifndef PROJECT_JOB_INFO_T_H
 #define PROJECT_JOB_INFO_T_H
 
-#include <functional>
 #include <chrono>
+#include <functional>
 #include <memory>
+#include <string>
+#include <boost/functional/hash.hpp>
 #include <tao/operators.hpp>
+#include <firestorm/utils/guid.h>
 
 namespace firestorm {
 
@@ -20,19 +23,28 @@ namespace firestorm {
 
         job_info_t& operator=(const job_info_t& other) noexcept = default;
 
-        inline std::chrono::system_clock::time_point created() const noexcept {
+        /// \brief Gets the ID of this job.
+        /// \return The ID.
+        inline const guid& id() const noexcept { return _uuid; }
+
+        /// \brief Gets this job's ID as a string representation.
+        /// \return The ID.
+        std::string id_str() const noexcept;
+
+        /// \brief Gets the creation time of this job.
+        /// \return The creation time.
+        inline const std::chrono::system_clock::time_point& created() const noexcept {
             return _created;
         }
 
         bool operator==(const job_info_t& rhs) const noexcept {
-            return _created == rhs._created;
+            return _uuid == rhs._uuid;
         }
 
-        // TODO: Add Job ID (GUID or cluster-wide unique ID?)
-        // TODO: Adjust hash<job_info_t> for correct unique ID.
         // TODO: Add deadline (as relative time so different machine clocks work!)
 
     private:
+        guid _uuid;
         std::chrono::system_clock::time_point _created;
     };
 
@@ -44,23 +56,15 @@ namespace std {
 
     template<>
     struct hash<firestorm::job_info_t> {
-        size_t operator()(const firestorm::job_info_t& k) const
-        {
-            using namespace std::chrono;
-
-            const auto created = k.created();
-            const auto created_ms = time_point_cast<milliseconds>(created);
-            const auto created_ms_since_epoch = created_ms.time_since_epoch().count();
-
-            // TODO: Adjust hash<job_info_t> for correct unique ID.
-            return hash<long>()(created_ms_since_epoch);
+        inline size_t operator()(const firestorm::job_info_t& k) const {
+            boost::hash<boost::uuids::uuid> uuid_hasher;
+            return uuid_hasher(k.id());
         }
     };
 
     template<>
     struct hash<firestorm::job_info_ptr> {
-        size_t operator()(const firestorm::job_info_ptr& k) const
-        {
+        inline size_t operator()(const firestorm::job_info_ptr& k) const {
             return hash<firestorm::job_info_t>()(*k);
         }
     };
