@@ -33,7 +33,6 @@ target_link_libraries(firestorm
         cli11
         libfirestorm
         libfirestorm-benchmark
-        libfirestorm-logging
         libfirestorm-utils)
 
 # Required compiler features

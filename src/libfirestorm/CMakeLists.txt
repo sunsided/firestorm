@@ -93,7 +93,6 @@ target_link_libraries(libfirestorm
         gperftools
         concurrentqueue
         taocpp-operators
-        libfirestorm-logging
         libfirestorm-utils
         ${CMAKE_THREAD_LIBS_INIT})
 

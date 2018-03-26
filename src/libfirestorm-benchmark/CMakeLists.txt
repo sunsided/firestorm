@@ -25,7 +25,6 @@ target_include_directories(libfirestorm-benchmark PUBLIC
 target_link_libraries(libfirestorm-benchmark
         boost
         libfirestorm
-        libfirestorm-logging
         libfirestorm-utils
         ${CMAKE_THREAD_LIBS_INIT})
 

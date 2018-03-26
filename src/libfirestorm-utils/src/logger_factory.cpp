@@ -3,8 +3,8 @@
 //
 
 #include <vector>
-#include <firestorm/logging/logger_factory.h>
-#include <firestorm/logging/logging_exception.h>
+#include "../include/firestorm/logging/logger_factory.h"
+#include "../include/firestorm/logging/logging_exception.h"
 
 namespace spd = spdlog;
 using namespace std;
