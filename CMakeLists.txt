@@ -31,6 +31,7 @@ include(OptionCcache)
 include(OptionSimd)
 include(OptionFastmath)
 include(OptionOpenMP)
+include(OptionEndianness)
 
 # Targets that we develop here
 add_subdirectory(src)
