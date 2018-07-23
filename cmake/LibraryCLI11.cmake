@@ -1,9 +1,9 @@
 include(ExternalProject)
 ExternalProject_Add(cli11_git
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11
-        GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/cli11"
+	GIT_SUBMODULES "${CMAKE_SOURCE_DIR}/external/CLI11"
         GIT_REMOTE_NAME origin
-        GIT_TAG v1.3.0
+        GIT_TAG v1.6.0
         GIT_SHALLOW On
         GIT_PROGRESS On
         SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/CLI11"
@@ -14,7 +14,7 @@ ExternalProject_Add(cli11_git
         TEST_COMMAND ""
         CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/CLI11/build/out/
+	    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=<BINARY_DIR>/out/
             -DCLI_SINGLE_FILE=ON
             -DCLI_EXAMPLES=OFF
             -DCLI_TESTING=OFF

@@ -14,7 +14,7 @@ ExternalProject_Add(taocpp_operators_git
         TEST_COMMAND ""
         CMAKE_ARGS
             -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/external/taocpp_operators/build/out/
+	    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=<BINARY_DIR>/out/
         LOG_BUILD ON
         )
 

@@ -37,11 +37,11 @@ CLI::Option* add_option(CLI::App &app, const std::string name, spd::level::level
     };
 
     CLI::Option *opt = app.add_option(name, fun, description, defaulted);
-    opt->set_custom_option("LEVEL", 1);
+    opt->type_name("LEVEL")->type_size(1);
     if(defaulted) {
         std::stringstream out;
         out << levelToString.at(variable);
-        opt->set_default_str(out.str());
+        opt->default_str(out.str());
     }
     return opt;
 }
