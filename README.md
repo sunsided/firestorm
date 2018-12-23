@@ -28,31 +28,31 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 
 | Option               | Default | Description |
 |----------------------|---------|-------------|
-| FSTM_ENABLE_LTO      | ON      | Enables link-time optimization (if available). |
-| FSTM_ENABLE_CCACHE   | ON      | Enables `ccache` support when building (if available). |
+| FSTM\_ENABLE\_LTO      | ON      | Enables link-time optimization (if available). |
+| FSTM\_ENABLE\_CCACHE   | ON      | Enables `ccache` support when building (if available). |
 
 ### Google Performance Tools
 
 | Option               | Default | Description |
 |----------------------|---------|-------------|
-| FSTM_WITH_PROFILER   | OFF     | Builds with performance profiler support. |
-| FSTM_WITH_TCMALLOC   | ON      | Builds with `tcmalloc` support. |
+| FSTM\_WITH\_PROFILER   | OFF     | Builds with performance profiler support. |
+| FSTM\_WITH\_TCMALLOC   | ON      | Builds with `tcmalloc` support. |
 
 ### Functionality and performance options
 
 | Option               | Default | Description |
 |----------------------|---------|-------------|
-| FSTM_WITH_FAST_MATH  | OFF     | Enables fast math optimizations (if available). |
-| FSTM_WITH_OPENMP     | ON      | Enables OpenMP support (if available). |
-| FSTM_WITH_SIMD_AVX2  | OFF     | Builds with AVX2 support |
-| FSTM_WITH_SIMD_AVX   | OFF     | Builds with AVX support |
-| FSTM_WITH_SIMD_SSE42 | ON      | Builds with SSE 4.2 support |
+| FSTM\_WITH\_FAST\_MATH  | OFF     | Enables fast math optimizations (if available). |
+| FSTM\_WITH\_OPENMP      | ON      | Enables OpenMP support (if available). |
+| FSTM\_WITH\_SIMD\_AVX2  | OFF     | Builds with AVX2 support |
+| FSTM\_WITH\_SIMD\_AVX   | OFF     | Builds with AVX support |
+| FSTM\_WITH\_SIMD\_SSE42 | ON      | Builds with SSE 4.2 support |
 
 ### Development options
 
 | Option               | Default | Description |
 |----------------------|---------|-------------|
-| FSTM_BUILD_TESTS     | ON      | Builds unit tests. |
+| FSTM\_BUILD\_TESTS     | ON      | Builds unit tests. |
 
 ## Unit Tests
 
