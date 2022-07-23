@@ -80,7 +80,7 @@ namespace firestorm {
 
         auto vectors_per_second =
                 static_cast<float>(total_num_vectors) / ms_to_s(static_cast<float>(total_duration_ms));
-        log->info("- Processed {} vectors in {} ms ({} vectors/s)",
-                  total_num_vectors, total_duration_ms, vectors_per_second);
+        log->info("- Processed {} vectors ({} repetitions) in {} ms ({} vectors/s)",
+                  total_num_vectors, repetitions, total_duration_ms, vectors_per_second);
     }
 }
